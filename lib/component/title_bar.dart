@@ -117,26 +117,27 @@ class _TitleBar_Large extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
       child: Row(
         children: [
           const NavBackBtn(),
-          const SizedBox(width: 8.0),
+          const SizedBox(width: 6.0),
           Expanded(
             child: DragToMoveArea(
               child: Row(
                 children: [
                   SizedBox(
-                    width: 248,
+                    width: 252,
                     child: Row(
                       children: [
-                        Image.asset("app_icon.ico", width: 24, height: 24),
-                        const SizedBox(width: 8.0),
+                        Image.asset("app_icon.ico", width: 21, height: 21),
+                        const SizedBox(width: 9.0),
                         Text(
                           "Border Player",
                           style: TextStyle(
                             color: scheme.onSurface,
                             fontSize: 16,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ],
@@ -144,7 +145,7 @@ class _TitleBar_Large extends StatelessWidget {
                   ),
                   const Expanded(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(0, 8.0, 16.0, 8.0),
+                      padding: EdgeInsets.fromLTRB(0, 22.0, 24.0, 18.0),
                       child: HorizontalLyricView(),
                     ),
                   ),

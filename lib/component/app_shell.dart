@@ -38,7 +38,7 @@ class _AppShell_Small extends StatelessWidget {
     return Scaffold(
       backgroundColor: scheme.surfaceContainer,
       appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(48.0),
+        preferredSize: Size.fromHeight(72.0),
         child: TitleBar(),
       ),
       drawer: const SideNav(),
@@ -58,7 +58,7 @@ class _AppShell_Large extends StatelessWidget {
     return Scaffold(
       backgroundColor: scheme.surfaceContainer,
       appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(48.0),
+        preferredSize: Size.fromHeight(72.0),
         child: TitleBar(),
       ),
       body: Row(
@@ -67,9 +67,9 @@ class _AppShell_Large extends StatelessWidget {
           Expanded(
             child: Stack(children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 14, 20, 18),
+                padding: const EdgeInsets.fromLTRB(0, 0, 20, 18),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24.0),
+                  borderRadius: BorderRadius.circular(22.0),
                   child: page,
                 ),
               ),

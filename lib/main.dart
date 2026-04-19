@@ -31,6 +31,10 @@ Future<void> initWindow() async {
 Future<void> loadPrefFont() async {
   final settings = AppSettings.instance;
   if (settings.fontFamily != null) {
+    if (settings.fontPath == null) {
+      ThemeProvider.instance.changeFontFamily(settings.fontFamily);
+      return;
+    }
     try {
       final fontLoader = FontLoader(settings.fontFamily!);
 

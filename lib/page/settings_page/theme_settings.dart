@@ -1,7 +1,4 @@
-import 'dart:io';
-import 'package:coriander_player/src/rust/api/installed_font.dart';
 import 'package:coriander_player/utils.dart';
-import 'package:flutter/services.dart';
 import 'package:coriander_player/app_settings.dart';
 import 'package:coriander_player/component/settings_tile.dart';
 import 'package:coriander_player/page/settings_page/theme_picker_dialog.dart';
@@ -168,32 +165,19 @@ class SelectFontCombobox extends StatelessWidget {
       description: "字体",
       action: FilledButton.icon(
         onPressed: () async {
-          final installedFont = await getInstalledFonts();
-          if (installedFont == null || installedFont.isEmpty) {
-            showTextOnSnackBar("无法获取字体");
-            return;
-          }
-
           if (context.mounted) {
-            final selectedFont = await showDialog<InstalledFont>(
+            final selectedFont = await showDialog<_FontOption>(
               context: context,
-              builder: (context) => _FontSelector(installedFont: installedFont),
+              builder: (context) => const _FontSelector(),
             );
             if (selectedFont == null) return;
 
             try {
-              final fontLoader = FontLoader(selectedFont.fullName);
-              fontLoader.addFont(
-                File(selectedFont.path).readAsBytes().then((value) {
-                  return ByteData.sublistView(value);
-                }),
-              );
-              await fontLoader.load();
-              ThemeProvider.instance.changeFontFamily(selectedFont.fullName);
+              ThemeProvider.instance.changeFontFamily(selectedFont.family);
 
               final settings = AppSettings.instance;
-              settings.fontFamily = selectedFont.fullName;
-              settings.fontPath = selectedFont.path;
+              settings.fontFamily = selectedFont.family;
+              settings.fontPath = null;
               await settings.saveSettings();
             } catch (err) {
               ThemeProvider.instance.changeFontFamily(null);
@@ -211,9 +195,24 @@ class SelectFontCombobox extends StatelessWidget {
   }
 }
 
+class _FontOption {
+  const _FontOption(this.label, this.family);
+
+  final String label;
+  final String? family;
+}
+
+const _fontOptions = [
+  _FontOption("默认字体", null),
+  _FontOption("微软雅黑", "Microsoft YaHei"),
+  _FontOption("Inter", "Inter"),
+  _FontOption("Noto Sans SC", "Noto Sans SC"),
+  _FontOption("Times New Roman", "Times New Roman"),
+  _FontOption("System Sans", "Segoe UI"),
+];
+
 class _FontSelector extends StatelessWidget {
-  const _FontSelector({required this.installedFont});
-  final List<InstalledFont> installedFont;
+  const _FontSelector();
 
   @override
   Widget build(BuildContext context) {
@@ -222,13 +221,13 @@ class _FontSelector extends StatelessWidget {
     return Dialog(
       insetPadding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(26.0),
       ),
       child: SizedBox(
-        width: 350.0,
-        height: 400,
+        width: 476.0,
+        height: 576,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(26, 26, 26, 18),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,30 +238,50 @@ class _FontSelector extends StatelessWidget {
                   "选择字体",
                   style: TextStyle(
                     color: scheme.onSurface,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
-              Text("当前字体：${theme.fontFamily ?? "默认"}"),
-              const SizedBox(height: 8.0),
+              Text(
+                "当前字体：${_fontOptions.firstWhere(
+                      (option) => option.family == theme.fontFamily,
+                      orElse: () => _fontOptions.first,
+                    ).label}",
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 18.0),
               Expanded(
                 child: Material(
                   type: MaterialType.transparency,
                   child: ListView.builder(
-                    itemCount: installedFont.length,
-                    itemExtent: 48,
+                    itemCount: _fontOptions.length,
+                    itemExtent: 72,
                     itemBuilder: (context, i) => ListTile(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
-                      title: Text(installedFont[i].fullName),
-                      onTap: () => Navigator.pop(context, installedFont[i]),
+                      selected: _fontOptions[i].family == theme.fontFamily,
+                      selectedTileColor: scheme.secondaryContainer,
+                      title: Text(
+                        _fontOptions[i].label,
+                        style: TextStyle(
+                          fontFamily: _fontOptions[i].family,
+                          color: scheme.onSurface,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      onTap: () => Navigator.pop(context, _fontOptions[i]),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 10.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

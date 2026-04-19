@@ -108,14 +108,14 @@ class PageScaffold extends StatelessWidget {
         color: scheme.surface,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 14.0,
+            horizontal: 22.0,
+            vertical: 18.0,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: rowChildren,
@@ -134,9 +134,9 @@ class PageScaffold extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 30.0,
+          fontSize: 29.0,
           color: scheme.onSurface,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w900,
         ),
         overflow: TextOverflow.ellipsis,
       ),
@@ -151,15 +151,19 @@ class PageScaffold extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontSize: 30.0,
+              fontSize: 29.0,
               color: scheme.onSurface,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
             ),
             overflow: TextOverflow.ellipsis,
           ),
           Text(
             subtitle!,
-            style: TextStyle(fontSize: 15.0, color: scheme.onSurfaceVariant),
+            style: TextStyle(
+              fontSize: 15.0,
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
             overflow: TextOverflow.ellipsis,
           )
         ],

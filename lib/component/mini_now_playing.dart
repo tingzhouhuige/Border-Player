@@ -22,11 +22,11 @@ class MiniNowPlaying extends StatelessWidget {
             8.0,
             0,
             8.0,
-            screenType == ScreenType.small ? 8.0 : 36.0,
+            screenType == ScreenType.small ? 8.0 : 34.0,
           ),
           child: SizedBox(
-            height: 56.0,
-            width: 620.0,
+            height: 58.0,
+            width: 624.0,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
@@ -94,7 +94,7 @@ class _NowPlayingForeground extends StatelessWidget {
                             ConnectionState.done => snapshot.data == null
                                 ? placeholder
                                 : ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(26.0),
                                     child: Image(
                                       image: snapshot.data!,
                                       width: 48.0,
@@ -125,7 +125,12 @@ class _NowPlayingForeground extends StatelessWidget {
                               : "Border Player",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: scheme.onSecondaryContainer),
+                          style: TextStyle(
+                            color: scheme.onSecondaryContainer,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            height: 1.1,
+                          ),
                         ),
 
                         /// artist - album
@@ -135,7 +140,12 @@ class _NowPlayingForeground extends StatelessWidget {
                               : "Enjoy music",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: scheme.onSecondaryContainer),
+                          style: TextStyle(
+                            color: scheme.onSurfaceVariant,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            height: 1.1,
+                          ),
                         ),
                       ],
                     ),

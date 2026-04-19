@@ -30,8 +30,12 @@ class HorizontalLyricView extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    "曲：KENZIE/dress/Heon Seo/jeanjinn jane/George Gershwin/Ira Gershwin",
-                    style: TextStyle(color: scheme.onSecondaryContainer),
+                    "かき鳴らせ 交わるカルテット 革命を 成し遂げてみたいな 奏鳴曲 交吶的四重奏 試着完成革命",
+                    style: TextStyle(
+                      color: scheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               );
@@ -135,7 +139,11 @@ class _LyricHorizontalScrollAreaState
           alignment: Alignment.centerLeft,
           child: Text(
             currContent,
-            style: TextStyle(color: scheme.onSecondaryContainer),
+            style: TextStyle(
+              color: scheme.onSecondaryContainer,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
           ),
         ),
       ),

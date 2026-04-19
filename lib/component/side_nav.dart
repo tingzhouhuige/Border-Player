@@ -61,7 +61,7 @@ class SideNav extends StatelessWidget {
             );
           case ScreenType.large:
             return SizedBox(
-              width: 280,
+              width: 244,
               child: _LargeSideNavContent(
                 selected: selected,
                 onDestinationSelected: onDestinationSelected,
@@ -102,12 +102,10 @@ class _LargeSideNavContent extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 12, 18, 18),
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _BrandHeader(color: scheme.primary),
-            const SizedBox(height: 26),
             _HomePill(colorScheme: scheme),
             const SizedBox(height: 28),
             for (var i = 0; i < destinations.length; i++) ...[
@@ -148,31 +146,6 @@ class _LargeSideNavContent extends StatelessWidget {
   }
 }
 
-class _BrandHeader extends StatelessWidget {
-  const _BrandHeader({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(Symbols.music_note, color: color, fill: 1, size: 22),
-        const SizedBox(width: 12),
-        Text(
-          "Border Player",
-          style: TextStyle(
-            color: scheme.onSurface,
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _HomePill extends StatelessWidget {
   const _HomePill({required this.colorScheme});
 
@@ -181,16 +154,16 @@ class _HomePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70,
-      padding: const EdgeInsets.symmetric(horizontal: 18),
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 21,
+            radius: 20,
             backgroundColor: colorScheme.primary.withOpacity(0.25),
             child: Icon(Symbols.music_note, color: colorScheme.onSurface),
           ),
@@ -203,7 +176,7 @@ class _HomePill extends StatelessWidget {
                 "Border Player",
                 style: TextStyle(
                   color: colorScheme.onSurface,
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: FontWeight.w800,
                   height: 1.0,
                 ),
@@ -213,7 +186,7 @@ class _HomePill extends StatelessWidget {
                 "Desktop Music",
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                   height: 1.0,
                 ),
@@ -244,23 +217,23 @@ class _SideNavItem extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Material(
       color: selected ? scheme.secondaryContainer : Colors.transparent,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(20),
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: SizedBox(
           height: 56,
           child: Row(
             children: [
-              const SizedBox(width: 18),
+              const SizedBox(width: 12),
               Icon(icon, size: 22, color: scheme.onSurface),
-              const SizedBox(width: 22),
+              const SizedBox(width: 20),
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
                     color: scheme.onSurface,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

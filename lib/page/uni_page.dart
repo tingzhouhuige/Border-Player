@@ -257,7 +257,7 @@ class _UniPageState<T> extends State<UniPage<T>> {
               controller: scrollController,
               padding: const EdgeInsets.only(bottom: 96.0),
               itemCount: widget.contentList.length,
-            itemExtent: 64,
+              itemExtent: 56,
               itemBuilder: (context, i) => widget.contentBuilder(
                 context,
                 widget.contentList[i],

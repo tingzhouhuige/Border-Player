@@ -124,14 +124,15 @@ class AudioTile extends StatelessWidget {
       ],
       builder: (context, controller, _) {
         final textColor = focus ? scheme.primary : scheme.onSurface;
+        final trackNumber = audio.track > 0 ? audio.track : audioIndex + 1;
         final placeholder = Icon(
           Symbols.broken_image,
-          size: 48.0,
+          size: 42.0,
           color: scheme.onSurface,
         );
 
         return Ink(
-          height: 64.0,
+          height: 56.0,
           decoration: BoxDecoration(
             color: multiSelectController == null
                 ? Colors.transparent
@@ -171,9 +172,24 @@ class AudioTile extends StatelessWidget {
               child: Row(children: [
                 if (leading != null)
                   Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
+                    padding: const EdgeInsets.only(right: 14.0),
                     child: leading!,
                   ),
+                if (leading == null) ...[
+                  SizedBox(
+                    width: 26,
+                    child: Text(
+                      trackNumber.toString().padLeft(2, "0"),
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: scheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                ],
 
                 /// cover
                 ScrollAwareFutureBuilder(
@@ -184,17 +200,17 @@ class AudioTile extends StatelessWidget {
                     }
 
                     return ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(6.0),
                       child: Image(
                         image: snapshot.data!,
-                        width: 48.0,
-                        height: 48.0,
+                        width: 42.0,
+                        height: 42.0,
                         errorBuilder: (_, __, ___) => placeholder,
                       ),
                     );
                   },
                 ),
-                const SizedBox(width: 16.0),
+                const SizedBox(width: 14.0),
 
                 /// title, artist and album
                 Expanded(
@@ -204,14 +220,24 @@ class AudioTile extends StatelessWidget {
                     children: [
                       Text(
                         audio.title,
-                        style: TextStyle(color: textColor, fontSize: 16),
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          height: 1.1,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 4.0),
+                      const SizedBox(height: 3.0),
                       Text(
                         "${audio.artist} - ${audio.album}",
-                        style: TextStyle(color: textColor),
+                        style: TextStyle(
+                          color: focus ? scheme.primary : scheme.onSurfaceVariant,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1.1,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -222,7 +248,9 @@ class AudioTile extends StatelessWidget {
                 Text(
                   Duration(seconds: audio.duration).toStringHMMSS(),
                   style: TextStyle(
-                    color: focus ? scheme.primary : scheme.onSurface,
+                    color: focus ? scheme.primary : scheme.onSurfaceVariant,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 if (action != null)
