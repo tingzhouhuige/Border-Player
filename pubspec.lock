@@ -108,7 +108,7 @@ packages:
   desktop_lyric:
     dependency: "direct main"
     description:
-      path: "../desktop_lyric-main"
+      path: desktop_lyric
       relative: true
     source: path
     version: "0.1.0"

@@ -27,7 +27,7 @@ dependencies:
   flex_color_picker: ^3.5.0
   filepicker_windows: ^2.1.4
   desktop_lyric:
-    path: ../desktop_lyric-main
+    path: desktop_lyric
   music_api:
     git:
       url: https://github.com/Ferry-200/music_api_dart.git
