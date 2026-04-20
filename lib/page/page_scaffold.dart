@@ -1,4 +1,4 @@
-import 'package:coriander_player/component/responsive_builder.dart';
+import 'package:border_player/component/responsive_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 

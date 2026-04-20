@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:coriander_player/lyric/lyric.dart';
+import 'package:border_player/lyric/lyric.dart';
 
 class Krc extends Lyric {
   Krc(super.lines);

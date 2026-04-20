@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:coriander_player/app_preference.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/play_service/play_service.dart';
-import 'package:coriander_player/src/bass/bass_player.dart';
-import 'package:coriander_player/src/rust/api/smtc_flutter.dart';
-import 'package:coriander_player/theme_provider.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_preference.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/play_service/play_service.dart';
+import 'package:border_player/src/bass/bass_player.dart';
+import 'package:border_player/src/rust/api/smtc_flutter.dart';
+import 'package:border_player/theme_provider.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/foundation.dart';
 
 enum PlayMode {

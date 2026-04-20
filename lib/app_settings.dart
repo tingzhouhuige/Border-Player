@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:coriander_player/src/rust/api/system_theme.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/src/rust/api/system_theme.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:github/github.dart';
 import 'package:path/path.dart' as path;
@@ -10,16 +10,22 @@ import 'package:window_manager/window_manager.dart';
 
 /// 把旧的 app data 目录（如果存在）移到新的目录
 /// 只在新 app data 目录没有数据时进行
-/// 从 C:\Users\$username\AppData\Roaming\com.example\coriander_player 移到 C:\Users\$username\Documents\coriander_player
+/// 从 C:\Users\$username\AppData\Roaming\com.example\border_player 移到 C:\Users\$username\Documents\border_player
 Future<void> migrateAppData() async {
   try {
     final newAppDataDir = await getAppDataDir();
     if (newAppDataDir.listSync().isNotEmpty) return;
 
     final oldAppDataDir = await getApplicationSupportDirectory();
+    final oldDocumentsDir = Directory(path.join(
+      (await getApplicationDocumentsDirectory()).path,
+      "border_player",
+    ));
+    final sourceDir =
+        oldDocumentsDir.existsSync() ? oldDocumentsDir : oldAppDataDir;
 
-    if (oldAppDataDir.existsSync()) {
-      final datas = oldAppDataDir.listSync();
+    if (sourceDir.existsSync()) {
+      final datas = sourceDir.listSync();
       for (var item in datas) {
         final oldDataFile = File(item.path);
         oldDataFile.copySync(
@@ -34,7 +40,7 @@ Future<void> migrateAppData() async {
 
 Future<Directory> getAppDataDir() async {
   final dir = await getApplicationDocumentsDirectory();
-  return Directory(path.join(dir.path, "coriander_player"))
+  return Directory(path.join(dir.path, "Border Player"))
       .create(recursive: true);
 }
 

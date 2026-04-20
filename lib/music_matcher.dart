@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/lyric/krc.dart';
-import 'package:coriander_player/lyric/lrc.dart';
-import 'package:coriander_player/lyric/lyric.dart';
-import 'package:coriander_player/lyric/qrc.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/lyric/krc.dart';
+import 'package:border_player/lyric/lrc.dart';
+import 'package:border_player/lyric/lyric.dart';
+import 'package:border_player/lyric/qrc.dart';
+import 'package:border_player/utils.dart';
 import 'package:music_api/music_api.dart';
 
 enum ResultSource { qq, kugou, netease }

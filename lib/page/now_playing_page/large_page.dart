@@ -8,30 +8,59 @@ class _NowPlayingPage_Large extends StatelessWidget {
     const spacer = SizedBox(width: 8.0);
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32.0, 8.0, 32.0, 32.0),
+      padding: const EdgeInsets.fromLTRB(32.0, _largePageTopGap, 32.0, 32.0),
       child: Column(
         children: [
           Expanded(
-            child: Row(
-              children: [
-                const Expanded(child: _NowPlayingInfo()),
-                Expanded(
-                  child: ValueListenableBuilder(
-                    valueListenable: NOW_PLAYING_VIEW_MODE,
-                    builder: (context, value, _) => AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 150),
-                      child: switch (value) {
-                        NowPlayingViewMode.onlyMain =>
-                          const VerticalLyricView(),
-                        NowPlayingViewMode.withLyric =>
-                          const VerticalLyricView(),
-                        NowPlayingViewMode.withPlaylist =>
-                          const CurrentPlaylistView(),
-                      },
-                    ),
-                  ),
-                ),
-              ],
+            child: FractionallySizedBox(
+              widthFactor: 0.92,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final leftWidth = constraints.maxWidth / 2;
+                  final coverAreaHeight =
+                      constraints.maxHeight - _largeTitleBlockHeight;
+                  var coverSize = leftWidth - 40;
+                  if (coverSize > coverAreaHeight) {
+                    coverSize = coverAreaHeight;
+                  }
+                  if (coverSize > 560) {
+                    coverSize = 560;
+                  }
+                  if (coverSize < 220) {
+                    coverSize = 220;
+                  }
+                  final coverTop = _largeTitleBlockHeight +
+                      ((coverAreaHeight - coverSize) / 2)
+                          .clamp(0.0, 999.0)
+                          .toDouble();
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _NowPlayingInfo(coverSize: coverSize)),
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: coverTop),
+                          child: ValueListenableBuilder(
+                            valueListenable: NOW_PLAYING_VIEW_MODE,
+                            builder: (context, value, _) => AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 150),
+                              child: switch (value) {
+                                NowPlayingViewMode.onlyMain =>
+                                  const VerticalLyricView(),
+                                NowPlayingViewMode.withLyric =>
+                                  const VerticalLyricView(),
+                                NowPlayingViewMode.withPlaylist =>
+                                  const CurrentPlaylistView(),
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 16.0),

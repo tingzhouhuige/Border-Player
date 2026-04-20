@@ -588,7 +588,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
-  rust_lib_coriander_player:
+  rust_lib_border_player:
     dependency: "direct main"
     description:
       path: rust_builder

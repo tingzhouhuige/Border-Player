@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/component/build_index_state_view.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/app_paths.dart' as app_paths;
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/build_index_state_view.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -178,7 +178,7 @@ class _TitleBar extends StatelessWidget {
                     child: Image.asset("app_icon.ico", width: 24, height: 24),
                   ),
                   Text(
-                    "Coriander Player",
+                    "Border Player",
                     style: TextStyle(color: scheme.onSurface, fontSize: 16),
                   ),
                 ],

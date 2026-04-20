@@ -1,4 +1,4 @@
-import 'package:coriander_player/lyric/lyric.dart';
+import 'package:border_player/lyric/lyric.dart';
 
 class Qrc extends Lyric {
   Qrc(super.lines);

@@ -1,6 +1,6 @@
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/src/rust/api/utils.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/src/rust/api/utils.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:github/github.dart';
@@ -31,7 +31,7 @@ class _CheckForUpdateState extends State<CheckForUpdate> {
                 try {
                   final newest = await AppSettings.github.repositories
                       .listReleases(
-                        RepositorySlug("Ferry-200", "coriander_player"),
+                        RepositorySlug("Ferry-200", "border_player"),
                       )
                       .first;
                   final newestVer = int.tryParse(

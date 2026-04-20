@@ -1,8 +1,8 @@
-import 'package:coriander_player/component/rectangle_progress_indicator.dart';
-import 'package:coriander_player/component/responsive_builder.dart';
-import 'package:coriander_player/play_service/play_service.dart';
-import 'package:coriander_player/src/bass/bass_player.dart';
-import 'package:coriander_player/app_paths.dart' as app_paths;
+import 'package:border_player/component/rectangle_progress_indicator.dart';
+import 'package:border_player/component/responsive_builder.dart';
+import 'package:border_player/play_service/play_service.dart';
+import 'package:border_player/src/bass/bass_player.dart';
+import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';

@@ -1,8 +1,8 @@
-import 'package:coriander_player/utils.dart';
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/component/settings_tile.dart';
-import 'package:coriander_player/page/settings_page/theme_picker_dialog.dart';
-import 'package:coriander_player/theme_provider.dart';
+import 'package:border_player/utils.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/settings_tile.dart';
+import 'package:border_player/page/settings_page/theme_picker_dialog.dart';
+import 'package:border_player/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';

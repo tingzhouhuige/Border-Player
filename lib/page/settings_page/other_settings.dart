@@ -1,9 +1,9 @@
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/component/build_index_state_view.dart';
-import 'package:coriander_player/component/settings_tile.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/library/playlist.dart';
-import 'package:coriander_player/lyric/lyric_source.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/build_index_state_view.dart';
+import 'package:border_player/component/settings_tile.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/library/playlist.dart';
+import 'package:border_player/lyric/lyric_source.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';

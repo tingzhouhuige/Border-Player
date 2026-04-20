@@ -1,6 +1,6 @@
-import 'package:coriander_player/app_paths.dart' as app_paths;
-import 'package:coriander_player/hotkeys_helper.dart';
-import 'package:coriander_player/library/audio_library.dart';
+import 'package:border_player/app_paths.dart' as app_paths;
+import 'package:border_player/hotkeys_helper.dart';
+import 'package:border_player/library/audio_library.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';

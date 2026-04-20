@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/utils.dart';
 
 enum LyricSourceType {
   qq("qq"),

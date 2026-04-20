@@ -1,9 +1,9 @@
-import 'package:coriander_player/app_preference.dart';
-import 'package:coriander_player/utils.dart';
-import 'package:coriander_player/hotkeys_helper.dart';
-import 'package:coriander_player/page/uni_page.dart';
-import 'package:coriander_player/library/playlist.dart';
-import 'package:coriander_player/app_paths.dart' as app_paths;
+import 'package:border_player/app_preference.dart';
+import 'package:border_player/utils.dart';
+import 'package:border_player/hotkeys_helper.dart';
+import 'package:border_player/page/uni_page.dart';
+import 'package:border_player/library/playlist.dart';
+import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';

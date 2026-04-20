@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 import 'dart:ui';
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/src/rust/api/tag_reader.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/src/rust/api/tag_reader.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/painting.dart';
 
 /// from index.json

@@ -1,5 +1,5 @@
-import 'package:coriander_player/app_preference.dart';
-import 'package:coriander_player/page/now_playing_page/component/lyric_source_view.dart';
+import 'package:border_player/app_preference.dart';
+import 'package:border_player/page/now_playing_page/component/lyric_source_view.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';

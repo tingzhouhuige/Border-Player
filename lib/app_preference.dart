@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/page/now_playing_page/component/lyric_view_controls.dart';
-import 'package:coriander_player/page/now_playing_page/page.dart';
-import 'package:coriander_player/page/uni_page.dart';
-import 'package:coriander_player/play_service/playback_service.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/page/now_playing_page/component/lyric_view_controls.dart';
+import 'package:border_player/page/now_playing_page/page.dart';
+import 'package:border_player/page/uni_page.dart';
+import 'package:border_player/play_service/playback_service.dart';
+import 'package:border_player/utils.dart';
 
 class PagePreference {
   int sortMethod;
@@ -85,8 +85,7 @@ class AppPreference {
   var artistDetailPagePref =
       PagePreference(0, SortOrder.ascending, ContentView.list);
 
-  var albumsPagePref =
-      PagePreference(0, SortOrder.ascending, ContentView.list);
+  var albumsPagePref = PagePreference(0, SortOrder.ascending, ContentView.list);
 
   var albumDetailPagePref =
       PagePreference(2, SortOrder.ascending, ContentView.list);

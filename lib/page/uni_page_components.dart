@@ -1,8 +1,8 @@
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/library/playlist.dart';
-import 'package:coriander_player/page/uni_page.dart';
-import 'package:coriander_player/play_service/play_service.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/library/playlist.dart';
+import 'package:border_player/page/uni_page.dart';
+import 'package:border_player/play_service/play_service.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 

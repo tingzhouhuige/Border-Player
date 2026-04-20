@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:coriander_player/src/rust/api/tag_reader.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/src/rust/api/tag_reader.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 
 class BuildIndexStateView extends StatefulWidget {

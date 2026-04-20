@@ -1,12 +1,12 @@
-import 'package:coriander_player/component/album_tile.dart';
-import 'package:coriander_player/component/artist_tile.dart';
-import 'package:coriander_player/component/audio_tile.dart';
-import 'package:coriander_player/hotkeys_helper.dart';
-import 'package:coriander_player/page/search_page/search_page.dart';
+import 'package:border_player/component/album_tile.dart';
+import 'package:border_player/component/artist_tile.dart';
+import 'package:border_player/component/audio_tile.dart';
+import 'package:border_player/hotkeys_helper.dart';
+import 'package:border_player/page/search_page/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:coriander_player/app_paths.dart' as app_paths;
+import 'package:border_player/app_paths.dart' as app_paths;
 
 class SearchResultPage extends StatefulWidget {
   const SearchResultPage({super.key, required this.searchResult});

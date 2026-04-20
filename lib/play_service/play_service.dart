@@ -1,6 +1,6 @@
-import 'package:coriander_player/play_service/desktop_lyric_service.dart';
-import 'package:coriander_player/play_service/lyric_service.dart';
-import 'package:coriander_player/play_service/playback_service.dart';
+import 'package:border_player/play_service/desktop_lyric_service.dart';
+import 'package:border_player/play_service/lyric_service.dart';
+import 'package:border_player/play_service/playback_service.dart';
 
 class PlayService {
   late final playbackService = PlaybackService(this);

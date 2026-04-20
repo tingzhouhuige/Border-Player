@@ -1,4 +1,4 @@
-import 'package:coriander_player/play_service/play_service.dart';
+import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 
 class CurrentPlaylistView extends StatefulWidget {

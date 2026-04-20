@@ -1,5 +1,5 @@
 [package]
-name = "rust_lib_coriander_player"
+name = "rust_lib_border_player"
 version = "0.1.0"
 edition = "2021"
 

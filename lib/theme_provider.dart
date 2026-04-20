@@ -1,6 +1,6 @@
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/play_service/play_service.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 
 class ThemeProvider extends ChangeNotifier {

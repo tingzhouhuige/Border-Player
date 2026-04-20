@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:coriander_player/app_preference.dart';
-import 'package:coriander_player/page/uni_page.dart';
-import 'package:coriander_player/page/uni_page_components.dart';
+import 'package:border_player/app_preference.dart';
+import 'package:border_player/page/uni_page.dart';
+import 'package:border_player/page/uni_page_components.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 

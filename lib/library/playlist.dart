@@ -3,9 +3,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/utils.dart';
 
 List<Playlist> PLAYLISTS = [];
 

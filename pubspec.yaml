@@ -1,4 +1,4 @@
-name: coriander_player
+name: border_player
 description: A new Flutter project.
 publish_to: 'none'
 version: 1.5.1
@@ -36,7 +36,7 @@ dependencies:
   hotkey_manager: ^0.2.3
   logger: ^2.4.0
   flutter_rust_bridge: 2.11.1
-  rust_lib_coriander_player:
+  rust_lib_border_player:
     path: rust_builder
 
 dev_dependencies:

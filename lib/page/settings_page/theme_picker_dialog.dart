@@ -1,6 +1,6 @@
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/utils.dart';
-import 'package:coriander_player/hotkeys_helper.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/utils.dart';
+import 'package:border_player/hotkeys_helper.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 

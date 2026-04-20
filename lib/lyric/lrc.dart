@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/lyric/lyric.dart';
-import 'package:coriander_player/src/rust/api/tag_reader.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/lyric/lyric.dart';
+import 'package:border_player/src/rust/api/tag_reader.dart';
 
 class LrcLine extends UnsyncLyricLine {
   bool isBlank;

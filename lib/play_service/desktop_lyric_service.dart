@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/lyric/lrc.dart';
-import 'package:coriander_player/lyric/lyric.dart';
-import 'package:coriander_player/play_service/play_service.dart';
-import 'package:coriander_player/play_service/playback_service.dart';
-import 'package:coriander_player/src/bass/bass_player.dart';
-import 'package:coriander_player/theme_provider.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/lyric/lrc.dart';
+import 'package:border_player/lyric/lyric.dart';
+import 'package:border_player/play_service/play_service.dart';
+import 'package:border_player/play_service/playback_service.dart';
+import 'package:border_player/src/bass/bass_player.dart';
+import 'package:border_player/theme_provider.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 

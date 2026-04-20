@@ -1,12 +1,12 @@
-import 'package:coriander_player/component/settings_tile.dart';
-import 'package:coriander_player/hotkeys_helper.dart';
-import 'package:coriander_player/page/settings_page/cpfeedback_key.dart';
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/component/settings_tile.dart';
+import 'package:border_player/hotkeys_helper.dart';
+import 'package:border_player/page/settings_page/cpfeedback_key.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:github/github.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:go_router/go_router.dart';
-import 'package:coriander_player/app_paths.dart' as app_paths;
+import 'package:border_player/app_paths.dart' as app_paths;
 
 class CreateIssueTile extends StatelessWidget {
   const CreateIssueTile({super.key});
@@ -58,7 +58,7 @@ class _SettingsIssuePageState extends State<SettingsIssuePage> {
 
     try {
       await cpfeedback.issues.create(
-        RepositorySlug("Ferry-200", "coriander_player"),
+        RepositorySlug("Ferry-200", "border_player"),
         issue,
       );
 

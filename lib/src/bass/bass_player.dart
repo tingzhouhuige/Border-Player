@@ -2,12 +2,12 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:coriander_player/app_preference.dart';
-import 'package:coriander_player/src/bass/bass_wasapi.dart' as BASS;
-import 'package:coriander_player/utils.dart';
+import 'package:border_player/app_preference.dart';
+import 'package:border_player/src/bass/bass_wasapi.dart' as BASS;
+import 'package:border_player/utils.dart';
 import 'package:ffi/ffi.dart' as ffi;
 import 'package:path/path.dart' as path;
-import 'package:coriander_player/src/bass/bass.dart' as BASS;
+import 'package:border_player/src/bass/bass.dart' as BASS;
 import 'dart:ffi' as ffi;
 
 enum PlayerState {

@@ -1,9 +1,9 @@
 // ignore_for_file: camel_case_types
 
-import 'package:coriander_player/component/mini_now_playing.dart';
-import 'package:coriander_player/component/responsive_builder.dart';
-import 'package:coriander_player/component/side_nav.dart';
-import 'package:coriander_player/component/title_bar.dart';
+import 'package:border_player/component/mini_now_playing.dart';
+import 'package:border_player/component/responsive_builder.dart';
+import 'package:border_player/component/side_nav.dart';
+import 'package:border_player/component/title_bar.dart';
 import 'package:flutter/material.dart';
 
 class AppShell extends StatelessWidget {

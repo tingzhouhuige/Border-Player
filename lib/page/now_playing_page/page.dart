@@ -2,18 +2,18 @@
 
 import 'dart:ui';
 
-import 'package:coriander_player/app_preference.dart';
-import 'package:coriander_player/component/title_bar.dart';
-import 'package:coriander_player/utils.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/component/responsive_builder.dart';
-import 'package:coriander_player/page/now_playing_page/component/current_playlist_view.dart';
-import 'package:coriander_player/page/now_playing_page/component/filled_icon_button_style.dart';
-import 'package:coriander_player/page/now_playing_page/component/vertical_lyric_view.dart';
-import 'package:coriander_player/app_paths.dart' as app_paths;
-import 'package:coriander_player/play_service/play_service.dart';
-import 'package:coriander_player/play_service/playback_service.dart';
-import 'package:coriander_player/src/bass/bass_player.dart';
+import 'package:border_player/app_preference.dart';
+import 'package:border_player/component/title_bar.dart';
+import 'package:border_player/utils.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/component/responsive_builder.dart';
+import 'package:border_player/page/now_playing_page/component/current_playlist_view.dart';
+import 'package:border_player/page/now_playing_page/component/filled_icon_button_style.dart';
+import 'package:border_player/page/now_playing_page/component/vertical_lyric_view.dart';
+import 'package:border_player/app_paths.dart' as app_paths;
+import 'package:border_player/play_service/play_service.dart';
+import 'package:border_player/play_service/playback_service.dart';
+import 'package:border_player/src/bass/bass_player.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -22,6 +22,9 @@ import 'package:window_manager/window_manager.dart';
 
 part 'small_page.dart';
 part 'large_page.dart';
+
+const double _largeTitleBlockHeight = 50.0;
+const double _largePageTopGap = 76.0;
 
 enum NowPlayingViewMode {
   onlyMain,
@@ -702,7 +705,9 @@ class _NowPlayingSliderState extends State<_NowPlayingSlider> {
 
 /// title, artist, album, cover
 class _NowPlayingInfo extends StatefulWidget {
-  const _NowPlayingInfo();
+  const _NowPlayingInfo({this.coverSize});
+
+  final double? coverSize;
 
   @override
   State<_NowPlayingInfo> createState() => __NowPlayingInfoState();
@@ -746,62 +751,79 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
       ),
     );
 
-    return Center(
-      child: SizedBox(
-        width: 512.0,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final coverSize = widget.coverSize ??
+            (constraints.biggest.shortestSide - 12)
+                .clamp(260.0, 560.0)
+                .toDouble();
+
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              nowPlaying == null ? "Border Music" : nowPlaying.title,
-              maxLines: 1,
-              style: TextStyle(
-                color: scheme.onSecondaryContainer,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
+            SizedBox(
+              height: _largeTitleBlockHeight,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nowPlaying == null ? "Border Music" : nowPlaying.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: scheme.onSecondaryContainer,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    Text(
+                      nowPlaying == null
+                          ? "Enjoy Music"
+                          : "${nowPlaying.artist} - ${nowPlaying.album}",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: scheme.onSecondaryContainer),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Text(
-              nowPlaying == null
-                  ? "Enjoy Music"
-                  : "${nowPlaying.artist} - ${nowPlaying.album}",
-              maxLines: 1,
-              style: TextStyle(color: scheme.onSecondaryContainer),
-            ),
-            const SizedBox(height: 16),
             Expanded(
-              child: Center(
-                child: RepaintBoundary(
-                  child: nowPlayingCover == null
-                      ? placeholder
-                      : FutureBuilder(
-                          future: nowPlayingCover,
-                          builder: (context, snapshot) =>
-                              switch (snapshot.connectionState) {
-                            ConnectionState.done => snapshot.data == null
-                                ? placeholder
-                                : FittedBox(
-                                    child: ClipRRect(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox.square(
+                  dimension: coverSize,
+                  child: RepaintBoundary(
+                    child: nowPlayingCover == null
+                        ? placeholder
+                        : FutureBuilder(
+                            future: nowPlayingCover,
+                            builder: (context, snapshot) =>
+                                switch (snapshot.connectionState) {
+                              ConnectionState.done => snapshot.data == null
+                                  ? placeholder
+                                  : ClipRRect(
                                       borderRadius: BorderRadius.circular(8.0),
                                       child: Image(
                                         image: snapshot.data!,
-                                        width: 512.0,
-                                        height: 512.0,
+                                        fit: BoxFit.cover,
                                         errorBuilder: (_, __, ___) =>
                                             placeholder,
                                       ),
                                     ),
-                                  ),
-                            _ => loadingWidget,
-                          },
-                        ),
+                              _ => loadingWidget,
+                            },
+                          ),
+                  ),
                 ),
               ),
-            )
+            ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 

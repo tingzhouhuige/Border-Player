@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:coriander_player/app_settings.dart';
-import 'package:coriander_player/library/audio_library.dart';
-import 'package:coriander_player/lyric/lrc.dart';
-import 'package:coriander_player/lyric/lyric.dart';
-import 'package:coriander_player/lyric/lyric_source.dart';
-import 'package:coriander_player/music_matcher.dart';
-import 'package:coriander_player/play_service/play_service.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/lyric/lrc.dart';
+import 'package:border_player/lyric/lyric.dart';
+import 'package:border_player/lyric/lyric_source.dart';
+import 'package:border_player/music_matcher.dart';
+import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/foundation.dart';
 
 /// 只通知 lyric 变更
