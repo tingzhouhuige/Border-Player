@@ -6,20 +6,37 @@ import 'package:coriander_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+BorderSide _selectBorder(ColorScheme scheme) => BorderSide(
+      color: scheme.outlineVariant.withOpacity(0.56),
+      width: 1,
+    );
+
+ButtonStyle _selectIconButtonStyle(ColorScheme scheme) => IconButton.styleFrom(
+      fixedSize: const Size(40, 40),
+      backgroundColor: scheme.secondaryContainer,
+      foregroundColor: scheme.onSecondaryContainer,
+      hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
+      side: _selectBorder(scheme),
+      shape: const CircleBorder(),
+      padding: EdgeInsets.zero,
+    );
+
 class ShufflePlay<T> extends StatelessWidget {
   final List<T> contentList;
   const ShufflePlay({super.key, required this.contentList});
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return FilledButton.icon(
       onPressed: () => PlayService.instance.playbackService.shuffleAndPlay(
         contentList as List<Audio>,
       ),
       icon: const Icon(Symbols.shuffle),
       label: const Text("随机播放"),
-      style: const ButtonStyle(
-        fixedSize: WidgetStatePropertyAll(Size.fromHeight(48)),
+      style: ButtonStyle(
+        fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40)),
+        side: WidgetStatePropertyAll(_selectBorder(scheme)),
       ),
     );
   }
@@ -63,10 +80,10 @@ class SortMethodComboBox<T> extends StatelessWidget {
         final borderRadius = BorderRadius.circular(20.0);
 
         return SizedBox(
-          height: 48.0,
+          height: 40.0,
           child: Material(
-            borderRadius: borderRadius,
             color: scheme.secondaryContainer,
+            shape: StadiumBorder(side: _selectBorder(scheme)),
             child: InkWell(
               hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
               borderRadius: borderRadius,
@@ -78,24 +95,29 @@ class SortMethodComboBox<T> extends StatelessWidget {
                 }
               },
               child: Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+                padding: const EdgeInsets.only(left: 14.0, right: 10.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Symbols.sort,
-                      size: 24,
+                      size: 20,
                       color: scheme.onSecondaryContainer,
                     ),
                     const SizedBox(width: 4.0),
                     Text(
                       currSortMethod.name,
-                      style: TextStyle(color: scheme.onSecondaryContainer),
+                      style: TextStyle(
+                        color: scheme.onSecondaryContainer,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 1.0,
+                      ),
                     ),
                     const SizedBox(width: 4.0),
                     Icon(
                       Symbols.arrow_drop_down,
-                      size: 24,
+                      size: 20,
                       color: scheme.onSecondaryContainer,
                     ),
                   ],
@@ -117,8 +139,10 @@ class SortOrderSwitch<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     var isAscending = sortOrder == SortOrder.ascending;
     return IconButton.filledTonal(
+      style: _selectIconButtonStyle(scheme),
       tooltip: "切换排序顺序；现在：${isAscending ? "升序" : "降序"}",
       onPressed: () => setSortOrder(
         isAscending ? SortOrder.decending : SortOrder.ascending,
@@ -136,8 +160,10 @@ class ContentViewSwitch<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     var isListView = contentView == ContentView.list;
     return IconButton.filledTonal(
+      style: _selectIconButtonStyle(scheme),
       tooltip: "切换页面视图；现在：${isListView ? "列表" : "表格"}",
       onPressed: () => setContentView(
         isListView ? ContentView.table : ContentView.list,
@@ -154,6 +180,7 @@ class AddAllToPlaylist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MenuAnchor(
       style: MenuStyle(
         shape: WidgetStatePropertyAll(
@@ -191,8 +218,9 @@ class AddAllToPlaylist extends StatelessWidget {
         },
         icon: const Icon(Symbols.add),
         label: const Text("添加到歌单"),
-        style: const ButtonStyle(
-          fixedSize: WidgetStatePropertyAll(Size.fromHeight(48)),
+        style: ButtonStyle(
+          fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40)),
+          side: WidgetStatePropertyAll(_selectBorder(scheme)),
         ),
       ),
     );
@@ -210,9 +238,11 @@ class MultiSelectSelectOrClearAll<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return ListenableBuilder(
       listenable: multiSelectController,
       builder: (context, _) => IconButton.filledTonal(
+        style: _selectIconButtonStyle(scheme),
         tooltip: multiSelectController.selected.isEmpty ? "全选" : "取消全选",
         onPressed: () {
           if (multiSelectController.selected.isEmpty) {
@@ -238,7 +268,9 @@ class MultiSelectExit<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return IconButton.filledTonal(
+      style: _selectIconButtonStyle(scheme),
       tooltip: "退出多选视图",
       onPressed: () {
         multiSelectController.useMultiSelectView(false);

@@ -92,8 +92,11 @@ class Entry extends StatelessWidget {
           backgroundColor: colorScheme.secondaryContainer,
           foregroundColor: colorScheme.onSecondaryContainer,
           elevation: 0,
+          minimumSize: const Size(0, 40),
+          fixedSize: const Size.fromHeight(40),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 0),
           side: BorderSide(
-            color: colorScheme.outlineVariant.withOpacity(0.55),
+            color: colorScheme.outlineVariant.withOpacity(0.56),
             width: 1,
           ),
           shape: const StadiumBorder(),
@@ -102,21 +105,31 @@ class Entry extends StatelessWidget {
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(colorScheme.surfaceContainer),
+          fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40)),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 16),
+          ),
+          backgroundColor:
+              WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.selected)) {
+              return colorScheme.secondaryContainer;
+            }
+            return colorScheme.surfaceContainer;
+          }),
           foregroundColor:
               WidgetStatePropertyAll(colorScheme.onSecondaryContainer),
           side: WidgetStatePropertyAll(
             BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.55),
+              color: colorScheme.outlineVariant.withOpacity(0.56),
               width: 1,
             ),
           ),
           textStyle: const WidgetStatePropertyAll(
             TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
-          visualDensity: VisualDensity.compact,
+          visualDensity: VisualDensity.standard,
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
       ),

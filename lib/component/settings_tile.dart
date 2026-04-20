@@ -11,20 +11,24 @@ class SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      height: 48,
+      height: 74,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             description,
             style: TextStyle(
               color: scheme.onSurface,
-              fontSize: 18.0,
+              fontSize: 19.0,
               fontWeight: FontWeight.w800,
               height: 1.0,
             ),
           ),
-          action,
+          Padding(
+            padding: const EdgeInsets.only(right: 2.0),
+            child: action,
+          ),
         ],
       ),
     );

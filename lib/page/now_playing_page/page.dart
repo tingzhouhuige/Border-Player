@@ -115,21 +115,11 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
         fit: StackFit.expand,
         alignment: AlignmentDirectional.center,
         children: [
-          if (nowPlayingCover != null) ...[
-            Image(
-              image: nowPlayingCover!,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
-            switch (brightness) {
-              Brightness.dark => const ColoredBox(color: Colors.black45),
-              Brightness.light => const ColoredBox(color: Colors.white54),
-            },
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 250, sigmaY: 250),
-              child: const ColoredBox(color: Colors.transparent),
-            ),
-          ],
+          _NowPlayingBackdrop(
+            cover: nowPlayingCover,
+            scheme: nowPlayingScheme ?? scheme,
+            brightness: brightness,
+          ),
           ChangeNotifierProvider.value(
             value: PlayService.instance.playbackService,
             builder: (context, _) {
@@ -146,6 +136,98 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                 }),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NowPlayingBackdrop extends StatelessWidget {
+  const _NowPlayingBackdrop({
+    required this.cover,
+    required this.scheme,
+    required this.brightness,
+  });
+
+  final ImageProvider<Object>? cover;
+  final ColorScheme scheme;
+  final Brightness brightness;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = brightness == Brightness.dark;
+    final base = isDark ? scheme.surface : scheme.secondaryContainer;
+    final wash = isDark ? Colors.black : Colors.white;
+    final shade = isDark ? Colors.black : scheme.onSecondaryContainer;
+
+    if (cover == null) {
+      return ColoredBox(color: base);
+    }
+
+    return ColoredBox(
+      color: base,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Opacity(
+            opacity: isDark ? 0.66 : 0.82,
+            child: Transform.scale(
+              scale: 1.22,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+                child: Image(
+                  image: cover!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
+          Opacity(
+            opacity: isDark ? 0.46 : 0.58,
+            child: Transform.scale(
+              scale: 1.72,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 150, sigmaY: 150),
+                child: Image(
+                  image: cover!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  wash.withOpacity(isDark ? 0.16 : 0.38),
+                  base.withOpacity(isDark ? 0.18 : 0.32),
+                  wash.withOpacity(isDark ? 0.24 : 0.52),
+                ],
+                stops: const [0.0, 0.48, 1.0],
+              ),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: const Alignment(-0.18, -0.18),
+                radius: 1.08,
+                colors: [
+                  Colors.transparent,
+                  shade.withOpacity(isDark ? 0.20 : 0.10),
+                  shade.withOpacity(isDark ? 0.48 : 0.20),
+                ],
+                stops: const [0.50, 0.78, 1.0],
+              ),
+            ),
+          ),
+          ColoredBox(
+            color: wash.withOpacity(isDark ? 0.08 : 0.20),
           ),
         ],
       ),
