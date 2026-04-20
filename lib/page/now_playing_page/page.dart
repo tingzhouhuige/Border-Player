@@ -120,18 +120,15 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
             builder: (context, _) {
               return Theme(
                 data: contentTheme,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 56.0),
-                  child: ResponsiveBuilder2(builder: (context, screenType) {
-                    switch (screenType) {
-                      case ScreenType.small:
-                        return const _NowPlayingPage_Small();
-                      case ScreenType.medium:
-                      case ScreenType.large:
-                        return const _NowPlayingPage_Large();
-                    }
-                  }),
-                ),
+                child: ResponsiveBuilder2(builder: (context, screenType) {
+                  switch (screenType) {
+                    case ScreenType.small:
+                      return const _NowPlayingPage_Small();
+                    case ScreenType.medium:
+                    case ScreenType.large:
+                      return const _NowPlayingPage_Large();
+                  }
+                }),
               );
             },
           ),
@@ -146,35 +143,14 @@ class _NowPlayingTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                scheme.surface.withOpacity(0.20),
-                scheme.surface.withOpacity(0.06),
-                scheme.surface.withOpacity(0.00),
-              ],
-              stops: const [0.0, 0.68, 1.0],
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              children: const [
-                NavBackBtn(),
-                Expanded(child: DragToMoveArea(child: SizedBox.expand())),
-                WindowControlls(),
-              ],
-            ),
-          ),
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: const [
+          NavBackBtn(),
+          Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+          WindowControlls(),
+        ],
       ),
     );
   }
@@ -208,11 +184,11 @@ class _NowPlayingBackdrop extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Opacity(
-            opacity: isDark ? 0.72 : 0.88,
+            opacity: isDark ? 0.78 : 0.92,
             child: Transform.scale(
-              scale: 1.14,
+              scale: 1.08,
               child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 34, sigmaY: 34),
+                imageFilter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                 child: Image(
                   image: cover!,
                   fit: BoxFit.cover,
@@ -222,11 +198,11 @@ class _NowPlayingBackdrop extends StatelessWidget {
             ),
           ),
           Opacity(
-            opacity: isDark ? 0.38 : 0.46,
+            opacity: isDark ? 0.30 : 0.34,
             child: Transform.scale(
-              scale: 1.52,
+              scale: 1.34,
               child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
+                imageFilter: ImageFilter.blur(sigmaX: 56, sigmaY: 56),
                 child: Image(
                   image: cover!,
                   fit: BoxFit.cover,
@@ -242,8 +218,8 @@ class _NowPlayingBackdrop extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   wash.withOpacity(isDark ? 0.16 : 0.38),
-                  base.withOpacity(isDark ? 0.18 : 0.32),
-                  wash.withOpacity(isDark ? 0.24 : 0.52),
+                  base.withOpacity(isDark ? 0.12 : 0.24),
+                  wash.withOpacity(isDark ? 0.20 : 0.44),
                 ],
                 stops: const [0.0, 0.48, 1.0],
               ),
@@ -256,15 +232,15 @@ class _NowPlayingBackdrop extends StatelessWidget {
                 radius: 1.08,
                 colors: [
                   Colors.transparent,
-                  shade.withOpacity(isDark ? 0.20 : 0.10),
-                  shade.withOpacity(isDark ? 0.48 : 0.20),
+                  shade.withOpacity(isDark ? 0.18 : 0.08),
+                  shade.withOpacity(isDark ? 0.42 : 0.17),
                 ],
                 stops: const [0.50, 0.78, 1.0],
               ),
             ),
           ),
           ColoredBox(
-            color: wash.withOpacity(isDark ? 0.08 : 0.20),
+            color: wash.withOpacity(isDark ? 0.06 : 0.14),
           ),
         ],
       ),
