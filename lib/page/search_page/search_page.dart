@@ -63,29 +63,63 @@ class SearchPage extends StatelessWidget {
               "搜索",
               style: TextStyle(
                 color: scheme.onSurface,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                height: 1.0,
               ),
             ),
-            const Padding(padding: EdgeInsets.only(bottom: 32.0)),
+            const SizedBox(height: 26.0),
             SizedBox(
-              width: 400,
+              width: 448,
+              height: 50,
               child: Focus(
                 onFocusChange: HotkeysHelper.onFocusChanges,
                 child: Hero(
                   tag: SEARCH_BAR_KEY,
                   child: TextField(
                     autofocus: true,
-                    decoration: const InputDecoration(
+                    style: TextStyle(
+                      color: scheme.onSurface,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: scheme.surfaceContainer,
                       suffixIcon: Padding(
-                        padding: EdgeInsets.only(right: 12.0),
-                        child: Icon(Symbols.search),
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: Icon(
+                          Symbols.search,
+                          size: 20,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                       hintText: "搜索歌曲、艺术家、专辑",
-                      border: OutlineInputBorder(),
+                      hintStyle: TextStyle(
+                        color: scheme.onSurfaceVariant,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      contentPadding: const EdgeInsets.fromLTRB(24, 14, 12, 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(
+                          color: scheme.outlineVariant.withOpacity(0.55),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(
+                          color: scheme.outlineVariant.withOpacity(0.55),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(
+                          color: scheme.primary.withOpacity(0.48),
+                        ),
+                      ),
                     ),
-
-                    /// when 'enter' is pressed
                     onSubmitted: (String query) {
                       context.push(
                         app_paths.SEARCH_RESULT_PAGE,

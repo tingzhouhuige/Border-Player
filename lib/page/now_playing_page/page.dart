@@ -50,12 +50,25 @@ class NowPlayingPage extends StatefulWidget {
 class _NowPlayingPageState extends State<NowPlayingPage> {
   final playbackService = PlayService.instance.playbackService;
   ImageProvider<Object>? nowPlayingCover;
+  ColorScheme? nowPlayingScheme;
 
   void updateCover() {
     playbackService.nowPlaying?.cover.then((cover) {
       if (mounted) {
         setState(() {
           nowPlayingCover = cover;
+        });
+      }
+      if (cover != null) {
+        ColorScheme.fromImageProvider(
+          provider: cover,
+          brightness: Theme.of(context).brightness,
+        ).then((scheme) {
+          if (mounted) {
+            setState(() {
+              nowPlayingScheme = scheme;
+            });
+          }
         });
       }
     });
@@ -79,6 +92,9 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     final theme = Theme.of(context);
     final brightness = theme.brightness;
     final scheme = theme.colorScheme;
+    final contentTheme = theme.copyWith(
+      colorScheme: nowPlayingScheme ?? scheme,
+    );
 
     return Scaffold(
       appBar: const PreferredSize(
@@ -117,15 +133,18 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
           ChangeNotifierProvider.value(
             value: PlayService.instance.playbackService,
             builder: (context, _) {
-              return ResponsiveBuilder2(builder: (context, screenType) {
-                switch (screenType) {
-                  case ScreenType.small:
-                    return const _NowPlayingPage_Small();
-                  case ScreenType.medium:
-                  case ScreenType.large:
-                    return const _NowPlayingPage_Large();
-                }
-              });
+              return Theme(
+                data: contentTheme,
+                child: ResponsiveBuilder2(builder: (context, screenType) {
+                  switch (screenType) {
+                    case ScreenType.small:
+                      return const _NowPlayingPage_Small();
+                    case ScreenType.medium:
+                    case ScreenType.large:
+                      return const _NowPlayingPage_Large();
+                  }
+                }),
+              );
             },
           ),
         ],

@@ -136,7 +136,7 @@ class PageScaffold extends StatelessWidget {
         style: TextStyle(
           fontSize: 29.0,
           color: scheme.onSurface,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w800,
         ),
         overflow: TextOverflow.ellipsis,
       ),
@@ -153,7 +153,7 @@ class PageScaffold extends StatelessWidget {
             style: TextStyle(
               fontSize: 29.0,
               color: scheme.onSurface,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w800,
             ),
             overflow: TextOverflow.ellipsis,
           ),

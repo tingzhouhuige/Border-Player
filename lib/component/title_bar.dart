@@ -2,6 +2,7 @@
 
 import 'package:coriander_player/app_preference.dart';
 import 'package:coriander_player/app_settings.dart';
+import 'package:coriander_player/component/brand_mark.dart';
 import 'package:coriander_player/component/horizontal_lyric_view.dart';
 import 'package:coriander_player/component/responsive_builder.dart';
 import 'package:coriander_player/hotkeys_helper.dart';
@@ -130,8 +131,8 @@ class _TitleBar_Large extends StatelessWidget {
                     width: 266,
                     child: Row(
                       children: [
-                        Image.asset("app_icon.ico", width: 21, height: 21),
-                        const SizedBox(width: 9.0),
+                        const BrandMark(size: 26, iconSize: 17),
+                        const SizedBox(width: 10.0),
                         Text(
                           "Border Player",
                           style: TextStyle(

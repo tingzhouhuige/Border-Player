@@ -10,19 +10,23 @@ class SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          description,
-          style: TextStyle(
-            color: scheme.onSurface,
-            fontSize: 18.0,
-            fontWeight: FontWeight.w800,
+    return SizedBox(
+      height: 48,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            description,
+            style: TextStyle(
+              color: scheme.onSurface,
+              fontSize: 18.0,
+              fontWeight: FontWeight.w800,
+              height: 1.0,
+            ),
           ),
-        ),
-        action,
-      ],
+          action,
+        ],
+      ),
     );
   }
 }

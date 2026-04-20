@@ -1,6 +1,7 @@
 // ignore_for_file: camel_case_types
 
 import 'package:coriander_player/app_preference.dart';
+import 'package:coriander_player/component/brand_mark.dart';
 import 'package:coriander_player/component/responsive_builder.dart';
 import 'package:coriander_player/app_paths.dart' as app_paths;
 import 'package:flutter/material.dart';
@@ -162,11 +163,7 @@ class _HomePill extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: colorScheme.primary.withOpacity(0.25),
-            child: Icon(Symbols.music_note, color: colorScheme.onSurface),
-          ),
+          const BrandMark(size: 40, iconSize: 24),
           const SizedBox(width: 14),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,

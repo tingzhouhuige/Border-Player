@@ -29,6 +29,7 @@ class MiniNowPlaying extends StatelessWidget {
             width: 612.0,
             child: DecoratedBox(
               decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(

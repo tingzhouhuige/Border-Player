@@ -6,6 +6,7 @@ class _NowPlayingPage_Large extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const spacer = SizedBox(width: 8.0);
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(32.0, 8.0, 32.0, 32.0),
       child: Column(
@@ -34,55 +35,90 @@ class _NowPlayingPage_Large extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16.0),
-          Container(
-            height: 190,
-            padding: const EdgeInsets.fromLTRB(32, 24, 32, 22),
+          DecoratedBox(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.42),
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withOpacity(0.20),
+                  blurRadius: 54,
+                  spreadRadius: 8,
+                  offset: const Offset(0, 18),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            child: const Column(
-              children: [
-                _NowPlayingSlider(),
-                Spacer(),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Stack(
-                    alignment: Alignment.center,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 42, sigmaY: 42),
+                child: Container(
+                  height: 190,
+                  padding: const EdgeInsets.fromLTRB(32, 24, 32, 22),
+                  decoration: BoxDecoration(
+                    color: scheme.surface.withOpacity(0.62),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: scheme.onSurface.withOpacity(0.08),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        scheme.surface.withOpacity(0.72),
+                        scheme.primaryContainer.withOpacity(0.34),
+                      ],
+                    ),
+                  ),
+                  child: const Column(
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      _NowPlayingSlider(),
+                      Spacer(),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
-                            _NowPlayingShuffleSwitch(),
-                            spacer,
-                            _NowPlayingPlayModeSwitch(),
-                            spacer,
-                            _NowPlayingVolDspSlider(),
-                            spacer,
-                            _ExclusiveModeSwitch(),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _NowPlayingShuffleSwitch(),
+                                  spacer,
+                                  _NowPlayingPlayModeSwitch(),
+                                  spacer,
+                                  _NowPlayingVolDspSlider(),
+                                  spacer,
+                                  _ExclusiveModeSwitch(),
+                                ],
+                              ),
+                            ),
+                            _NowPlayingMainControls(),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _NowPlayingLargeViewSwitch(),
+                                  spacer,
+                                  _DesktopLyricSwitch(),
+                                  spacer,
+                                  _NowPlayingMoreAction(),
+                                ],
+                              ),
+                            )
                           ],
                         ),
                       ),
-                      _NowPlayingMainControls(),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _NowPlayingLargeViewSwitch(),
-                            spacer,
-                            _DesktopLyricSwitch(),
-                            spacer,
-                            _NowPlayingMoreAction(),
-                          ],
-                        ),
-                      )
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ],

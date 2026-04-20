@@ -17,10 +17,7 @@ class LargeFilledIconButtonStyle extends ButtonStyle {
   @override
   WidgetStateProperty<Color?>? get backgroundColor =>
       WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-        if (states.contains(WidgetState.disabled)) {
-          return scheme.onSurface.withOpacity(0.12);
-        }
-        return primary ? scheme.primary : scheme.secondary;
+        return Colors.transparent;
       });
 
   @override
@@ -29,21 +26,21 @@ class LargeFilledIconButtonStyle extends ButtonStyle {
         if (states.contains(WidgetState.disabled)) {
           return scheme.onSurface.withOpacity(0.38);
         }
-        return primary ? scheme.onPrimary : scheme.onSecondary;
+        return primary ? scheme.primary : scheme.onSurface;
       });
 
   @override
   WidgetStateProperty<Color?>? get overlayColor =>
       WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-        final color = primary ? scheme.onPrimary : scheme.onSecondary;
+        final color = primary ? scheme.primary : scheme.onSurface;
         if (states.contains(WidgetState.pressed)) {
-          return color.withOpacity(0.1);
+          return color.withOpacity(0.18);
         }
         if (states.contains(WidgetState.hovered)) {
-          return color.withOpacity(0.08);
+          return color.withOpacity(0.12);
         }
         if (states.contains(WidgetState.focused)) {
-          return color.withOpacity(0.1);
+          return color.withOpacity(0.16);
         }
         return Colors.transparent;
       });
@@ -65,8 +62,9 @@ class LargeFilledIconButtonStyle extends ButtonStyle {
       const WidgetStatePropertyAll<EdgeInsetsGeometry>(EdgeInsets.all(8.0));
 
   @override
-  WidgetStateProperty<Size>? get minimumSize =>
-      const WidgetStatePropertyAll<Size>(Size(64.0, 64.0));
+  WidgetStateProperty<Size>? get minimumSize => WidgetStatePropertyAll<Size>(
+        primary ? const Size(76.0, 76.0) : const Size(68.0, 68.0),
+      );
 
   // No default fixedSize
 
@@ -76,7 +74,7 @@ class LargeFilledIconButtonStyle extends ButtonStyle {
 
   @override
   WidgetStateProperty<double>? get iconSize =>
-      const WidgetStatePropertyAll<double>(24.0);
+      WidgetStatePropertyAll<double>(primary ? 31.0 : 27.0);
 
   @override
   WidgetStateProperty<BorderSide?>? get side => null;

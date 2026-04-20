@@ -63,10 +63,10 @@ class RectangleProgressPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final progressPainter = Paint();
-    progressPainter.color = scheme.primary.withOpacity(0.16);
+    progressPainter.color = scheme.primary.withOpacity(0.18);
 
     final trackPainter = Paint();
-    trackPainter.color = scheme.surfaceContainerHighest.withOpacity(0.45);
+    trackPainter.color = scheme.secondaryContainer;
 
     /// 进度条背景
     canvas.drawRect(

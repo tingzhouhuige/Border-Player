@@ -92,7 +92,32 @@ class Entry extends StatelessWidget {
           backgroundColor: colorScheme.secondaryContainer,
           foregroundColor: colorScheme.onSecondaryContainer,
           elevation: 0,
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withOpacity(0.55),
+            width: 1,
+          ),
           shape: const StadiumBorder(),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(colorScheme.surfaceContainer),
+          foregroundColor:
+              WidgetStatePropertyAll(colorScheme.onSecondaryContainer),
+          side: WidgetStatePropertyAll(
+            BorderSide(
+              color: colorScheme.outlineVariant.withOpacity(0.55),
+              width: 1,
+            ),
+          ),
+          textStyle: const WidgetStatePropertyAll(
+            TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          visualDensity: VisualDensity.compact,
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
