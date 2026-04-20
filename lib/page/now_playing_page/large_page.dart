@@ -35,87 +35,94 @@ class _NowPlayingPage_Large extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16.0),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: scheme.primary.withOpacity(0.20),
-                  blurRadius: 54,
-                  spreadRadius: 8,
-                  offset: const Offset(0, 18),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 42, sigmaY: 42),
-                child: Container(
-                  height: 190,
-                  padding: const EdgeInsets.fromLTRB(32, 24, 32, 22),
-                  decoration: BoxDecoration(
-                    color: scheme.surface.withOpacity(0.62),
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(
-                      color: scheme.onSurface.withOpacity(0.08),
+          FractionallySizedBox(
+            widthFactor: 0.92,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(34),
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.primary.withOpacity(0.16),
+                    blurRadius: 74,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 20),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.10),
+                    blurRadius: 42,
+                    spreadRadius: -8,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(34),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+                  child: Container(
+                    height: 176,
+                    padding: const EdgeInsets.fromLTRB(30, 22, 30, 20),
+                    decoration: BoxDecoration(
+                      color: scheme.surface.withOpacity(0.34),
+                      borderRadius: BorderRadius.circular(34),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.10),
+                        width: 0.8,
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          scheme.surface.withOpacity(0.44),
+                          scheme.primaryContainer.withOpacity(0.22),
+                          scheme.surface.withOpacity(0.26),
+                        ],
+                        stops: const [0.0, 0.58, 1.0],
+                      ),
                     ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        scheme.surface.withOpacity(0.72),
-                        scheme.primaryContainer.withOpacity(0.34),
+                    child: const Column(
+                      children: [
+                        _NowPlayingSlider(),
+                        Spacer(),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _NowPlayingShuffleSwitch(),
+                                    spacer,
+                                    _NowPlayingPlayModeSwitch(),
+                                    spacer,
+                                    _NowPlayingVolDspSlider(),
+                                    spacer,
+                                    _ExclusiveModeSwitch(),
+                                  ],
+                                ),
+                              ),
+                              _NowPlayingMainControls(),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _NowPlayingLargeViewSwitch(),
+                                    spacer,
+                                    _DesktopLyricSwitch(),
+                                    spacer,
+                                    _NowPlayingMoreAction(),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  child: const Column(
-                    children: [
-                      _NowPlayingSlider(),
-                      Spacer(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _NowPlayingShuffleSwitch(),
-                                  spacer,
-                                  _NowPlayingPlayModeSwitch(),
-                                  spacer,
-                                  _NowPlayingVolDspSlider(),
-                                  spacer,
-                                  _ExclusiveModeSwitch(),
-                                ],
-                              ),
-                            ),
-                            _NowPlayingMainControls(),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _NowPlayingLargeViewSwitch(),
-                                  spacer,
-                                  _DesktopLyricSwitch(),
-                                  spacer,
-                                  _NowPlayingMoreAction(),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
