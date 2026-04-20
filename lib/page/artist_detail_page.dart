@@ -40,7 +40,17 @@ class ArtistDetailPage extends StatelessWidget {
       tertiaryContentBuilder: (context, album, i, multiSelectController) =>
           ListTile(
         onTap: () => context.push(app_paths.ALBUM_DETAIL_PAGE, extra: album),
-        title: Text(album.name),
+        dense: true,
+        minVerticalPadding: 0,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+        title: Text(
+          album.name,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 17,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       enableShufflePlay: true,

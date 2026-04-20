@@ -19,7 +19,7 @@ class ShufflePlay<T> extends StatelessWidget {
       icon: const Icon(Symbols.shuffle),
       label: const Text("随机播放"),
       style: const ButtonStyle(
-        fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+        fixedSize: WidgetStatePropertyAll(Size.fromHeight(48)),
       ),
     );
   }
@@ -63,7 +63,7 @@ class SortMethodComboBox<T> extends StatelessWidget {
         final borderRadius = BorderRadius.circular(20.0);
 
         return SizedBox(
-          height: 40.0,
+          height: 48.0,
           child: Material(
             borderRadius: borderRadius,
             color: scheme.secondaryContainer,
@@ -192,7 +192,7 @@ class AddAllToPlaylist extends StatelessWidget {
         icon: const Icon(Symbols.add),
         label: const Text("添加到歌单"),
         style: const ButtonStyle(
-          fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+          fixedSize: WidgetStatePropertyAll(Size.fromHeight(48)),
         ),
       ),
     );

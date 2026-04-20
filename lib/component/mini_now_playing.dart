@@ -22,20 +22,20 @@ class MiniNowPlaying extends StatelessWidget {
             8.0,
             0,
             8.0,
-            screenType == ScreenType.small ? 8.0 : 34.0,
+            screenType == ScreenType.small ? 8.0 : 38.0,
           ),
           child: SizedBox(
             height: 58.0,
-            width: 624.0,
+            width: 612.0,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
                     color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.18),
-                    blurRadius: 36,
-                    spreadRadius: 8,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.16),
+                    blurRadius: 42,
+                    spreadRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],

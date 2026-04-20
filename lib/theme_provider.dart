@@ -7,9 +7,13 @@ class ThemeProvider extends ChangeNotifier {
   ColorScheme lightScheme = ColorScheme.fromSeed(
     seedColor: Color(AppSettings.instance.defaultTheme),
     brightness: Brightness.light,
-    surface: const Color(0xFFFFFBF6),
-    surfaceContainer: const Color(0xFFFFFBF3),
-    secondaryContainer: const Color(0xFFFFF8DB),
+    primary: const Color(0xFFE6AE22),
+    onPrimary: const Color(0xFF302600),
+    surface: const Color(0xFFFFFEFA),
+    surfaceContainer: const Color(0xFFFFFBF4),
+    secondaryContainer: const Color(0xFFFFF8DF),
+    onSurface: const Color(0xFF2E2A22),
+    onSurfaceVariant: const Color(0xFF6F695D),
     onSecondaryContainer: const Color(0xFF3C3727),
   );
 
@@ -103,20 +107,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   void applyThemeFromAudio(Audio audio) {
-    if (!AppSettings.instance.dynamicTheme) return;
-
-    audio.cover.then((image) {
-      if (image == null) return;
-
-      applyThemeFromImage(image, themeMode);
-
-      final second = switch (themeMode) {
-        ThemeMode.system => ThemeMode.dark,
-        ThemeMode.light => ThemeMode.dark,
-        ThemeMode.dark => ThemeMode.light,
-      };
-      applyThemeFromImage(image, second);
-    });
+    return;
   }
 
   void changeFontFamily(String? fontFamily) {

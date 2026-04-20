@@ -108,7 +108,7 @@ class PageScaffold extends StatelessWidget {
         color: scheme.surface,
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 22.0,
+            horizontal: 14.0,
             vertical: 18.0,
           ),
           child: Column(

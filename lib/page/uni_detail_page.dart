@@ -161,7 +161,7 @@ class _UniDetailPageState<P, S, T> extends State<UniDetailPage<P, S, T>> {
     return ColoredBox(
       color: scheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 16.0),
         child: Column(
           children: [
             // head
@@ -175,7 +175,7 @@ class _UniDetailPageState<P, S, T> extends State<UniDetailPage<P, S, T>> {
               multiSelectController: multiSelectController,
               multiSelectViewActions: widget.multiSelectViewActions,
             ),
-            const SizedBox(height: 16.0),
+            const SizedBox(height: 22.0),
             Expanded(
               child: Material(
                 borderRadius: BorderRadius.circular(8.0),
@@ -211,13 +211,13 @@ class _UniDetailPageState<P, S, T> extends State<UniDetailPage<P, S, T>> {
                     // tertiary content
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.fromLTRB(8, 16, 8, 18),
                         child: Text(
                           widget.tertiaryContentTitle,
                           style: TextStyle(
                             color: scheme.onSurface,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 22.0,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
@@ -273,113 +273,130 @@ class _UniDetailPageHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final brightness = theme.brightness;
-    return SizedBox(
-      height: 200,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          FutureBuilder(
-            future: backgroundPic,
-            builder: (context, snapshot) {
-              if (snapshot.data == null) return const SizedBox.shrink();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(34.0),
+      child: SizedBox(
+        height: 250,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            FutureBuilder(
+              future: backgroundPic,
+              builder: (context, snapshot) {
+                if (snapshot.data == null) return const SizedBox.shrink();
 
-              return Image(
-                image: snapshot.data!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              );
-            },
-          ),
-          switch (brightness) {
-            Brightness.dark => const ColoredBox(color: Colors.black38),
-            Brightness.light => const ColoredBox(color: Colors.white30),
-          },
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
-            child: const ColoredBox(color: Colors.transparent),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              FutureBuilder(
-                future: pic,
-                builder: (context, snapshot) {
-                  final placeholder = Icon(
-                    Symbols.broken_image,
-                    size: 200.0,
-                    color: scheme.onSurface,
-                  );
-                  return switch (snapshot.connectionState) {
-                    ConnectionState.done => snapshot.data == null
-                        ? placeholder
-                        : switch (picShape) {
-                            PicShape.oval => ClipOval(
-                                child: Image(
-                                  image: snapshot.data!,
-                                  width: 200.0,
-                                  height: 200.0,
-                                  errorBuilder: (_, __, ___) => placeholder,
-                                ),
-                              ),
-                            PicShape.rrect => ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image(
-                                  image: snapshot.data!,
-                                  width: 200.0,
-                                  height: 200.0,
-                                  errorBuilder: (_, __, ___) => placeholder,
-                                ),
-                              ),
-                          },
-                    _ => const SizedBox(
-                        width: 200,
-                        height: 200,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                  };
-                },
-              ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 22.0,
-                          color: scheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Wrap(
-                      spacing: 8.0,
-                      runSpacing: 8.0,
-                      children: multiSelectController == null
-                          ? actions
-                          : multiSelectController!.enableMultiSelectView
-                              ? multiSelectViewActions!
-                              : actions,
-                    )
-                  ],
+                return Image(
+                  image: snapshot.data!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                );
+              },
+            ),
+            switch (brightness) {
+              Brightness.dark => const ColoredBox(color: Colors.black54),
+              Brightness.light => ColoredBox(
+                  color: scheme.secondaryContainer.withOpacity(0.72),
                 ),
+            },
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 76, sigmaY: 76),
+              child: const ColoredBox(color: Colors.transparent),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 22, 28, 22),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FutureBuilder(
+                    future: pic,
+                    builder: (context, snapshot) {
+                      final placeholder = Icon(
+                        Symbols.broken_image,
+                        size: 220.0,
+                        color: scheme.onSurface,
+                      );
+                      return switch (snapshot.connectionState) {
+                        ConnectionState.done => snapshot.data == null
+                            ? placeholder
+                            : switch (picShape) {
+                                PicShape.oval => ClipOval(
+                                    child: Image(
+                                      image: snapshot.data!,
+                                      width: 220.0,
+                                      height: 220.0,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => placeholder,
+                                    ),
+                                  ),
+                                PicShape.rrect => ClipRRect(
+                                    borderRadius: BorderRadius.circular(24.0),
+                                    child: Image(
+                                      image: snapshot.data!,
+                                      width: 220.0,
+                                      height: 220.0,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => placeholder,
+                                    ),
+                                  ),
+                              },
+                        _ => const SizedBox(
+                            width: 220,
+                            height: 220,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                      };
+                    },
+                  ),
+                  const SizedBox(width: 28.0),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 29.0,
+                              height: 1.12,
+                              color: scheme.onSurface,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 6.0),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: scheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 14.0),
+                          Wrap(
+                            spacing: 10.0,
+                            runSpacing: 8.0,
+                            children: multiSelectController == null
+                                ? actions
+                                : multiSelectController!.enableMultiSelectView
+                                    ? multiSelectViewActions!
+                                    : actions,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

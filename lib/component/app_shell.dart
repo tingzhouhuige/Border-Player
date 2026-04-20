@@ -67,7 +67,7 @@ class _AppShell_Large extends StatelessWidget {
           Expanded(
             child: Stack(children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 20, 18),
+                padding: const EdgeInsets.fromLTRB(0, 16, 20, 18),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(22.0),
                   child: page,

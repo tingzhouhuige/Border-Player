@@ -49,7 +49,7 @@ class AppSettings {
   int defaultTheme = const Color(0xFFE7C94E).value;
 
   /// 跟随歌曲封面的动态主题
-  bool dynamicTheme = true;
+  bool dynamicTheme = false;
 
   /// 跟随系统主题色
   bool useSystemTheme = false;

@@ -173,7 +173,14 @@ class AudioTile extends StatelessWidget {
                 if (leading != null)
                   Padding(
                     padding: const EdgeInsets.only(right: 14.0),
-                    child: leading!,
+                    child: DefaultTextStyle(
+                      style: TextStyle(
+                        color: scheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      child: leading!,
+                    ),
                   ),
                 if (leading == null) ...[
                   SizedBox(
@@ -233,7 +240,8 @@ class AudioTile extends StatelessWidget {
                       Text(
                         "${audio.artist} - ${audio.album}",
                         style: TextStyle(
-                          color: focus ? scheme.primary : scheme.onSurfaceVariant,
+                          color:
+                              focus ? scheme.primary : scheme.onSurfaceVariant,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           height: 1.1,

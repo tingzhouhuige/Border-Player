@@ -61,7 +61,7 @@ class SideNav extends StatelessWidget {
             );
           case ScreenType.large:
             return SizedBox(
-              width: 244,
+              width: 272,
               child: _LargeSideNavContent(
                 selected: selected,
                 onDestinationSelected: onDestinationSelected,
@@ -102,12 +102,12 @@ class _LargeSideNavContent extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 18),
+        padding: const EdgeInsets.fromLTRB(28, 16, 24, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _HomePill(colorScheme: scheme),
-            const SizedBox(height: 28),
+            const SizedBox(height: 36),
             for (var i = 0; i < destinations.length; i++) ...[
               _SideNavItem(
                 icon: destinations[i].icon,
@@ -115,7 +115,7 @@ class _LargeSideNavContent extends StatelessWidget {
                 selected: selected == i,
                 onTap: () => onDestinationSelected(i),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
             ],
             const Spacer(),
             Row(
@@ -158,7 +158,7 @@ class _HomePill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
         children: [
@@ -222,12 +222,12 @@ class _SideNavItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: onTap,
         child: SizedBox(
-          height: 56,
+          height: 58,
           child: Row(
             children: [
-              const SizedBox(width: 12),
+              const SizedBox(width: 13),
               Icon(icon, size: 22, color: scheme.onSurface),
-              const SizedBox(width: 20),
+              const SizedBox(width: 21),
               Expanded(
                 child: Text(
                   label,

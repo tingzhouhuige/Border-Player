@@ -26,7 +26,7 @@ class ArtistTile extends StatelessWidget {
         onTap: () => context.push(app_paths.ARTIST_DETAIL_PAGE, extra: artist),
         borderRadius: BorderRadius.circular(8.0),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
           child: Row(
             children: [
               FutureBuilder(
@@ -47,12 +47,17 @@ class ArtistTile extends StatelessWidget {
               ),
               Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
+                  padding: const EdgeInsets.only(left: 12.0),
                   child: Text(
                     artist.name,
                     softWrap: false,
-                    maxLines: 2,
-                    style: TextStyle(color: scheme.onSurface),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: scheme.onSurface,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),
