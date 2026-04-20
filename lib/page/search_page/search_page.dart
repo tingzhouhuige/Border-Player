@@ -56,83 +56,130 @@ class SearchPage extends StatelessWidget {
       color: scheme.surface,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "搜索",
-              style: TextStyle(
-                color: scheme.onSurface,
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                height: 1.0,
+        child: Transform.translate(
+          offset: const Offset(0, -82),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "搜索",
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  height: 1.0,
+                ),
               ),
-            ),
-            const SizedBox(height: 26.0),
-            SizedBox(
-              width: 448,
-              height: 50,
-              child: Focus(
-                onFocusChange: HotkeysHelper.onFocusChanges,
-                child: Hero(
-                  tag: SEARCH_BAR_KEY,
-                  child: TextField(
-                    autofocus: true,
-                    style: TextStyle(
-                      color: scheme.onSurface,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+              const SizedBox(height: 24.0),
+              _SearchFieldGlow(
+                child: SizedBox(
+                  width: 448,
+                  height: 50,
+                  child: Focus(
+                    onFocusChange: HotkeysHelper.onFocusChanges,
+                    child: Hero(
+                      tag: SEARCH_BAR_KEY,
+                      child: TextField(
+                        autofocus: true,
+                        style: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: scheme.surfaceContainer.withOpacity(0.82),
+                          suffixIcon: Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: Icon(
+                              Symbols.search,
+                              size: 20,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                          hintText: "搜索歌曲、艺术家、专辑",
+                          hintStyle: TextStyle(
+                            color: scheme.onSurfaceVariant,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          contentPadding:
+                              const EdgeInsets.fromLTRB(24, 14, 12, 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide(
+                              color: scheme.primary.withOpacity(0.22),
+                              width: 0.8,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide(
+                              color: scheme.primary.withOpacity(0.20),
+                              width: 0.8,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide(
+                              color: scheme.primary.withOpacity(0.30),
+                              width: 0.9,
+                            ),
+                          ),
+                        ),
+                        onSubmitted: (String query) {
+                          context.push(
+                            app_paths.SEARCH_RESULT_PAGE,
+                            extra: UnionSearchResult.search(query),
+                          );
+                        },
+                      ),
                     ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: scheme.surfaceContainer,
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: Icon(
-                          Symbols.search,
-                          size: 20,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                      hintText: "搜索歌曲、艺术家、专辑",
-                      hintStyle: TextStyle(
-                        color: scheme.onSurfaceVariant,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      contentPadding: const EdgeInsets.fromLTRB(24, 14, 12, 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(
-                          color: scheme.outlineVariant.withOpacity(0.55),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(
-                          color: scheme.outlineVariant.withOpacity(0.55),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(
-                          color: scheme.primary.withOpacity(0.48),
-                        ),
-                      ),
-                    ),
-                    onSubmitted: (String query) {
-                      context.push(
-                        app_paths.SEARCH_RESULT_PAGE,
-                        extra: UnionSearchResult.search(query),
-                      );
-                    },
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _SearchFieldGlow extends StatelessWidget {
+  const _SearchFieldGlow({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: scheme.primary.withOpacity(0.055),
+                blurRadius: 24,
+                spreadRadius: 1,
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.34),
+                blurRadius: 18,
+                spreadRadius: -4,
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: child,
+          ),
+        ),
+      ],
     );
   }
 }

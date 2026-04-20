@@ -95,10 +95,6 @@ class Entry extends StatelessWidget {
           minimumSize: const Size(0, 40),
           fixedSize: const Size.fromHeight(40),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 0),
-          side: BorderSide(
-            color: colorScheme.outlineVariant.withOpacity(0.56),
-            width: 1,
-          ),
           shape: const StadiumBorder(),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
@@ -118,12 +114,7 @@ class Entry extends StatelessWidget {
           }),
           foregroundColor:
               WidgetStatePropertyAll(colorScheme.onSecondaryContainer),
-          side: WidgetStatePropertyAll(
-            BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.56),
-              width: 1,
-            ),
-          ),
+          side: const WidgetStatePropertyAll(BorderSide.none),
           textStyle: const WidgetStatePropertyAll(
             TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),

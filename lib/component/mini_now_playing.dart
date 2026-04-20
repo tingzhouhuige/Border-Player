@@ -34,10 +34,15 @@ class MiniNowPlaying extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.16),
-                    blurRadius: 42,
-                    spreadRadius: 10,
-                    offset: const Offset(0, 4),
+                        Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                    blurRadius: 30,
+                    spreadRadius: 3,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.40),
+                    blurRadius: 26,
+                    spreadRadius: -8,
                   ),
                 ],
               ),

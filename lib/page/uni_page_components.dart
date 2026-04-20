@@ -6,17 +6,11 @@ import 'package:coriander_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-BorderSide _selectBorder(ColorScheme scheme) => BorderSide(
-      color: scheme.outlineVariant.withOpacity(0.56),
-      width: 1,
-    );
-
 ButtonStyle _selectIconButtonStyle(ColorScheme scheme) => IconButton.styleFrom(
       fixedSize: const Size(40, 40),
       backgroundColor: scheme.secondaryContainer,
       foregroundColor: scheme.onSecondaryContainer,
       hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
-      side: _selectBorder(scheme),
       shape: const CircleBorder(),
       padding: EdgeInsets.zero,
     );
@@ -27,16 +21,14 @@ class ShufflePlay<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return FilledButton.icon(
       onPressed: () => PlayService.instance.playbackService.shuffleAndPlay(
         contentList as List<Audio>,
       ),
       icon: const Icon(Symbols.shuffle),
       label: const Text("随机播放"),
-      style: ButtonStyle(
-        fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40)),
-        side: WidgetStatePropertyAll(_selectBorder(scheme)),
+      style: const ButtonStyle(
+        fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
       ),
     );
   }
@@ -83,7 +75,7 @@ class SortMethodComboBox<T> extends StatelessWidget {
           height: 40.0,
           child: Material(
             color: scheme.secondaryContainer,
-            shape: StadiumBorder(side: _selectBorder(scheme)),
+            shape: const StadiumBorder(),
             child: InkWell(
               hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
               borderRadius: borderRadius,
@@ -180,7 +172,6 @@ class AddAllToPlaylist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return MenuAnchor(
       style: MenuStyle(
         shape: WidgetStatePropertyAll(
@@ -218,9 +209,8 @@ class AddAllToPlaylist extends StatelessWidget {
         },
         icon: const Icon(Symbols.add),
         label: const Text("添加到歌单"),
-        style: ButtonStyle(
-          fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40)),
-          side: WidgetStatePropertyAll(_selectBorder(scheme)),
+        style: const ButtonStyle(
+          fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
         ),
       ),
     );
