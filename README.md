@@ -1,12 +1,16 @@
 # Border Player
 
-Border Player is a Windows desktop music player fork based on an upstream GPLv3 music player project.
+Border Player is a Windows desktop music player fork based on Coriander Player.
+
+Upstream project:
+
+https://github.com/Ferry-200/coriander_player
 
 This repository contains the player source code, the bundled desktop lyric helper, and the Windows build configuration used for the Border Player release package.
 
 ## License
 
-This project is distributed under the GNU General Public License v3.0. The original upstream project was also GPLv3, so modified releases must keep the same license, include the license text, and provide the corresponding source code.
+This project is distributed under the GNU General Public License v3.0. The upstream Coriander Player project is also GPLv3, so modified releases must keep the same license, include the license text, preserve copyright/license notices, and provide the corresponding source code.
 
 See `LICENSE` and `FORK_NOTICE.md`.
 
@@ -35,4 +39,8 @@ The release package must include the Flutter release output, the `BASS` runtime 
 
 ## Upstream Notice
 
-Border Player is a modified version of an upstream GPLv3 project. Keep upstream copyright notices and GPLv3 license terms when publishing modified source or binary releases.
+Border Player is a modified version of Coriander Player:
+
+https://github.com/Ferry-200/coriander_player
+
+Keep upstream copyright notices and GPLv3 license terms when publishing modified source or binary releases.

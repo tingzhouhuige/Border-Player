@@ -1,6 +1,8 @@
 # Fork Notice
 
-Border Player is a modified fork of an upstream GPLv3 music player project.
+Border Player is a modified fork of Coriander Player:
+
+https://github.com/Ferry-200/coriander_player
 
 The project keeps the upstream GPLv3 license. When publishing Border Player binaries, publish the matching source code and keep the original license and copyright notices.
 
