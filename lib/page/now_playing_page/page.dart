@@ -97,17 +97,12 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     );
 
     return Scaffold(
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(56.0),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            children: [
-              NavBackBtn(),
-              Expanded(child: DragToMoveArea(child: SizedBox.expand())),
-              WindowControlls(),
-            ],
-          ),
+      extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56.0),
+        child: Theme(
+          data: contentTheme,
+          child: const _NowPlayingTopBar(),
         ),
       ),
       backgroundColor: scheme.secondaryContainer,
@@ -125,19 +120,61 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
             builder: (context, _) {
               return Theme(
                 data: contentTheme,
-                child: ResponsiveBuilder2(builder: (context, screenType) {
-                  switch (screenType) {
-                    case ScreenType.small:
-                      return const _NowPlayingPage_Small();
-                    case ScreenType.medium:
-                    case ScreenType.large:
-                      return const _NowPlayingPage_Large();
-                  }
-                }),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 56.0),
+                  child: ResponsiveBuilder2(builder: (context, screenType) {
+                    switch (screenType) {
+                      case ScreenType.small:
+                        return const _NowPlayingPage_Small();
+                      case ScreenType.medium:
+                      case ScreenType.large:
+                        return const _NowPlayingPage_Large();
+                    }
+                  }),
+                ),
               );
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _NowPlayingTopBar extends StatelessWidget {
+  const _NowPlayingTopBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                scheme.surface.withOpacity(0.20),
+                scheme.surface.withOpacity(0.06),
+                scheme.surface.withOpacity(0.00),
+              ],
+              stops: const [0.0, 0.68, 1.0],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: const [
+                NavBackBtn(),
+                Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+                WindowControlls(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -171,11 +208,11 @@ class _NowPlayingBackdrop extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Opacity(
-            opacity: isDark ? 0.66 : 0.82,
+            opacity: isDark ? 0.72 : 0.88,
             child: Transform.scale(
-              scale: 1.22,
+              scale: 1.14,
               child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+                imageFilter: ImageFilter.blur(sigmaX: 34, sigmaY: 34),
                 child: Image(
                   image: cover!,
                   fit: BoxFit.cover,
@@ -185,11 +222,11 @@ class _NowPlayingBackdrop extends StatelessWidget {
             ),
           ),
           Opacity(
-            opacity: isDark ? 0.46 : 0.58,
+            opacity: isDark ? 0.38 : 0.46,
             child: Transform.scale(
-              scale: 1.72,
+              scale: 1.52,
               child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 150, sigmaY: 150),
+                imageFilter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
                 child: Image(
                   image: cover!,
                   fit: BoxFit.cover,
