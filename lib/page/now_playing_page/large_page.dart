@@ -35,30 +35,30 @@ class _NowPlayingPage_Large extends StatelessWidget {
                           .clamp(0.0, 999.0)
                           .toDouble();
 
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  return Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Expanded(
-                        flex: 14,
+                      SizedBox(
+                        width: coverSize,
                         child: _NowPlayingInfo(coverSize: coverSize),
                       ),
-                      Expanded(
-                        flex: 11,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: coverTop),
-                          child: ValueListenableBuilder(
-                            valueListenable: NOW_PLAYING_VIEW_MODE,
-                            builder: (context, value, _) => AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 150),
-                              child: switch (value) {
-                                NowPlayingViewMode.onlyMain =>
-                                  const VerticalLyricView(),
-                                NowPlayingViewMode.withLyric =>
-                                  const VerticalLyricView(),
-                                NowPlayingViewMode.withPlaylist =>
-                                  const CurrentPlaylistView(),
-                              },
-                            ),
+                      Positioned(
+                        left: coverSize + 48,
+                        right: 0,
+                        top: coverTop,
+                        height: coverSize,
+                        child: ValueListenableBuilder(
+                          valueListenable: NOW_PLAYING_VIEW_MODE,
+                          builder: (context, value, _) => AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 150),
+                            child: switch (value) {
+                              NowPlayingViewMode.onlyMain =>
+                                const VerticalLyricView(),
+                              NowPlayingViewMode.withLyric =>
+                                const VerticalLyricView(),
+                              NowPlayingViewMode.withPlaylist =>
+                                const CurrentPlaylistView(),
+                            },
                           ),
                         ),
                       ),
