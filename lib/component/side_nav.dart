@@ -230,7 +230,7 @@ class _SideNavItem extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: scheme.onSurface,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

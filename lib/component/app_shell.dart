@@ -5,6 +5,7 @@ import 'package:border_player/component/responsive_builder.dart';
 import 'package:border_player/component/side_nav.dart';
 import 'package:border_player/component/title_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.page});
@@ -35,14 +36,17 @@ class _AppShell_Small extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: scheme.surfaceContainer,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(72.0),
-        child: TitleBar(),
+    return DragToResizeArea(
+      resizeEdgeSize: 12,
+      child: Scaffold(
+        backgroundColor: scheme.surfaceContainer,
+        appBar: const PreferredSize(
+          preferredSize: Size.fromHeight(72.0),
+          child: TitleBar(),
+        ),
+        drawer: const SideNav(),
+        body: Stack(children: [page, const MiniNowPlaying()]),
       ),
-      drawer: const SideNav(),
-      body: Stack(children: [page, const MiniNowPlaying()]),
     );
   }
 }
@@ -55,28 +59,31 @@ class _AppShell_Large extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Scaffold(
-      backgroundColor: scheme.surfaceContainer,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(72.0),
-        child: TitleBar(),
-      ),
-      body: Row(
-        children: [
-          const SideNav(),
-          Expanded(
-            child: Stack(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 16, 20, 18),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22.0),
-                  child: page,
+    return DragToResizeArea(
+      resizeEdgeSize: 12,
+      child: Scaffold(
+        backgroundColor: scheme.surfaceContainer,
+        appBar: const PreferredSize(
+          preferredSize: Size.fromHeight(72.0),
+          child: TitleBar(),
+        ),
+        body: Row(
+          children: [
+            const SideNav(),
+            Expanded(
+              child: Stack(children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 16, 20, 18),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22.0),
+                    child: page,
+                  ),
                 ),
-              ),
-              const MiniNowPlaying()
-            ]),
-          ),
-        ],
+                const MiniNowPlaying()
+              ]),
+            ),
+          ],
+        ),
       ),
     );
   }

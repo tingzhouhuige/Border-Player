@@ -220,21 +220,14 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
 
   Future<void> _toggleFullScreen() async {
     if (_isProcessing) return;
-
-    setState(() {
-      _isProcessing = true;
-    });
+    _isProcessing = true;
 
     try {
       await windowManager.setFullScreen(!_isFullScreen);
     } catch (e) {
       rethrow;
     } finally {
-      // 无论成功还是失败，最终都重置处理状态
-      // 调用_updateWindowStates()确保状态同步，即使监听器没有触发
-      if (mounted) {
-        await _updateWindowStates();
-      }
+      _isProcessing = false;
     }
   }
 
@@ -293,16 +286,12 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
   void onWindowEnterFullScreen() {
     super.onWindowEnterFullScreen();
     _updateWindowStates();
-    // 进入全屏时保存设置
-    AppSettings.instance.saveSettings();
   }
 
   @override
   void onWindowLeaveFullScreen() {
     super.onWindowLeaveFullScreen();
     _updateWindowStates();
-    // 退出全屏时保存设置
-    AppSettings.instance.saveSettings();
   }
 
   @override
