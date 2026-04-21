@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:border_player/app_preference.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/library/playlist.dart';
@@ -61,7 +60,7 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
     _subscription?.cancel();
     final ctx = context;
     if (ctx.mounted) {
-      ctx.go(app_paths.START_PAGES[AppPreference.instance.startPage]);
+      ctx.go(app_paths.AUDIOS_PAGE);
     }
   }
 

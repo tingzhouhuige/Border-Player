@@ -70,7 +70,7 @@ class AppSettings {
   Size windowSize = const Size(1280, 756);
   bool isWindowMaximized = false;
 
-  String? fontFamily;
+  String? fontFamily = "Microsoft YaHei";
   String? fontPath;
 
   late String artistSplitPattern = artistSeparator.join("|");

@@ -25,20 +25,7 @@ class HorizontalLyricView extends StatelessWidget {
           future: PlayService.instance.lyricService.currLyricFuture,
           builder: (context, snapshot) {
             if (snapshot.data == null) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "かき鳴らせ 交わるカルテット 革命を 成し遂げてみたいな 奏鳴曲 交吶的四重奏 試着完成革命",
-                    style: TextStyle(
-                      color: scheme.onSecondaryContainer,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              );
+              return const SizedBox.expand();
             }
 
             return _LyricHorizontalScrollArea(snapshot.data!);
@@ -67,22 +54,11 @@ class _LyricHorizontalScrollAreaState
   final lyricService = PlayService.instance.lyricService;
   late StreamSubscription lyricLineStreamSubscription;
 
-  var currContent = "Enjoy Music";
+  var currContent = "";
 
   @override
   void initState() {
     super.initState();
-    if (widget.lyric.lines.isNotEmpty) {
-      final first = widget.lyric.lines.first;
-      if (first is LrcLine) {
-        currContent = first.content;
-      } else if (first is SyncLyricLine) {
-        currContent = first.translation == null
-            ? first.content
-            : "${first.content}┃${first.translation}";
-      }
-    }
-
     lyricLineStreamSubscription = lyricService.lyricLineStream.listen((line) {
       if (widget.lyric.lines.isEmpty) return;
       final currLine = widget.lyric.lines[line];

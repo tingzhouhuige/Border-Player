@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:border_player/app_lifecycle.dart';
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/entry.dart';
@@ -14,6 +15,8 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> initWindow() async {
   await windowManager.ensureInitialized();
+  await AppLifecycle.instance.init();
+
   WindowOptions windowOptions = WindowOptions(
     minimumSize: const Size(507, 507),
     size: AppSettings.instance.windowSize,
@@ -23,6 +26,9 @@ Future<void> initWindow() async {
     titleBarStyle: TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
+    if (AppSettings.instance.isWindowMaximized) {
+      await windowManager.maximize();
+    }
     await windowManager.show();
     await windowManager.focus();
   });

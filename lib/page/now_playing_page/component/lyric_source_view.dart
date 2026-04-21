@@ -5,6 +5,7 @@ import 'package:border_player/lyric/lrc.dart';
 import 'package:border_player/lyric/lyric.dart';
 import 'package:border_player/lyric/lyric_source.dart';
 import 'package:border_player/music_matcher.dart';
+import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:border_player/page/now_playing_page/component/vertical_lyric_view.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
@@ -53,47 +54,103 @@ class _SetLyricSourceBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final lyricService = PlayService.instance.lyricService;
-    return MenuAnchor(
-      onOpen: () {
-        ALWAYS_SHOW_LYRIC_VIEW_CONTROLS = true;
-      },
-      onClose: () {
-        ALWAYS_SHOW_LYRIC_VIEW_CONTROLS = false;
-      },
-      menuChildren: [
-        MenuItemButton(
-          onPressed: () {
-            final nowPlaying = PlayService.instance.playbackService.nowPlaying;
-            showDialog<String>(
-              context: context,
-              builder: (context) => _SetLyricSourceDialog(audio: nowPlaying!),
-            );
-          },
-          child: const Text("指定默认歌词"),
+    return IconButton(
+      onPressed: PlayService.instance.playbackService.nowPlaying == null
+          ? null
+          : () {
+              ALWAYS_SHOW_LYRIC_VIEW_CONTROLS = true;
+              showNowPlayingGlassPopup<void>(
+                context: context,
+                width: 170,
+                height: 162,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                child: Column(
+                  children: [
+                    _LyricPopupAction(
+                      label: "指定默认歌词",
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        final nowPlaying =
+                            PlayService.instance.playbackService.nowPlaying;
+                        showNowPlayingGlassPopup<void>(
+                          context: context,
+                          title: "默认歌词",
+                          width: 540,
+                          height: 560,
+                          child: _SetLyricSourceDialog(audio: nowPlaying!),
+                        );
+                      },
+                    ),
+                    _LyricPopupAction(
+                      label: "在线",
+                      checked: isLocal == false,
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        lyricService.useOnlineLyric();
+                      },
+                    ),
+                    _LyricPopupAction(
+                      label: "本地",
+                      checked: isLocal == true,
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        lyricService.useLocalLyric();
+                      },
+                    ),
+                  ],
+                ),
+              ).whenComplete(() {
+                ALWAYS_SHOW_LYRIC_VIEW_CONTROLS = false;
+              });
+            },
+      icon: const Icon(Symbols.lyrics),
+      color: scheme.onSecondaryContainer,
+    );
+  }
+}
+
+class _LyricPopupAction extends StatelessWidget {
+  const _LyricPopupAction({
+    required this.label,
+    required this.onTap,
+    this.checked = false,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final bool checked;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: SizedBox(
+        height: 44,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: checked
+                  ? Icon(Symbols.check, size: 20, color: scheme.onSurface)
+                  : null,
+            ),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
-        MenuItemButton(
-          onPressed: lyricService.useOnlineLyric,
-          leadingIcon: isLocal == false ? const Icon(Symbols.check) : null,
-          child: const Text("在线"),
-        ),
-        MenuItemButton(
-          onPressed: lyricService.useLocalLyric,
-          leadingIcon: isLocal == true ? const Icon(Symbols.check) : null,
-          child: const Text("本地"),
-        ),
-      ],
-      builder: (context, controller, _) => IconButton(
-        onPressed: PlayService.instance.playbackService.nowPlaying == null
-            ? null
-            : () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
-        icon: const Icon(Symbols.lyrics),
-        color: scheme.onSecondaryContainer,
       ),
     );
   }
@@ -106,67 +163,47 @@ class _SetLyricSourceDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: 384, maxWidth: 600),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text(
-                  "默认歌词",
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ListTile(
-                title: const Text("使用本地歌词"),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                onTap: () {
-                  LYRIC_SOURCES[audio.path] =
-                      LyricSource(LyricSourceType.local);
-                  PlayService.instance.lyricService.useLocalLyric();
-                  Navigator.pop(context);
-                },
-              ),
-              const Divider(),
-              Expanded(
-                child: FutureBuilder(
-                  future: uniSearch(audio),
-                  builder: (context, snapshot) {
-                    if (snapshot.data == null) {
-                      return const Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                    return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, i) => _LyricSourceTile(
-                        audio: audio,
-                        searchResult: snapshot.data![i],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: const Text("使用本地歌词"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            onTap: () {
+              LYRIC_SOURCES[audio.path] = LyricSource(LyricSourceType.local);
+              PlayService.instance.lyricService.useLocalLyric();
+              Navigator.pop(context);
+            },
           ),
-        ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: FutureBuilder(
+              future: uniSearch(audio),
+              builder: (context, snapshot) {
+                if (snapshot.data == null) {
+                  return const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, i) => _LyricSourceTile(
+                    audio: audio,
+                    searchResult: snapshot.data![i],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

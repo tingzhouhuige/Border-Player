@@ -1,14 +1,10 @@
 // ignore_for_file: camel_case_types
 
-import 'package:border_player/app_preference.dart';
+import 'package:border_player/app_lifecycle.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/brand_mark.dart';
 import 'package:border_player/component/horizontal_lyric_view.dart';
 import 'package:border_player/component/responsive_builder.dart';
-import 'package:border_player/hotkeys_helper.dart';
-import 'package:border_player/library/playlist.dart';
-import 'package:border_player/lyric/lyric_source.dart';
-import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -138,7 +134,7 @@ class _TitleBar_Large extends StatelessWidget {
                           style: TextStyle(
                             color: scheme.onSurface,
                             fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -335,17 +331,7 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
         ),
         IconButton(
           tooltip: "退出",
-          onPressed: () async {
-            PlayService.instance.close();
-
-            await savePlaylists();
-            await saveLyricSources();
-            await AppSettings.instance.saveSettings();
-            await AppPreference.instance.save();
-
-            await HotkeysHelper.unregisterAll();
-            windowManager.close();
-          },
+          onPressed: AppLifecycle.instance.close,
           icon: const Icon(Symbols.close),
         ),
       ],

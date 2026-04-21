@@ -43,7 +43,7 @@ class _NowPlayingPage_Large extends StatelessWidget {
                         child: _NowPlayingInfo(coverSize: coverSize),
                       ),
                       Positioned(
-                        left: coverSize + 48,
+                        left: coverSize + 84,
                         right: 0,
                         top: coverTop,
                         height: coverSize,
@@ -57,7 +57,7 @@ class _NowPlayingPage_Large extends StatelessWidget {
                               NowPlayingViewMode.withLyric =>
                                 const VerticalLyricView(),
                               NowPlayingViewMode.withPlaylist =>
-                                const CurrentPlaylistView(),
+                                const VerticalLyricView(),
                             },
                           ),
                         ),
@@ -176,33 +176,19 @@ class _NowPlayingLargeViewSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return ValueListenableBuilder(
-      valueListenable: NOW_PLAYING_VIEW_MODE,
-      builder: (context, value, _) => IconButton(
-        tooltip: switch (value) {
-          NowPlayingViewMode.withPlaylist => "歌词",
-          _ => "播放列表",
-        },
-        onPressed: () {
-          if (value == NowPlayingViewMode.onlyMain ||
-              value == NowPlayingViewMode.withLyric) {
-            NOW_PLAYING_VIEW_MODE.value = NowPlayingViewMode.withPlaylist;
-            AppPreference.instance.nowPlayingPagePref.nowPlayingViewMode =
-                NowPlayingViewMode.withPlaylist;
-          } else {
-            NOW_PLAYING_VIEW_MODE.value = NowPlayingViewMode.withLyric;
-            AppPreference.instance.nowPlayingPagePref.nowPlayingViewMode =
-                NowPlayingViewMode.withLyric;
-          }
-        },
-        icon: Icon(
-          switch (value) {
-            NowPlayingViewMode.withPlaylist => Symbols.lyrics,
-            _ => Symbols.queue_music,
-          },
-        ),
-        color: scheme.onSecondaryContainer,
-      ),
+    return IconButton(
+      tooltip: "播放列表",
+      onPressed: () {
+        showNowPlayingGlassPopup<void>(
+          context: context,
+          title: "播放列表",
+          width: 450,
+          height: 520,
+          child: const CurrentPlaylistView(showTitle: false),
+        );
+      },
+      icon: const Icon(Symbols.queue_music),
+      color: scheme.onSecondaryContainer,
     );
   }
 }

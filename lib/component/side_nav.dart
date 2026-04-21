@@ -174,7 +174,7 @@ class _HomePill extends StatelessWidget {
                 style: TextStyle(
                   color: colorScheme.onSurface,
                   fontSize: 17,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   height: 1.0,
                 ),
               ),
@@ -184,7 +184,7 @@ class _HomePill extends StatelessWidget {
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontSize: 11,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   height: 1.0,
                 ),
               ),
@@ -230,7 +230,7 @@ class _SideNavItem extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: scheme.onSurface,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

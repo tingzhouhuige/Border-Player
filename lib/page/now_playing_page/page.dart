@@ -9,6 +9,7 @@ import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/component/responsive_builder.dart';
 import 'package:border_player/page/now_playing_page/component/current_playlist_view.dart';
 import 'package:border_player/page/now_playing_page/component/filled_icon_button_style.dart';
+import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:border_player/page/now_playing_page/component/vertical_lyric_view.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:border_player/play_service/play_service.dart';
@@ -292,55 +293,98 @@ class _NowPlayingMoreAction extends StatelessWidget {
       );
     }
 
-    return MenuAnchor(
-      menuChildren: [
-        SubmenuButton(
-          menuChildren: List.generate(
-            nowPlaying.splitedArtists.length,
-            (i) => MenuItemButton(
-              onPressed: () {
-                final Artist artist = AudioLibrary
-                    .instance.artistCollection[nowPlaying.splitedArtists[i]]!;
-                context.pushReplacement(
-                  app_paths.ARTIST_DETAIL_PAGE,
-                  extra: artist,
-                );
-              },
-              leadingIcon: const Icon(Symbols.people),
-              child: Text(nowPlaying.splitedArtists[i]),
-            ),
+    return IconButton(
+      tooltip: "更多",
+      onPressed: () {
+        showNowPlayingGlassPopup<void>(
+          context: context,
+          width: 420,
+          height: 84.0 + nowPlaying.splitedArtists.length * 52.0,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final artistName in nowPlaying.splitedArtists)
+                _NowPlayingPopupAction(
+                  icon: Symbols.people,
+                  label: artistName,
+                  onTap: () {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    final artist =
+                        AudioLibrary.instance.artistCollection[artistName]!;
+                    context.pushReplacement(
+                      app_paths.ARTIST_DETAIL_PAGE,
+                      extra: artist,
+                    );
+                  },
+                ),
+              _NowPlayingPopupAction(
+                icon: Symbols.album,
+                label: nowPlaying.album,
+                onTap: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  final album =
+                      AudioLibrary.instance.albumCollection[nowPlaying.album]!;
+                  context.pushReplacement(app_paths.ALBUM_DETAIL_PAGE,
+                      extra: album);
+                },
+              ),
+              _NowPlayingPopupAction(
+                icon: Symbols.info,
+                label: "详细信息",
+                onTap: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  context.pushReplacement(app_paths.AUDIO_DETAIL_PAGE,
+                      extra: nowPlaying);
+                },
+              ),
+            ],
           ),
-          child: const Text("艺术家"),
+        );
+      },
+      icon: const Icon(Symbols.more_vert),
+      color: scheme.onSecondaryContainer,
+    );
+  }
+}
+
+class _NowPlayingPopupAction extends StatelessWidget {
+  const _NowPlayingPopupAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: SizedBox(
+        height: 52,
+        child: Row(
+          children: [
+            Icon(icon, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
-        MenuItemButton(
-          onPressed: () {
-            final Album album =
-                AudioLibrary.instance.albumCollection[nowPlaying.album]!;
-            context.pushReplacement(app_paths.ALBUM_DETAIL_PAGE, extra: album);
-          },
-          leadingIcon: const Icon(Symbols.album),
-          child: Text(nowPlaying.album),
-        ),
-        MenuItemButton(
-          onPressed: () {
-            context.pushReplacement(app_paths.AUDIO_DETAIL_PAGE,
-                extra: nowPlaying);
-          },
-          leadingIcon: const Icon(Symbols.info),
-          child: const Text("详细信息"),
-        ),
-      ],
-      builder: (context, controller, _) => IconButton(
-        tooltip: "更多",
-        onPressed: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
-        icon: const Icon(Symbols.more_vert),
-        color: scheme.onSecondaryContainer,
       ),
     );
   }
@@ -402,57 +446,52 @@ class _NowPlayingVolDspSliderState extends State<_NowPlayingVolDspSlider> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return MenuAnchor(
-      style: MenuStyle(
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        ),
-      ),
-      menuChildren: [
-        SliderTheme(
-          data: const SliderThemeData(
-            showValueIndicator: ShowValueIndicator.always,
-          ),
-          child: ValueListenableBuilder(
-            valueListenable: dragVolDsp,
-            builder: (context, dragVolDspValue, _) => Slider(
-              thumbColor: scheme.primary,
-              activeColor: scheme.primary,
-              inactiveColor: scheme.outline,
-              min: 0.0,
-              max: 1.0,
-              value: isDragging ? dragVolDspValue : playbackService.volumeDsp,
-              label: "${(dragVolDspValue * 100).toInt()}",
-              onChangeStart: (value) {
-                isDragging = true;
-                dragVolDsp.value = value;
-                playbackService.setVolumeDsp(value);
-              },
-              onChanged: (value) {
-                dragVolDsp.value = value;
-                playbackService.setVolumeDsp(value);
-              },
-              onChangeEnd: (value) {
-                isDragging = false;
-                dragVolDsp.value = value;
-                playbackService.setVolumeDsp(value);
-              },
+    return IconButton(
+      tooltip: "音量",
+      onPressed: () {
+        showNowPlayingGlassPopup<void>(
+          context: context,
+          width: 210,
+          height: 58,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          child: SliderTheme(
+            data: const SliderThemeData(
+              showValueIndicator: ShowValueIndicator.always,
+              trackHeight: 3,
+              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10),
+              overlayShape: RoundSliderOverlayShape(overlayRadius: 18),
+            ),
+            child: ValueListenableBuilder(
+              valueListenable: dragVolDsp,
+              builder: (context, dragVolDspValue, _) => Slider(
+                thumbColor: scheme.primary,
+                activeColor: scheme.primary,
+                inactiveColor: scheme.outline,
+                min: 0.0,
+                max: 1.0,
+                value: isDragging ? dragVolDspValue : playbackService.volumeDsp,
+                label: "${(dragVolDspValue * 100).toInt()}",
+                onChangeStart: (value) {
+                  isDragging = true;
+                  dragVolDsp.value = value;
+                  playbackService.setVolumeDsp(value);
+                },
+                onChanged: (value) {
+                  dragVolDsp.value = value;
+                  playbackService.setVolumeDsp(value);
+                },
+                onChangeEnd: (value) {
+                  isDragging = false;
+                  dragVolDsp.value = value;
+                  playbackService.setVolumeDsp(value);
+                },
+              ),
             ),
           ),
-        ),
-      ],
-      builder: (context, controller, _) => IconButton(
-        tooltip: "音量",
-        onPressed: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
-        icon: const Icon(Symbols.volume_up),
-        color: scheme.onSecondaryContainer,
-      ),
+        );
+      },
+      icon: const Icon(Symbols.volume_up),
+      color: scheme.onSecondaryContainer,
     );
   }
 }

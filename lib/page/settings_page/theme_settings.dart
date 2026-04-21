@@ -1,8 +1,9 @@
-import 'package:border_player/utils.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/settings_tile.dart';
+import 'package:border_player/page/settings_page/settings_dialog.dart';
 import 'package:border_player/page/settings_page/theme_picker_dialog.dart';
 import 'package:border_player/theme_provider.dart';
+import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +33,6 @@ class ThemeSelector extends StatelessWidget {
     );
   }
 }
-
 class ThemeModeControl extends StatefulWidget {
   const ThemeModeControl({super.key});
 
@@ -168,6 +168,7 @@ class SelectFontCombobox extends StatelessWidget {
           if (context.mounted) {
             final selectedFont = await showDialog<_FontOption>(
               context: context,
+              barrierColor: Colors.black.withOpacity(0.46),
               builder: (context) => const _FontSelector(),
             );
             if (selectedFont == null) return;
@@ -203,7 +204,6 @@ class _FontOption {
 }
 
 const _fontOptions = [
-  _FontOption("默认字体", null),
   _FontOption("微软雅黑", "Microsoft YaHei"),
   _FontOption("Inter", "Inter"),
   _FontOption("Noto Sans SC", "Noto Sans SC"),
@@ -218,82 +218,73 @@ class _FontSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeProvider>(context);
     final scheme = Theme.of(context).colorScheme;
-    return Dialog(
-      insetPadding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(26.0),
-      ),
-      child: SizedBox(
-        width: 476.0,
-        height: 576,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(26, 26, 26, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text(
-                  "选择字体",
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              Text(
-                "当前字体：${_fontOptions.firstWhere(
-                      (option) => option.family == theme.fontFamily,
-                      orElse: () => _fontOptions.first,
-                    ).label}",
-                style: TextStyle(
-                  color: scheme.onSurface,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 18.0),
-              Expanded(
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: ListView.builder(
-                    itemCount: _fontOptions.length,
-                    itemExtent: 72,
-                    itemBuilder: (context, i) => ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+    final currentFont = _fontOptions.firstWhere(
+      (option) => option.family == theme.fontFamily,
+      orElse: () => _fontOptions.first,
+    );
+
+    return SettingsGlassDialog(
+      title: "选择字体",
+      width: 560,
+      height: 560,
+      actions: [
+        TextButton(
+          style: settingsDialogActionStyle(scheme),
+          onPressed: () => Navigator.pop(context),
+          child: const Text("取消"),
+        ),
+      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "当前字体：${currentFont.label}",
+            style: settingsDialogTextStyle(scheme).copyWith(
+              color: scheme.onSurface.withOpacity(0.72),
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Expanded(
+            child: Material(
+              type: MaterialType.transparency,
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: _fontOptions.length,
+                itemExtent: 58,
+                itemBuilder: (context, i) {
+                  final option = _fontOptions[i];
+                  final selected = option.family == theme.fontFamily;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => Navigator.pop(context, option),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? scheme.primaryContainer.withOpacity(0.38)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      selected: _fontOptions[i].family == theme.fontFamily,
-                      selectedTileColor: scheme.secondaryContainer,
-                      title: Text(
-                        _fontOptions[i].label,
-                        style: TextStyle(
-                          fontFamily: _fontOptions[i].family,
-                          color: scheme.onSurface,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        option.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: settingsDialogTextStyle(scheme).copyWith(
+                          fontFamily: option.family,
+                          fontSize: 18,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                         ),
                       ),
-                      onTap: () => Navigator.pop(context, _fontOptions[i]),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
-              const SizedBox(height: 10.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("取消"),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

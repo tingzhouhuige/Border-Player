@@ -4,6 +4,7 @@ import 'package:border_player/component/settings_tile.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/lyric/lyric_source.dart';
+import 'package:border_player/page/settings_page/settings_dialog.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -50,7 +51,6 @@ class _DefaultLyricSourceControlState extends State<DefaultLyricSourceControl> {
     );
   }
 }
-
 class AudioLibraryEditor extends StatelessWidget {
   const AudioLibraryEditor({super.key});
 
@@ -65,6 +65,7 @@ class AudioLibraryEditor extends StatelessWidget {
           showDialog(
             context: context,
             barrierDismissible: false,
+            barrierColor: Colors.black.withOpacity(0.46),
             builder: (context) => const AudioLibraryEditorDialog(),
           );
         },
@@ -95,116 +96,105 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Dialog(
-      insetPadding: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: SizedBox(
-        height: 450.0,
-        width: 450.0,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text(
-                  "管理文件夹",
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 150),
-                  child: editing
-                      ? ListView.builder(
-                          itemCount: folders.length,
-                          itemBuilder: (context, i) => ListTile(
-                            title: Text(folders[i], maxLines: 1),
-                            trailing: IconButton(
-                              tooltip: "移除",
-                              color: scheme.error,
-                              onPressed: () {
-                                setState(() {
-                                  folders.removeAt(i);
-                                });
-                              },
-                              icon: const Icon(Symbols.delete),
-                            ),
-                          ),
-                        )
-                      : FutureBuilder(
-                          future: applicationSupportDirectory,
-                          builder: (context, snapshot) {
-                            if (snapshot.data == null) {
-                              return const Center(
-                                child: Text("Fail to get app data dir."),
-                              );
-                            }
+    return SettingsGlassDialog(
+      title: "管理文件夹",
+      width: 650,
+      height: 560,
+      actions: [
+        TextButton(
+          style: settingsDialogActionStyle(scheme),
+          onPressed: () async {
+            final dirPicker = DirectoryPicker();
+            dirPicker.title = "选择文件夹";
 
-                            return Center(
-                              child: BuildIndexStateView(
-                                indexPath: snapshot.data!,
-                                folders: folders,
-                                whenIndexBuilt: () async {
-                                  await Future.wait([
-                                    AudioLibrary.initFromIndex(),
-                                    readPlaylists(),
-                                    readLyricSources(),
-                                  ]);
-                                  if (context.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () async {
-                      final dirPicker = DirectoryPicker();
-                      dirPicker.title = "选择文件夹";
+            final dir = dirPicker.getDirectory();
+            if (dir == null) return;
 
-                      final dir = dirPicker.getDirectory();
-                      if (dir == null) return;
-
-                      setState(() {
-                        folders.add(dir.path);
-                      });
-                    },
-                    child: const Text("添加"),
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("取消"),
-                  ),
-                  const SizedBox(width: 8.0),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        editing = false;
-                      });
-                    },
-                    child: const Text("确定"),
-                  ),
-                ],
-              )
-            ],
-          ),
+            setState(() {
+              folders.add(dir.path);
+            });
+          },
+          child: const Text("添加"),
         ),
+        TextButton(
+          style: settingsDialogActionStyle(scheme),
+          onPressed: () => Navigator.pop(context),
+          child: const Text("取消"),
+        ),
+        TextButton(
+          style: settingsDialogActionStyle(scheme),
+          onPressed: () {
+            setState(() {
+              editing = false;
+            });
+          },
+          child: const Text("确定"),
+        ),
+      ],
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 150),
+        child: editing
+            ? ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: folders.length,
+                itemExtent: 60,
+                itemBuilder: (context, i) => Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 28),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          folders[i],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: settingsDialogTextStyle(scheme),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: "移除",
+                        color: scheme.error,
+                        iconSize: 25,
+                        onPressed: () {
+                          setState(() {
+                            folders.removeAt(i);
+                          });
+                        },
+                        icon: const Icon(Symbols.delete),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : FutureBuilder(
+                future: applicationSupportDirectory,
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Center(
+                      child: Text(
+                        "Fail to get app data dir.",
+                        style: settingsDialogTextStyle(scheme),
+                      ),
+                    );
+                  }
+
+                  return Center(
+                    child: BuildIndexStateView(
+                      indexPath: snapshot.data!,
+                      folders: folders,
+                      whenIndexBuilt: () async {
+                        await Future.wait([
+                          AudioLibrary.initFromIndex(),
+                          readPlaylists(),
+                          readLyricSources(),
+                        ]);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
