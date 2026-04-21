@@ -755,7 +755,7 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
       builder: (context, constraints) {
         final coverSize = widget.coverSize ??
             (constraints.biggest.shortestSide - 12)
-                .clamp(260.0, 560.0)
+                .clamp(260.0, 680.0)
                 .toDouble();
 
         return Column(
@@ -764,7 +764,7 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
             SizedBox(
               height: _largeTitleBlockHeight,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560.0),
+                constraints: const BoxConstraints(maxWidth: 680.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -16,15 +16,16 @@ class _NowPlayingPage_Large extends StatelessWidget {
               widthFactor: 0.92,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final leftWidth = constraints.maxWidth / 2;
+                  final leftWidth = constraints.maxWidth * 0.56;
                   final coverAreaHeight =
                       constraints.maxHeight - _largeTitleBlockHeight;
-                  var coverSize = leftWidth - 40;
-                  if (coverSize > coverAreaHeight) {
-                    coverSize = coverAreaHeight;
+                  final relaxedCoverAreaHeight = coverAreaHeight - 72;
+                  var coverSize = leftWidth - 48;
+                  if (coverSize > relaxedCoverAreaHeight) {
+                    coverSize = relaxedCoverAreaHeight;
                   }
-                  if (coverSize > 560) {
-                    coverSize = 560;
+                  if (coverSize > 680) {
+                    coverSize = 680;
                   }
                   if (coverSize < 220) {
                     coverSize = 220;
@@ -37,8 +38,12 @@ class _NowPlayingPage_Large extends StatelessWidget {
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _NowPlayingInfo(coverSize: coverSize)),
                       Expanded(
+                        flex: 14,
+                        child: _NowPlayingInfo(coverSize: coverSize),
+                      ),
+                      Expanded(
+                        flex: 11,
                         child: Padding(
                           padding: EdgeInsets.only(top: coverTop),
                           child: ValueListenableBuilder(
