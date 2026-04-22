@@ -5,9 +5,7 @@ import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/brand_mark.dart';
 import 'package:border_player/component/horizontal_lyric_view.dart';
 import 'package:border_player/component/responsive_builder.dart';
-import 'package:border_player/window_fullscreen_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:window_manager/window_manager.dart';
@@ -49,7 +47,7 @@ class _TitleBar_Small extends StatelessWidget {
             const SizedBox(width: 8.0),
             const NavBackBtn(),
             Expanded(
-              child: _FullScreenAwareDragToMoveArea(
+              child: DragToMoveArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
@@ -81,7 +79,7 @@ class _TitleBar_Medium extends StatelessWidget {
           child: Center(child: NavBackBtn()),
         ),
         Expanded(
-          child: _FullScreenAwareDragToMoveArea(
+          child: DragToMoveArea(
             child: Row(
               children: [
                 Text(
@@ -122,7 +120,7 @@ class _TitleBar_Large extends StatelessWidget {
           const NavBackBtn(),
           const SizedBox(width: 6.0),
           Expanded(
-            child: _FullScreenAwareDragToMoveArea(
+            child: DragToMoveArea(
               child: Row(
                 children: [
                   SizedBox(
@@ -155,23 +153,6 @@ class _TitleBar_Large extends StatelessWidget {
           const WindowControlls(),
         ],
       ),
-    );
-  }
-}
-
-class _FullScreenAwareDragToMoveArea extends StatelessWidget {
-  const _FullScreenAwareDragToMoveArea({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: windowNativeFullScreen,
-      builder: (context, isFullScreen, _) {
-        if (isFullScreen) return child;
-        return DragToMoveArea(child: child);
-      },
     );
   }
 }
@@ -214,8 +195,6 @@ class WindowControlls extends StatefulWidget {
 }
 
 class _WindowControllsState extends State<WindowControlls> with WindowListener {
-  static const _windowChannel = MethodChannel('border_player_window');
-
   bool _isFullScreen = false;
   bool _isMaximized = false;
   bool _isProcessing = false;
@@ -228,9 +207,8 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
   }
 
   Future<void> _updateWindowStates() async {
-    final isFullScreen = await _isNativeFullScreen();
+    final isFullScreen = await windowManager.isFullScreen();
     final isMaximized = await windowManager.isMaximized();
-    windowNativeFullScreen.value = isFullScreen;
     if (mounted) {
       setState(() {
         _isFullScreen = isFullScreen;
@@ -242,27 +220,22 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
 
   Future<void> _toggleFullScreen() async {
     if (_isProcessing) return;
-    _isProcessing = true;
+
+    setState(() {
+      _isProcessing = true;
+    });
 
     try {
-      await _setNativeFullScreen(!_isFullScreen);
-      await _updateWindowStates();
+      await windowManager.setFullScreen(!_isFullScreen);
     } catch (e) {
       rethrow;
     } finally {
-      _isProcessing = false;
+      // 无论成功还是失败，最终都重置处理状态
+      // 调用_updateWindowStates()确保状态同步，即使监听器没有触发
+      if (mounted) {
+        await _updateWindowStates();
+      }
     }
-  }
-
-  Future<void> _setNativeFullScreen(bool isFullScreen) {
-    return _windowChannel.invokeMethod(
-      'setBorderlessFullScreen',
-      {'isFullScreen': isFullScreen},
-    );
-  }
-
-  Future<bool> _isNativeFullScreen() async {
-    return await _windowChannel.invokeMethod('isBorderlessFullScreen') ?? false;
   }
 
   Future<void> _toggleMaximized() async {
@@ -320,12 +293,16 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
   void onWindowEnterFullScreen() {
     super.onWindowEnterFullScreen();
     _updateWindowStates();
+    // 进入全屏时保存设置
+    AppSettings.instance.saveSettings();
   }
 
   @override
   void onWindowLeaveFullScreen() {
     super.onWindowLeaveFullScreen();
     _updateWindowStates();
+    // 退出全屏时保存设置
+    AppSettings.instance.saveSettings();
   }
 
   @override

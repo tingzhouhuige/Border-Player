@@ -16,17 +16,18 @@ class UpdatingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF4),
+      backgroundColor: scheme.surface,
       body: Center(
         child: FutureBuilder(
           future: getAppDataDir(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const SizedBox.shrink();
-            }
             if (snapshot.data == null) {
-              return const SizedBox.shrink();
+              return const Center(
+                child: Text("Fail to get app data dir."),
+              );
             }
 
             return UpdatingStateView(indexPath: snapshot.data!);
@@ -87,23 +88,19 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
       child: StreamBuilder(
         stream: updateIndexStream,
         builder: (context, snapshot) {
-          final progress = snapshot.data?.progress;
-          final message = snapshot.data?.message ?? "";
-
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               LinearProgressIndicator(
-                value: progress,
+                value: snapshot.data?.progress,
                 borderRadius: BorderRadius.circular(2.0),
               ),
               const SizedBox(height: 8.0),
-              if (message.isNotEmpty)
-                Text(
-                  message,
-                  style: TextStyle(color: scheme.onSurface),
-                ),
+              Text(
+                "${snapshot.data?.message}",
+                style: TextStyle(color: scheme.onSurface),
+              ),
             ],
           );
         },

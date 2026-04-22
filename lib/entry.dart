@@ -96,11 +96,7 @@ class Entry extends StatelessWidget {
           fixedSize: const Size.fromHeight(40),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 0),
           shape: const StadiumBorder(),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            height: 1.0,
-          ),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(

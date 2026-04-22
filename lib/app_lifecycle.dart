@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/hotkeys_helper.dart';
@@ -36,7 +34,7 @@ class AppLifecycle with WindowListener {
 
     windowManager.removeListener(this);
     await windowManager.setPreventClose(false);
-    exit(0);
+    await windowManager.close();
   }
 
   @override

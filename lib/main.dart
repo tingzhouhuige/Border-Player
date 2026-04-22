@@ -21,7 +21,7 @@ Future<void> initWindow() async {
     minimumSize: const Size(507, 507),
     size: AppSettings.instance.windowSize,
     center: true,
-    backgroundColor: const Color(0xFFFFFBF4),
+    backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
   );
