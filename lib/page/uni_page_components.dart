@@ -6,6 +6,12 @@ import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+const _pageActionLabelStyle = TextStyle(
+  fontSize: 14,
+  fontWeight: FontWeight.w700,
+  height: 1.0,
+);
+
 ButtonStyle _selectIconButtonStyle(ColorScheme scheme) => IconButton.styleFrom(
       fixedSize: const Size(40, 40),
       backgroundColor: scheme.secondaryContainer,
@@ -26,9 +32,10 @@ class ShufflePlay<T> extends StatelessWidget {
         contentList as List<Audio>,
       ),
       icon: const Icon(Symbols.shuffle),
-      label: const Text("随机播放"),
+      label: const Text("随机播放", style: _pageActionLabelStyle),
       style: const ButtonStyle(
         fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+        textStyle: WidgetStatePropertyAll(_pageActionLabelStyle),
       ),
     );
   }
@@ -101,9 +108,9 @@ class SortMethodComboBox<T> extends StatelessWidget {
                       currSortMethod.name,
                       style: TextStyle(
                         color: scheme.onSecondaryContainer,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        height: 1.0,
+                        fontSize: _pageActionLabelStyle.fontSize,
+                        fontWeight: _pageActionLabelStyle.fontWeight,
+                        height: _pageActionLabelStyle.height,
                       ),
                     ),
                     const SizedBox(width: 4.0),
@@ -208,9 +215,10 @@ class AddAllToPlaylist extends StatelessWidget {
           }
         },
         icon: const Icon(Symbols.add),
-        label: const Text("添加到歌单"),
+        label: const Text("添加到歌单", style: _pageActionLabelStyle),
         style: const ButtonStyle(
           fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+          textStyle: WidgetStatePropertyAll(_pageActionLabelStyle),
         ),
       ),
     );

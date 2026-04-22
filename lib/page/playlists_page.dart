@@ -8,6 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+const _playlistActionLabelStyle = TextStyle(
+  fontSize: 14,
+  fontWeight: FontWeight.w700,
+  height: 1.0,
+);
+
 class PlaylistsPage extends StatefulWidget {
   const PlaylistsPage({super.key});
 
@@ -91,9 +97,10 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
       primaryAction: FilledButton.icon(
         onPressed: () => newPlaylist(context),
         icon: const Icon(Symbols.add),
-        label: const Text("新建歌单"),
+        label: const Text("新建歌单", style: _playlistActionLabelStyle),
         style: const ButtonStyle(
           fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+          textStyle: WidgetStatePropertyAll(_playlistActionLabelStyle),
         ),
       ),
       enableShufflePlay: false,

@@ -15,6 +15,7 @@ import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:border_player/play_service/play_service.dart';
 import 'package:border_player/play_service/playback_service.dart';
 import 'package:border_player/src/bass/bass_player.dart';
+import 'package:border_player/window_fullscreen_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -152,10 +153,26 @@ class _NowPlayingTopBar extends StatelessWidget {
       child: Row(
         children: const [
           NavBackBtn(),
-          Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+          Expanded(child: _NowPlayingDragArea()),
           WindowControlls(),
         ],
       ),
+    );
+  }
+}
+
+class _NowPlayingDragArea extends StatelessWidget {
+  const _NowPlayingDragArea();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: windowNativeFullScreen,
+      builder: (context, isFullScreen, _) {
+        const child = SizedBox.expand();
+        if (isFullScreen) return child;
+        return const DragToMoveArea(child: child);
+      },
     );
   }
 }
