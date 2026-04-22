@@ -273,6 +273,32 @@ class _UniDetailPageHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final brightness = theme.brightness;
+    final headerControlFill = brightness == Brightness.dark
+        ? Colors.white.withOpacity(0.12)
+        : Colors.white.withOpacity(0.42);
+    final headerControlTheme = theme.copyWith(
+      colorScheme: scheme.copyWith(
+        secondaryContainer: headerControlFill,
+        onSecondaryContainer: scheme.onSurface,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: headerControlFill,
+          foregroundColor: scheme.onSurface,
+          elevation: 0,
+          minimumSize: const Size(0, 40),
+          fixedSize: const Size.fromHeight(40),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          shape: const StadiumBorder(),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            height: 1.0,
+          ),
+        ),
+      ),
+    );
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(34.0),
       child: SizedBox(
@@ -280,6 +306,7 @@ class _UniDetailPageHeader extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            ColoredBox(color: scheme.surfaceContainerHighest),
             FutureBuilder(
               future: backgroundPic,
               builder: (context, snapshot) {
@@ -293,13 +320,13 @@ class _UniDetailPageHeader extends StatelessWidget {
               },
             ),
             switch (brightness) {
-              Brightness.dark => const ColoredBox(color: Colors.black54),
+              Brightness.dark => const ColoredBox(color: Colors.black38),
               Brightness.light => ColoredBox(
-                  color: scheme.secondaryContainer.withOpacity(0.72),
+                  color: scheme.surface.withOpacity(0.32),
                 ),
             },
             BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 76, sigmaY: 76),
+              filter: ImageFilter.blur(sigmaX: 54, sigmaY: 54),
               child: const ColoredBox(color: Colors.transparent),
             ),
             Padding(
@@ -379,14 +406,17 @@ class _UniDetailPageHeader extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 14.0),
-                          Wrap(
-                            spacing: 10.0,
-                            runSpacing: 8.0,
-                            children: multiSelectController == null
-                                ? actions
-                                : multiSelectController!.enableMultiSelectView
-                                    ? multiSelectViewActions!
-                                    : actions,
+                          Theme(
+                            data: headerControlTheme,
+                            child: Wrap(
+                              spacing: 10.0,
+                              runSpacing: 8.0,
+                              children: multiSelectController == null
+                                  ? actions
+                                  : multiSelectController!.enableMultiSelectView
+                                      ? multiSelectViewActions!
+                                      : actions,
+                            ),
                           )
                         ],
                       ),
