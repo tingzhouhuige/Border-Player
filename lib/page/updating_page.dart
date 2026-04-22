@@ -24,6 +24,13 @@ class UpdatingPage extends StatelessWidget {
         child: FutureBuilder(
           future: getAppDataDir(),
           builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const SizedBox(
+                width: 240,
+                child: LinearProgressIndicator(),
+              );
+            }
+
             if (snapshot.data == null) {
               return const Center(
                 child: Text("Fail to get app data dir."),
@@ -88,6 +95,8 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
       child: StreamBuilder(
         stream: updateIndexStream,
         builder: (context, snapshot) {
+          final message = snapshot.data?.message;
+
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -98,7 +107,7 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
               ),
               const SizedBox(height: 8.0),
               Text(
-                "${snapshot.data?.message}",
+                message == null || message.isEmpty ? "正在启动..." : message,
                 style: TextStyle(color: scheme.onSurface),
               ),
             ],

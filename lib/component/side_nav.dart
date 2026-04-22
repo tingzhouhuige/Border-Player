@@ -223,14 +223,14 @@ class _SideNavItem extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 13),
-              Icon(icon, size: 22, color: scheme.onSurface),
-              const SizedBox(width: 21),
+              Icon(icon, size: 23, color: scheme.onSurface),
+              const SizedBox(width: 20),
               Expanded(
                 child: Text(
                   label,
                   style: TextStyle(
                     color: scheme.onSurface,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
                 ),

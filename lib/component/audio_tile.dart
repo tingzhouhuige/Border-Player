@@ -168,7 +168,7 @@ class AudioTile extends StatelessWidget {
                   position: details.localPosition.translate(0, -240));
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.fromLTRB(8.0, 0, 26.0, 0),
               child: Row(children: [
                 if (leading != null)
                   Padding(

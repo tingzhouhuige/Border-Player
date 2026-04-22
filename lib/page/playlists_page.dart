@@ -2,6 +2,7 @@ import 'package:border_player/app_preference.dart';
 import 'package:border_player/utils.dart';
 import 'package:border_player/hotkeys_helper.dart';
 import 'package:border_player/page/uni_page.dart';
+import 'package:border_player/page/uni_page_components.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:flutter/material.dart';
@@ -88,13 +89,19 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
           extra: PLAYLISTS[i],
         ),
       ),
-      primaryAction: FilledButton.icon(
+      primaryAction: FilledButton(
         onPressed: () => newPlaylist(context),
-        icon: const Icon(Symbols.add),
-        label: const Text("新建歌单"),
         style: const ButtonStyle(
           fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+          textStyle: WidgetStatePropertyAll(
+            TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              height: 1.0,
+            ),
+          ),
         ),
+        child: pageActionContent(icon: Symbols.add, label: "新建歌单"),
       ),
       enableShufflePlay: false,
       enableSortMethod: true,

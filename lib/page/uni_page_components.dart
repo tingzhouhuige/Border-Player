@@ -15,21 +15,54 @@ ButtonStyle _selectIconButtonStyle(ColorScheme scheme) => IconButton.styleFrom(
       padding: EdgeInsets.zero,
     );
 
+const _pageActionTextStyle = TextStyle(
+  fontSize: 15,
+  fontWeight: FontWeight.w700,
+  height: 1.0,
+);
+
+const _pageActionButtonStyle = ButtonStyle(
+  fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
+  textStyle: WidgetStatePropertyAll(_pageActionTextStyle),
+);
+
+Widget pageActionContent({
+  required IconData icon,
+  required String label,
+  Color? color,
+}) {
+  return Center(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, size: 20, color: color),
+        const SizedBox(width: 8),
+        Transform.translate(
+          offset: const Offset(0, 1),
+          child: Text(
+            label,
+            style: _pageActionTextStyle.copyWith(color: color),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class ShufflePlay<T> extends StatelessWidget {
   final List<T> contentList;
   const ShufflePlay({super.key, required this.contentList});
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton.icon(
+    return FilledButton(
       onPressed: () => PlayService.instance.playbackService.shuffleAndPlay(
         contentList as List<Audio>,
       ),
-      icon: const Icon(Symbols.shuffle),
-      label: const Text("随机播放"),
-      style: const ButtonStyle(
-        fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
-      ),
+      style: _pageActionButtonStyle,
+      child: pageActionContent(icon: Symbols.shuffle, label: "随机播放"),
     );
   }
 }
@@ -91,20 +124,10 @@ class SortMethodComboBox<T> extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Symbols.sort,
-                      size: 20,
+                    pageActionContent(
+                      icon: Symbols.sort,
+                      label: currSortMethod.name,
                       color: scheme.onSecondaryContainer,
-                    ),
-                    const SizedBox(width: 4.0),
-                    Text(
-                      currSortMethod.name,
-                      style: TextStyle(
-                        color: scheme.onSecondaryContainer,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        height: 1.0,
-                      ),
                     ),
                     const SizedBox(width: 4.0),
                     Icon(
@@ -199,7 +222,7 @@ class AddAllToPlaylist extends StatelessWidget {
           child: Text(PLAYLISTS[i].name),
         ),
       ),
-      builder: (context, controller, _) => FilledButton.icon(
+      builder: (context, controller, _) => FilledButton(
         onPressed: () {
           if (controller.isOpen) {
             controller.close();
@@ -207,11 +230,8 @@ class AddAllToPlaylist extends StatelessWidget {
             controller.open();
           }
         },
-        icon: const Icon(Symbols.add),
-        label: const Text("添加到歌单"),
-        style: const ButtonStyle(
-          fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
-        ),
+        style: _pageActionButtonStyle,
+        child: pageActionContent(icon: Symbols.add, label: "添加到歌单"),
       ),
     );
   }
