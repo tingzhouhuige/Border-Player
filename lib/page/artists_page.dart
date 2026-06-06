@@ -27,6 +27,7 @@ class ArtistsPage extends StatelessWidget {
         SortMethodDesc(
           icon: Symbols.title,
           name: "名称",
+          nameExtractor: (Artist a) => a.name,
           method: (list, order) {
             switch (order) {
               case SortOrder.ascending:

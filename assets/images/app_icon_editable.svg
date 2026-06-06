@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Border Player icon">
+  <defs>
+    <radialGradient id="discGradient" cx="38%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fff1ad"/>
+      <stop offset="50%" stop-color="#ffe074"/>
+      <stop offset="100%" stop-color="#ffc731"/>
+    </radialGradient>
+
+    <linearGradient id="noteFace" x1="260" y1="760" x2="650" y2="250" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e89a00"/>
+      <stop offset="45%" stop-color="#f6b21a"/>
+      <stop offset="100%" stop-color="#ffc542"/>
+    </linearGradient>
+
+    <linearGradient id="ribbonFace" x1="600" y1="260" x2="800" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f0a615"/>
+      <stop offset="42%" stop-color="#ffd266"/>
+      <stop offset="100%" stop-color="#ffc342"/>
+    </linearGradient>
+
+    <linearGradient id="ribbonEdge" x1="610" y1="280" x2="810" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffe993"/>
+      <stop offset="45%" stop-color="#fff5c8"/>
+      <stop offset="100%" stop-color="#ffc544"/>
+    </linearGradient>
+
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#8f5e00" flood-opacity="0.24"/>
+    </filter>
+
+    <filter id="innerShade" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="7" dy="10" stdDeviation="8" flood-color="#7d5200" flood-opacity="0.25"/>
+    </filter>
+
+    <filter id="rimLight" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="-3" dy="-3" stdDeviation="2" flood-color="#fff6cd" flood-opacity="0.85"/>
+    </filter>
+  </defs>
+
+  <g id="icon">
+    <circle id="yellow-disc" cx="512" cy="512" r="462" fill="url(#discGradient)"/>
+
+    <g id="note-and-b" filter="url(#softShadow)">
+      <path id="note-body"
+            d="M372 804
+               C292 804 232 755 232 687
+               C232 616 294 565 382 565
+               C416 565 449 574 474 590
+               L559 214
+               C565 188 589 172 617 178
+               L708 197
+               C735 203 751 227 745 254
+               L628 780
+               C622 806 599 822 572 816
+               L505 801
+               C472 822 426 804 372 804Z"
+            fill="url(#noteFace)"
+            filter="url(#innerShade)"/>
+
+      <path id="note-highlight"
+            d="M585 218
+               C590 196 611 186 635 190
+               L707 205
+               C728 210 741 228 737 249"
+            fill="none"
+            stroke="#ffe9a5"
+            stroke-width="8"
+            stroke-linecap="round"
+            opacity="0.8"/>
+
+      <path id="b-ribbon-main"
+            d="M651 218
+               C777 240 844 313 835 407
+               C827 487 764 536 672 560
+               C745 579 811 635 821 715
+               C834 821 750 888 612 899
+               C585 901 567 879 572 853
+               C577 829 598 813 626 811
+               C704 804 742 771 737 720
+               C731 660 678 629 596 623
+               C565 621 548 595 556 568
+               C563 544 581 529 608 524
+               C696 508 749 470 754 411
+               C760 343 714 303 632 287Z"
+            fill="url(#ribbonFace)"
+            filter="url(#rimLight)"/>
+
+      <path id="b-ribbon-shadow"
+            d="M622 529
+               C710 510 751 470 754 411
+               C758 357 733 322 681 302
+               C742 325 781 369 776 426
+               C770 493 706 537 622 555Z"
+            fill="#b46f00"
+            opacity="0.22"/>
+
+      <path id="b-ribbon-front-edge"
+            d="M610 525
+               C687 508 733 477 748 426
+               C758 492 712 536 628 562
+               C592 573 582 606 616 621
+               C701 658 749 704 738 765
+               C725 835 653 873 600 878
+               C578 880 564 864 572 844
+               C584 817 620 816 649 810
+               C709 797 742 764 730 717
+               C716 660 657 630 594 623
+               C552 618 540 582 560 554
+               C571 539 588 530 610 525Z"
+            fill="url(#ribbonEdge)"
+            opacity="0.95"/>
+
+      <path id="b-ribbon-white-glint"
+            d="M607 541
+               C674 528 726 500 748 454
+               C725 512 676 548 617 567
+               C586 577 581 600 608 613"
+            fill="none"
+            stroke="#fff3bf"
+            stroke-width="8"
+            stroke-linecap="round"
+            opacity="0.85"/>
+    </g>
+  </g>
+</svg>

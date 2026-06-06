@@ -68,13 +68,14 @@ class PlaybackService extends ChangeNotifier {
   final _smtc = SmtcFlutter();
   final _pref = AppPreference.instance.playbackPref;
 
-  late final _wasapiExclusive = ValueNotifier(_player.wasapiExclusive);
+  late final _wasapiExclusive = ValueNotifier(_pref.wasapiExclusive);
   ValueNotifier<bool> get wasapiExclusive => _wasapiExclusive;
 
   /// 独占模式
   void useExclusiveMode(bool exclusive) {
     if (_player.useExclusiveMode(exclusive)) {
       _wasapiExclusive.value = exclusive;
+      _pref.wasapiExclusive = exclusive;
     }
   }
 
@@ -94,7 +95,7 @@ class PlaybackService extends ChangeNotifier {
     _pref.playMode = playMode;
   }
 
-  late final _shuffle = ValueNotifier(false);
+  late final _shuffle = ValueNotifier(_pref.shuffle);
   ValueNotifier<bool> get shuffle => _shuffle;
 
   double get length => _player.length;
@@ -211,6 +212,7 @@ class PlaybackService extends ChangeNotifier {
       _playlistIndex = playlist.value.indexOf(nowPlaying!);
       shuffle.value = false;
     }
+    _pref.shuffle = flag;
   }
 
   void _nextAudio_forward() {
@@ -308,7 +310,66 @@ class PlaybackService extends ChangeNotifier {
     playService.lyricService.findCurrLyricLine();
   }
 
+  /// 保存当前播放状态到偏好
+  void savePlaybackState() {
+    _pref.lastPlayingPath = nowPlaying?.path;
+    _pref.lastPlaylistPaths =
+        playlist.value.map((a) => a.path).toList();
+    _pref.lastPosition = position;
+  }
+
+  /// 从偏好恢复上次播放状态（启动时调用）
+  Future<void> restoreLastPlayback() async {
+    if (!_pref.autoPlayOnStartup) return;
+    final lastPath = _pref.lastPlayingPath;
+    if (lastPath == null) return;
+
+    try {
+      final allAudios = AudioLibrary.instance.audioCollection;
+      final lastAudio = allAudios.where((a) => a.path == lastPath).firstOrNull;
+      if (lastAudio == null) return;
+
+      // 恢复播放列表
+      List<Audio> restoredPlaylist = [];
+      if (_pref.lastPlaylistPaths.isNotEmpty) {
+        for (final p in _pref.lastPlaylistPaths) {
+          final match = allAudios.where((a) => a.path == p).firstOrNull;
+          if (match != null) restoredPlaylist.add(match);
+        }
+      }
+      if (restoredPlaylist.isEmpty) {
+        restoredPlaylist = List.from(allAudios);
+      }
+
+      final idx = restoredPlaylist.indexOf(lastAudio);
+      if (idx == -1) return;
+
+      if (_pref.shuffle) {
+        playlist.value = List.from(restoredPlaylist);
+        playlist.value.shuffle();
+        playlist.value.remove(lastAudio);
+        playlist.value.insert(0, lastAudio);
+        _playlistBackup = List.from(restoredPlaylist);
+        _loadAndPlay(0, playlist.value);
+      } else {
+        playlist.value = List.from(restoredPlaylist);
+        _playlistBackup = List.from(restoredPlaylist);
+        _loadAndPlay(idx, playlist.value);
+      }
+
+      // 恢复进度
+      if (_pref.lastPosition > 0) {
+        seek(_pref.lastPosition);
+      }
+      // 恢复后暂停，由用户决定是否播放
+      pause();
+    } catch (err) {
+      LOGGER.e("[restore last playback] $err");
+    }
+  }
+
   void close() {
+    savePlaybackState();
     _playerStateStreamSub.cancel();
     _smtcEventStreamSub.cancel();
     _player.free();

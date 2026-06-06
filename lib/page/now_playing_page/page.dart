@@ -257,6 +257,7 @@ class _ExclusiveModeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return ValueListenableBuilder(
       valueListenable: PlayService.instance.playbackService.wasapiExclusive,
       builder: (context, exclusive, _) => IconButton(
@@ -266,8 +267,12 @@ class _ExclusiveModeSwitch extends StatelessWidget {
         },
         icon: Center(
           child: Text(
-            exclusive ? "Excl" : "Shrd",
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            "独占",
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: exclusive ? scheme.primary : null,
+            ),
           ),
         ),
       ),

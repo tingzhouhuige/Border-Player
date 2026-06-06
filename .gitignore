@@ -32,6 +32,10 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Local release package archive
+/release_packages/*
+!/release_packages/.gitkeep
+
 # Symbolication related
 app.*.symbols
 

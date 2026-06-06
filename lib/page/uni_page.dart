@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:border_player/app_preference.dart';
+import 'package:border_player/component/alpha_index_bar.dart';
 import 'package:border_player/page/uni_page_components.dart';
 import 'package:border_player/page/page_scaffold.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,15 @@ class SortMethodDesc<T> {
   String name;
   SortMethod<T> method;
 
+  /// When non-null, the alpha index bar will be shown.
+  /// Returns the string used to determine the first letter for indexing.
+  String Function(T item)? nameExtractor;
+
   SortMethodDesc({
     required this.icon,
     required this.name,
     required this.method,
+    this.nameExtractor,
   });
 }
 
@@ -146,10 +152,22 @@ class _UniPageState<T> extends State<UniPage<T>> {
   late ContentView currContentView = widget.pref.contentView;
   late ScrollController scrollController = ScrollController();
 
+  Map<String, int> _letterIndexMap = {};
+
+  void _rebuildLetterIndexMap() {
+    final extractor = currSortMethod?.nameExtractor;
+    if (extractor != null) {
+      _letterIndexMap = buildLetterIndexMap(widget.contentList, extractor);
+    } else {
+      _letterIndexMap = {};
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     currSortMethod?.method(widget.contentList, currSortOrder);
+    _rebuildLetterIndexMap();
     if (widget.locateTo == null) return;
 
     int targetAt = widget.contentList.indexOf(widget.locateTo as T);
@@ -174,6 +192,7 @@ class _UniPageState<T> extends State<UniPage<T>> {
   void didUpdateWidget(covariant UniPage<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     currSortMethod?.method(widget.contentList, currSortOrder);
+    _rebuildLetterIndexMap();
   }
 
   void setSortMethod(SortMethodDesc<T> sortMethod) {
@@ -181,6 +200,7 @@ class _UniPageState<T> extends State<UniPage<T>> {
       currSortMethod = sortMethod;
       widget.pref.sortMethod = widget.sortMethods?.indexOf(sortMethod) ?? 0;
       currSortMethod?.method(widget.contentList, currSortOrder);
+      _rebuildLetterIndexMap();
     });
   }
 
@@ -189,6 +209,7 @@ class _UniPageState<T> extends State<UniPage<T>> {
       currSortOrder = sortOrder;
       widget.pref.sortOrder = sortOrder;
       currSortMethod?.method(widget.contentList, currSortOrder);
+      _rebuildLetterIndexMap();
     });
   }
 
@@ -242,6 +263,9 @@ class _UniPageState<T> extends State<UniPage<T>> {
 
   Widget result(
       MultiSelectController<T>? multiSelectController, List<Widget> actions) {
+    final showAlphaIndex = currContentView == ContentView.list &&
+        _letterIndexMap.isNotEmpty;
+
     return PageScaffold(
       title: widget.title,
       subtitle: widget.subtitle,
@@ -252,32 +276,54 @@ class _UniPageState<T> extends State<UniPage<T>> {
               : actions,
       body: Material(
         type: MaterialType.transparency,
-        child: switch (currContentView) {
-          ContentView.list => ListView.builder(
-              controller: scrollController,
-              padding: const EdgeInsets.only(bottom: 96.0),
-              itemCount: widget.contentList.length,
-              itemExtent: 66,
-              itemBuilder: (context, i) => widget.contentBuilder(
-                context,
-                widget.contentList[i],
-                i,
-                multiSelectController,
-              ),
+        child: Row(
+          children: [
+            Expanded(
+              child: switch (currContentView) {
+                ContentView.list => ListView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.only(bottom: 96.0),
+                    itemCount: widget.contentList.length,
+                    itemExtent: 66,
+                    itemBuilder: (context, i) => widget.contentBuilder(
+                      context,
+                      widget.contentList[i],
+                      i,
+                      multiSelectController,
+                    ),
+                  ),
+                ContentView.table => GridView.builder(
+                    controller: scrollController,
+                    padding: const EdgeInsets.only(bottom: 96.0),
+                    gridDelegate: gridDelegate,
+                    itemCount: widget.contentList.length,
+                    itemBuilder: (context, i) => widget.contentBuilder(
+                      context,
+                      widget.contentList[i],
+                      i,
+                      multiSelectController,
+                    ),
+                  ),
+              },
             ),
-          ContentView.table => GridView.builder(
-              controller: scrollController,
-              padding: const EdgeInsets.only(bottom: 96.0),
-              gridDelegate: gridDelegate,
-              itemCount: widget.contentList.length,
-              itemBuilder: (context, i) => widget.contentBuilder(
-                context,
-                widget.contentList[i],
-                i,
-                multiSelectController,
+            if (showAlphaIndex)
+              SizedBox(
+                width: 24,
+                child: AlphaIndexBar(
+                  letterIndexMap: _letterIndexMap,
+                  itemCount: widget.contentList.length,
+                  onJumpToIndex: (index) {
+                    final offset = index * 66.0;
+                    scrollController.animateTo(
+                      offset.clamp(0, scrollController.position.maxScrollExtent),
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                ),
               ),
-            ),
-        },
+          ],
+        ),
       ),
     );
   }

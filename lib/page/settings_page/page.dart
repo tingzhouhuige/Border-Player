@@ -1,6 +1,7 @@
 import 'package:border_player/page/page_scaffold.dart';
 import 'package:border_player/page/settings_page/artist_separator_editor.dart';
 import 'package:border_player/page/settings_page/other_settings.dart';
+import 'package:border_player/page/settings_page/playback_settings.dart';
 import 'package:border_player/page/settings_page/theme_settings.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,7 @@ class SettingsPage extends StatelessWidget {
         children: const [
           AudioLibraryEditor(),
           DefaultLyricSourceControl(),
+          AutoPlayOnStartupControl(),
           ThemeModeControl(),
           SelectFontCombobox(),
           ArtistSeparatorEditor(),

@@ -62,17 +62,42 @@ class NowPlayingPagePreference {
 class PlaybackPreference {
   PlayMode playMode;
   double volumeDsp;
+  bool shuffle;
+  bool wasapiExclusive;
+  bool autoPlayOnStartup;
+  String? lastPlayingPath;
+  List<String> lastPlaylistPaths;
+  double lastPosition;
 
-  PlaybackPreference(this.playMode, this.volumeDsp);
+  PlaybackPreference(this.playMode, this.volumeDsp,
+      {this.shuffle = false,
+      this.wasapiExclusive = false,
+      this.autoPlayOnStartup = true,
+      this.lastPlayingPath,
+      this.lastPlaylistPaths = const [],
+      this.lastPosition = 0});
 
   Map toMap() => {
         "playMode": playMode.name,
         "volumeDsp": volumeDsp,
+        "shuffle": shuffle,
+        "wasapiExclusive": wasapiExclusive,
+        "autoPlayOnStartup": autoPlayOnStartup,
+        "lastPlayingPath": lastPlayingPath,
+        "lastPlaylistPaths": lastPlaylistPaths,
+        "lastPosition": lastPosition,
       };
 
   factory PlaybackPreference.fromMap(Map map) => PlaybackPreference(
         PlayMode.fromString(map["playMode"]) ?? PlayMode.forward,
         map["volumeDsp"] ?? 1.0,
+        shuffle: map["shuffle"] ?? false,
+        wasapiExclusive: map["wasapiExclusive"] ?? false,
+        autoPlayOnStartup: map["autoPlayOnStartup"] ?? true,
+        lastPlayingPath: map["lastPlayingPath"],
+        lastPlaylistPaths:
+            (map["lastPlaylistPaths"] as List?)?.cast<String>() ?? [],
+        lastPosition: (map["lastPosition"] ?? 0).toDouble(),
       );
 }
 

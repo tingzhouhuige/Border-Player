@@ -42,6 +42,7 @@ class FolderDetailPage extends StatelessWidget {
         SortMethodDesc(
           icon: Symbols.title,
           name: "标题",
+          nameExtractor: (Audio a) => a.title,
           method: (list, order) {
             switch (order) {
               case SortOrder.ascending:
@@ -56,6 +57,7 @@ class FolderDetailPage extends StatelessWidget {
         SortMethodDesc(
           icon: Symbols.artist,
           name: "艺术家",
+          nameExtractor: (Audio a) => a.artist,
           method: (list, order) {
             switch (order) {
               case SortOrder.ascending:
@@ -70,6 +72,7 @@ class FolderDetailPage extends StatelessWidget {
         SortMethodDesc(
           icon: Symbols.album,
           name: "专辑",
+          nameExtractor: (Audio a) => a.album,
           method: (list, order) {
             switch (order) {
               case SortOrder.ascending:

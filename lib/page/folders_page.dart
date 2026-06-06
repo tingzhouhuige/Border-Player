@@ -29,6 +29,7 @@ class FoldersPage extends StatelessWidget {
         SortMethodDesc(
           icon: Symbols.title,
           name: "路径",
+          nameExtractor: (AudioFolder f) => f.path,
           method: (list, order) {
             switch (order) {
               case SortOrder.ascending:

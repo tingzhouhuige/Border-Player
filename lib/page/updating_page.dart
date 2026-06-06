@@ -5,6 +5,7 @@ import 'package:border_player/app_settings.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/lyric/lyric_source.dart';
+import 'package:border_player/play_service/play_service.dart';
 import 'package:border_player/src/rust/api/tag_reader.dart';
 import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,10 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
       readLyricSources(),
     ]);
     _subscription?.cancel();
+
+    // 恢复上次播放状态
+    PlayService.instance.playbackService.restoreLastPlayback();
+
     final ctx = context;
     if (ctx.mounted) {
       ctx.go(app_paths.AUDIOS_PAGE);

@@ -111,6 +111,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
         SortMethodDesc(
           icon: Symbols.title,
           name: "名称",
+          nameExtractor: (Playlist p) => p.name,
           method: (list, order) {
             switch (order) {
               case SortOrder.ascending:

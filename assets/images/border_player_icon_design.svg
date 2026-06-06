@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Border Player icon">
+  <defs>
+    <!-- App palette: warm cream, soft yellow, amber, dark honey. -->
+    <radialGradient id="disc" cx="36%" cy="28%" r="78%">
+      <stop offset="0%" stop-color="#FFFBEA"/>
+      <stop offset="54%" stop-color="#FFE89D"/>
+      <stop offset="100%" stop-color="#E6AE22"/>
+    </radialGradient>
+
+    <linearGradient id="stem" x1="330" y1="805" x2="600" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B97800"/>
+      <stop offset="48%" stop-color="#D99B16"/>
+      <stop offset="100%" stop-color="#F3C456"/>
+    </linearGradient>
+
+    <linearGradient id="ribbon" x1="590" y1="210" x2="790" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D89A18"/>
+      <stop offset="42%" stop-color="#FFE08A"/>
+      <stop offset="74%" stop-color="#EAB43A"/>
+      <stop offset="100%" stop-color="#C9870B"/>
+    </linearGradient>
+
+    <linearGradient id="ribbonLight" x1="580" y1="405" x2="840" y2="695" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFF8D7"/>
+      <stop offset="52%" stop-color="#FFE597"/>
+      <stop offset="100%" stop-color="#DDA228"/>
+    </linearGradient>
+
+    <filter id="mainShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#6F4A00" flood-opacity="0.16"/>
+    </filter>
+
+    <filter id="softLift" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="5" dy="8" stdDeviation="7" flood-color="#6F4A00" flood-opacity="0.18"/>
+    </filter>
+
+    <filter id="discShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#D79D20" flood-opacity="0.16"/>
+    </filter>
+
+    <clipPath id="discClip">
+      <circle cx="512" cy="512" r="430"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background disc. Change r for overall icon weight. -->
+  <circle id="disc-base" cx="512" cy="512" r="430" fill="url(#disc)" filter="url(#discShadow)"/>
+
+  <!-- Unified mark: note stem + lower note head. -->
+  <g id="mark" clip-path="url(#discClip)" filter="url(#mainShadow)" transform="translate(62 52) scale(0.78 0.78)">
+    <path id="note-shape"
+      d="M374 789
+         C302 789 250 746 250 686
+         C250 625 305 582 381 582
+         C414 582 444 590 468 606
+         L541 249
+         C546 224 568 209 594 214
+         L640 223
+         C667 228 683 252 678 279
+         L565 815
+         C560 838 539 852 516 847
+         L485 840
+         C454 808 416 789 374 789Z"
+      fill="url(#stem)"
+      filter="url(#softLift)"/>
+
+    <!-- B/ribbon silhouette wraps around the stem, making the brand B. -->
+    <path id="b-ribbon-back"
+      d="M620 246
+         C742 266 813 335 804 424
+         C797 492 742 535 659 558
+         C735 582 785 636 787 707
+         C789 798 712 854 588 854
+         C565 854 551 833 561 813
+         C570 796 589 787 613 786
+         C684 783 721 754 720 707
+         C719 656 678 626 597 616
+         C562 612 548 584 564 561
+         C574 546 593 537 618 533
+         C691 519 735 487 738 424
+         C742 368 698 333 618 320Z"
+      fill="url(#ribbon)"
+      filter="url(#softLift)"/>
+
+    <!-- Front fold of the B. This is the main tweakable design layer. -->
+    <path id="b-ribbon-front"
+      d="M626 535
+         C692 519 731 488 738 424
+         C731 492 684 533 617 555
+         C589 564 585 588 615 600
+         C680 627 716 661 715 706
+         C713 755 671 786 609 791
+         C585 793 570 776 581 756
+         C590 740 609 734 635 729
+         C677 721 699 701 694 672
+         C687 632 647 612 596 604
+         C556 597 546 563 570 539
+         C584 526 604 521 626 535Z"
+      fill="url(#ribbonLight)"/>
+
+    <!-- Carved inner counter for a readable B at small sizes. -->
+    <path id="b-inner-shadow"
+      d="M613 356
+         C666 366 694 392 691 429
+         C688 466 654 489 605 500
+         L588 498
+         L618 357Z"
+      fill="#B56F00"
+      opacity="0.22"/>
+
+    <path id="b-lower-counter"
+      d="M599 640
+         C652 652 681 675 681 710
+         C681 746 652 768 607 773
+         C593 775 581 765 584 751
+         L604 641Z"
+      fill="#B56F00"
+      opacity="0.18"/>
+
+    <!-- Highlights: keep these easy to disable if the icon feels too glossy. -->
+    <path id="stem-highlight"
+      d="M571 251 L501 615"
+      fill="none"
+      stroke="#FFE9A1"
+      stroke-width="9"
+      stroke-linecap="round"
+      opacity="0.72"/>
+
+    <path id="ribbon-highlight"
+      d="M611 544
+         C672 531 715 498 731 456
+         C717 511 676 546 617 565
+         C592 573 589 596 612 608"
+      fill="none"
+      stroke="#FFF3BD"
+      stroke-width="8"
+      stroke-linecap="round"
+      opacity="0.86"/>
+  </g>
+</svg>
