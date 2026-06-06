@@ -55,10 +55,25 @@ https://github.com/tingzhouhuige/Border-Player/releases
 - Git
 - Rust 工具链
 
-构建命令：
+一键构建完整发布包（包含主程序、桌面歌词、BASS 运行库）：
 
 ```powershell
-$env:Path='C:\src\flutter\bin;C:\Program Files\Git\cmd;' + $env:Path
+.\tools\build_windows_release.ps1
+```
+
+输出目录：`release_packages\full-windows-x64`
+
+如果 BASS DLL 缺失，加 `-DownloadBassIfMissing` 参数会自动下载：
+
+```powershell
+.\tools\build_windows_release.ps1 -DownloadBassIfMissing
+```
+
+也可以用 `build.bat` 快速编译主程序和桌面歌词（不打包）。
+
+单独构建主程序：
+
+```powershell
 flutter pub get
 flutter build windows --release
 ```
@@ -69,7 +84,7 @@ flutter build windows --release
 build\windows\x64\runner\Release\border_player.exe
 ```
 
-完整发布包还需要包含 Flutter release 输出、`BASS` 运行库目录，以及 `desktop_lyric` 桌面歌词辅助程序目录。
+注意：仅 `flutter build windows` 不会构建桌面歌词辅助程序，也不会包含 BASS 运行库。发布时请使用打包脚本或手动将 `desktop_lyric\build\windows\x64\runner\Release` 和 `third_party\bass\windows\x64` 目录一并打包。
 
 ## 开源协议
 
