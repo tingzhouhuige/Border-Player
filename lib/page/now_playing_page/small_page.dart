@@ -105,6 +105,7 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
               _NowPlayingPlayModeSwitch(),
               _NowPlayingVolDspSlider(),
               _ExclusiveModeSwitch(),
+              _NowPlayingSongInfo(),
               _DesktopLyricSwitch(),
               _NowPlayingMoreAction(),
             ],

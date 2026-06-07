@@ -15,17 +15,34 @@ class TitleBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBuilder(
-      builder: (context, screenType) {
-        switch (screenType) {
-          case ScreenType.small:
-            return const _TitleBar_Small();
-          case ScreenType.medium:
-            return const _TitleBar_Medium();
-          case ScreenType.large:
-            return const _TitleBar_Large();
-        }
-      },
+    return Stack(
+      children: [
+        ResponsiveBuilder(
+          builder: (context, screenType) {
+            switch (screenType) {
+              case ScreenType.small:
+                return const _TitleBar_Small();
+              case ScreenType.medium:
+                return const _TitleBar_Medium();
+              case ScreenType.large:
+                return const _TitleBar_Large();
+            }
+          },
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 8,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.resizeUpDown,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanStart: (_) => windowManager.startResizing(ResizeEdge.top),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -52,7 +69,11 @@ class _TitleBar_Small extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
                     "Border Player",
-                    style: TextStyle(color: scheme.onSurface, fontSize: 16),
+                    style: TextStyle(
+                      color: scheme.onSurface,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -84,7 +105,11 @@ class _TitleBar_Medium extends StatelessWidget {
               children: [
                 Text(
                   "Border Player",
-                  style: TextStyle(color: scheme.onSurface, fontSize: 16),
+                  style: TextStyle(
+                    color: scheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const Expanded(
                   child: Padding(

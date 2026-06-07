@@ -182,16 +182,59 @@ MenuStyle nowPlayingGlassMenuStyle(BuildContext context) {
   return MenuStyle(
     elevation: const WidgetStatePropertyAll(0),
     backgroundColor: WidgetStatePropertyAll(
-      scheme.primaryContainer.withOpacity(0.64),
+      scheme.secondaryContainer,
     ),
     surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
-    shadowColor: WidgetStatePropertyAll(scheme.shadow.withOpacity(0.10)),
+    shadowColor: const WidgetStatePropertyAll(Colors.transparent),
     padding: const WidgetStatePropertyAll(
-      EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      EdgeInsets.symmetric(horizontal: 6, vertical: 6),
     ),
     shape: WidgetStatePropertyAll(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: scheme.outlineVariant.withOpacity(0.12),
+          width: 0.7,
+        ),
+      ),
+    ),
+  );
+}
+
+ButtonStyle nowPlayingGlassMenuItemStyle(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  return MenuItemButton.styleFrom(
+    foregroundColor: scheme.onSurface,
+    backgroundColor: Colors.transparent,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+  ).copyWith(
+    backgroundColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.hovered)) {
+        return scheme.onSurface.withOpacity(0.08);
+      }
+      return Colors.transparent;
+    }),
+  );
+}
+
+MenuStyle nowPlayingGlassSubmenuStyle(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  return MenuStyle(
+    elevation: const WidgetStatePropertyAll(0),
+    backgroundColor: WidgetStatePropertyAll(
+      scheme.secondaryContainer,
+    ),
+    surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+    shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+    padding: const WidgetStatePropertyAll(
+      EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+    ),
+    shape: WidgetStatePropertyAll(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
         side: BorderSide(
           color: scheme.outlineVariant.withOpacity(0.12),
           width: 0.7,

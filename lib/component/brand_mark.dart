@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 class BrandMark extends StatelessWidget {
   const BrandMark({
@@ -13,19 +12,13 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFE89D),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        Symbols.music_note,
-        color: Color(0xFF2E2A22),
-        size: iconSize,
-        weight: 700,
-        fill: 1,
+      child: Image.asset(
+        'assets/images/brand_mark.png',
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
       ),
     );
   }

@@ -99,7 +99,7 @@ TextStyle settingsDialogTextStyle(ColorScheme scheme) {
 
 ButtonStyle settingsDialogActionStyle(ColorScheme scheme) {
   return TextButton.styleFrom(
-    foregroundColor: scheme.primary,
+    foregroundColor: scheme.onSurface,
     disabledForegroundColor: scheme.onSurface.withOpacity(0.28),
     textStyle: const TextStyle(
       fontSize: 15,

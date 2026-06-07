@@ -146,6 +146,8 @@ class _NowPlayingPage_Large extends StatelessWidget {
                                   children: [
                                     _NowPlayingLargeViewSwitch(),
                                     spacer,
+                                    _NowPlayingSongInfo(),
+                                    spacer,
                                     _DesktopLyricSwitch(),
                                     spacer,
                                     _NowPlayingMoreAction(),
@@ -183,7 +185,7 @@ class _NowPlayingLargeViewSwitch extends StatelessWidget {
           context: context,
           title: "播放列表",
           width: 450,
-          height: 520,
+          height: 720,
           child: const CurrentPlaylistView(showTitle: false),
         );
       },

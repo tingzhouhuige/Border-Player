@@ -1,4 +1,5 @@
 import 'package:border_player/component/scroll_aware_future_builder.dart';
+import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:border_player/utils.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/page/uni_page.dart';
@@ -37,12 +38,16 @@ class AudioTile extends StatelessWidget {
 
     return MenuAnchor(
       consumeOutsideTap: true,
+      style: nowPlayingGlassMenuStyle(context),
       menuChildren: [
         /// artists
         SubmenuButton(
+          style: nowPlayingGlassMenuItemStyle(context),
+          menuStyle: nowPlayingGlassSubmenuStyle(context),
           menuChildren: List.generate(
             audio.splitedArtists.length,
             (i) => MenuItemButton(
+              style: nowPlayingGlassMenuItemStyle(context),
               onPressed: () {
                 final Artist artist = AudioLibrary
                     .instance.artistCollection[audio.splitedArtists[i]]!;
@@ -60,6 +65,7 @@ class AudioTile extends StatelessWidget {
 
         /// album
         MenuItemButton(
+          style: nowPlayingGlassMenuItemStyle(context),
           onPressed: () {
             final Album album =
                 AudioLibrary.instance.albumCollection[audio.album]!;
@@ -71,6 +77,7 @@ class AudioTile extends StatelessWidget {
 
         /// 下一首播放
         MenuItemButton(
+          style: nowPlayingGlassMenuItemStyle(context),
           onPressed: () {
             PlayService.instance.playbackService.addToNext(audio);
           },
@@ -81,6 +88,7 @@ class AudioTile extends StatelessWidget {
         /// 多选
         if (multiSelectController != null)
           MenuItemButton(
+            style: nowPlayingGlassMenuItemStyle(context),
             onPressed: () {
               multiSelectController!.useMultiSelectView(true);
               multiSelectController!.select(audio);
@@ -91,9 +99,12 @@ class AudioTile extends StatelessWidget {
 
         /// add to playlist
         SubmenuButton(
+          style: nowPlayingGlassMenuItemStyle(context),
+          menuStyle: nowPlayingGlassSubmenuStyle(context),
           menuChildren: List.generate(
             PLAYLISTS.length,
             (i) => MenuItemButton(
+              style: nowPlayingGlassMenuItemStyle(context),
               onPressed: () {
                 final added = PLAYLISTS[i].audios.containsKey(audio.path);
                 if (added) {
@@ -115,6 +126,7 @@ class AudioTile extends StatelessWidget {
 
         /// to detail page
         MenuItemButton(
+          style: nowPlayingGlassMenuItemStyle(context),
           onPressed: () {
             context.push(app_paths.AUDIO_DETAIL_PAGE, extra: audio);
           },

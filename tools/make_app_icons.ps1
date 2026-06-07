@@ -44,25 +44,72 @@ public static class AppIconMaker {
     int renderSize = finalSize * Math.Max(1, supersample);
     using (var hi = new Bitmap(renderSize, renderSize, PixelFormat.Format32bppArgb)) {
       using (var g = Graphics.FromImage(hi)) {
-        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.SmoothingMode = SmoothingMode.HighQuality;
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.PixelOffsetMode = PixelOffsetMode.HighQuality;
         g.CompositingQuality = CompositingQuality.HighQuality;
         g.Clear(Color.Transparent);
-        using (var clip = new GraphicsPath()) {
-          int iconSize = (int)Math.Round(renderSize * iconScale);
-          int dx = (renderSize - iconSize) / 2 + (int)Math.Round(offsetX * (renderSize / 1024.0));
-          int dy = (renderSize - iconSize) / 2 + (int)Math.Round(offsetY * (renderSize / 1024.0));
-          clip.AddEllipse(dx, dy, iconSize, iconSize);
-          g.SetClip(clip);
-          g.DrawImage(src, new Rectangle(dx, dy, iconSize, iconSize), new Rectangle(cropX, cropY, cropSize, cropSize), GraphicsUnit.Pixel);
-          g.ResetClip();
+        
+        int iconSize = (int)Math.Round(renderSize * iconScale);
+        int dx = (renderSize - iconSize) / 2 + (int)Math.Round(offsetX * (renderSize / 1024.0));
+        int dy = (renderSize - iconSize) / 2 + (int)Math.Round(offsetY * (renderSize / 1024.0));
+        
+        // 绘制源图片到临时位图
+        using (var tempBitmap = new Bitmap(iconSize, iconSize, PixelFormat.Format32bppArgb)) {
+          using (var tg = Graphics.FromImage(tempBitmap)) {
+            tg.SmoothingMode = SmoothingMode.HighQuality;
+            tg.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            tg.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            tg.CompositingQuality = CompositingQuality.HighQuality;
+            tg.Clear(Color.Transparent);
+            tg.DrawImage(src, new Rectangle(0, 0, iconSize, iconSize), new Rectangle(cropX, cropY, cropSize, cropSize), GraphicsUnit.Pixel);
+          }
+          
+          // 从角落采样背景色并去除
+          var bg = tempBitmap.GetPixel(0, 0);
+          int bgR = bg.R, bgG = bg.G, bgB = bg.B;
+          int threshold = 30;
+          
+          for (int y = 0; y < iconSize; y++) {
+            for (int x = 0; x < iconSize; x++) {
+              var pixel = tempBitmap.GetPixel(x, y);
+              int dr = Math.Abs(pixel.R - bgR);
+              int dg = Math.Abs(pixel.G - bgG);
+              int db = Math.Abs(pixel.B - bgB);
+              if (dr < threshold && dg < threshold && db < threshold) {
+                tempBitmap.SetPixel(x, y, Color.FromArgb(0, pixel.R, pixel.G, pixel.B));
+              }
+            }
+          }
+          
+          // 创建圆形蒙版
+          using (var maskBitmap = new Bitmap(iconSize, iconSize, PixelFormat.Format32bppArgb)) {
+            using (var mg = Graphics.FromImage(maskBitmap)) {
+              mg.SmoothingMode = SmoothingMode.HighQuality;
+              mg.Clear(Color.Transparent);
+              using (var brush = new SolidBrush(Color.White)) {
+                mg.FillEllipse(brush, 1, 1, iconSize - 3, iconSize - 3);
+              }
+            }
+            
+            // 应用圆形蒙版
+            for (int y = 0; y < iconSize; y++) {
+              for (int x = 0; x < iconSize; x++) {
+                var maskPixel = maskBitmap.GetPixel(x, y);
+                var srcPixel = tempBitmap.GetPixel(x, y);
+                int alpha = (srcPixel.A * maskPixel.A) / 255;
+                tempBitmap.SetPixel(x, y, Color.FromArgb(alpha, srcPixel.R, srcPixel.G, srcPixel.B));
+              }
+            }
+            
+            g.DrawImage(tempBitmap, dx, dy, iconSize, iconSize);
+          }
         }
       }
 
       using (var lo = new Bitmap(finalSize, finalSize, PixelFormat.Format32bppArgb)) {
         using (var g = Graphics.FromImage(lo)) {
-          g.SmoothingMode = SmoothingMode.AntiAlias;
+          g.SmoothingMode = SmoothingMode.HighQuality;
           g.InterpolationMode = InterpolationMode.HighQualityBicubic;
           g.PixelOffsetMode = PixelOffsetMode.HighQuality;
           g.CompositingQuality = CompositingQuality.HighQuality;

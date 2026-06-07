@@ -2,6 +2,7 @@ import 'package:border_player/app_settings.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ColorScheme lightScheme = ColorScheme.fromSeed(
@@ -96,6 +97,7 @@ class ThemeProvider extends ChangeNotifier {
   void applyThemeMode(ThemeMode themeMode) {
     this.themeMode = themeMode;
     notifyListeners();
+    _updateWindowBackground();
     PlayService.instance.desktopLyricService.canSendMessage.then((canSend) {
       if (!canSend) return;
 
@@ -104,6 +106,11 @@ class ThemeProvider extends ChangeNotifier {
         themeMode == ThemeMode.dark,
       );
     });
+  }
+
+  void _updateWindowBackground() {
+    final color = currScheme.surface;
+    windowManager.setBackgroundColor(color);
   }
 
   void applyThemeFromAudio(Audio audio) {

@@ -1,5 +1,6 @@
 // ignore_for_file: camel_case_types
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:border_player/app_preference.dart';
@@ -428,6 +429,144 @@ class _DesktopLyricSwitch extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _NowPlayingSongInfo extends StatelessWidget {
+  const _NowPlayingSongInfo();
+
+  String _formatDuration(int secs) {
+    final m = secs ~/ 60;
+    final s = secs % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes >= 1024 * 1024) {
+      return '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
+    }
+    return '${(bytes / 1024).toStringAsFixed(0)} KB';
+  }
+
+  String _formatFromPath(String path) {
+    final ext = path.split('.').last.toUpperCase();
+    return ext;
+  }
+
+  String _guessBitDepth(int? bitrate, int? sampleRate) {
+    if (bitrate == null || sampleRate == null) return '-';
+    final perChannel = bitrate / 2.0;
+    if (perChannel < 500) return '-';
+    if (perChannel < 800) return '16 bit';
+    if (perChannel < 1600) return '24 bit';
+    return '32 bit';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final playbackService = PlayService.instance.playbackService;
+    final nowPlaying = playbackService.nowPlaying;
+
+    return IconButton(
+      tooltip: "歌曲信息",
+      onPressed: nowPlaying == null
+          ? null
+          : () {
+              final fileSize = _getFileLength(nowPlaying.path);
+              final bitrateStr =
+                  nowPlaying.bitrate != null ? '${nowPlaying.bitrate} kbps' : '-';
+              final sampleRateStr = nowPlaying.sampleRate != null
+                  ? '${nowPlaying.sampleRate} Hz'
+                  : '-';
+
+              showNowPlayingGlassPopup<void>(
+                context: context,
+                title: "歌曲信息",
+                width: 380,
+                height: 380,
+                padding:
+                    const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _InfoRow(label: "标题", value: nowPlaying.title),
+                    _InfoRow(label: "艺术家", value: nowPlaying.artist),
+                    _InfoRow(label: "专辑", value: nowPlaying.album),
+                    _InfoRow(
+                        label: "时长",
+                        value: _formatDuration(nowPlaying.duration)),
+                    _InfoRow(label: "比特率", value: bitrateStr),
+                    _InfoRow(label: "采样率", value: sampleRateStr),
+                    _InfoRow(
+                        label: "位深",
+                        value: _guessBitDepth(
+                            nowPlaying.bitrate, nowPlaying.sampleRate)),
+                    _InfoRow(
+                        label: "大小",
+                        value: fileSize != null
+                            ? _formatFileSize(fileSize)
+                            : '-'),
+                    _InfoRow(
+                        label: "格式",
+                        value: _formatFromPath(nowPlaying.path)),
+                  ],
+                ),
+              );
+            },
+      icon: const Icon(Symbols.info),
+      color: scheme.onSecondaryContainer,
+    );
+  }
+}
+
+int? _getFileLength(String path) {
+  try {
+    return File(path).lengthSync();
+  } catch (_) {
+    return null;
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 64,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: scheme.onSurfaceVariant,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: scheme.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -120,6 +120,9 @@ class AudioDetailPage extends StatelessWidget {
               children: [
                 Text("路径", style: styleTitle),
                 TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: scheme.onSurface,
+                  ),
                   onPressed: () async {
                     final result = await showInExplorer(path: audio.path);
 
