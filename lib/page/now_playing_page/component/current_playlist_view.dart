@@ -17,7 +17,7 @@ class _CurrentPlaylistViewState extends State<CurrentPlaylistView> {
   void _toNowPlaying() {
     if (scrollController.hasClients) {
       scrollController.animateTo(
-        playbackService.playlistIndex * 80.0,
+        playbackService.playlistIndex * 64.0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.fastOutSlowIn,
       );
@@ -28,7 +28,7 @@ class _CurrentPlaylistViewState extends State<CurrentPlaylistView> {
   void initState() {
     super.initState();
     scrollController = ScrollController(
-      initialScrollOffset: playbackService.playlistIndex * 80.0,
+      initialScrollOffset: playbackService.playlistIndex * 64.0,
     );
     playbackService.addListener(_toNowPlaying);
   }
@@ -62,7 +62,7 @@ class _CurrentPlaylistViewState extends State<CurrentPlaylistView> {
                 return ListView.builder(
                   controller: scrollController,
                   itemCount: playbackService.playlist.value.length,
-                  itemExtent: 80.0,
+                  itemExtent: 64.0,
                   padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     return _PlaylistViewItem(index: index);
@@ -102,10 +102,10 @@ class _PlaylistViewItem extends StatelessWidget {
         playbackService.playIndexOfPlaylist(index);
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.symmetric(vertical: 3),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
           decoration: BoxDecoration(
             color: selected
                 ? scheme.primaryContainer.withOpacity(0.36)

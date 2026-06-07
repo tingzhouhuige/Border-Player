@@ -185,7 +185,7 @@ class _NowPlayingLargeViewSwitch extends StatelessWidget {
           context: context,
           title: "播放列表",
           width: 450,
-          height: 720,
+          height: 850,
           child: const CurrentPlaylistView(showTitle: false),
         );
       },

@@ -163,7 +163,7 @@ class _HomePill extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const BrandMark(size: 40, iconSize: 24),
+          const BrandMark(size: 50, iconSize: 30),
           const SizedBox(width: 14),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,

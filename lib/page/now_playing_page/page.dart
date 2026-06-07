@@ -148,15 +148,32 @@ class _NowPlayingTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        children: const [
-          NavBackBtn(),
-          Expanded(child: DragToMoveArea(child: SizedBox.expand())),
-          WindowControlls(),
-        ],
-      ),
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: const [
+              NavBackBtn(),
+              Expanded(child: DragToMoveArea(child: SizedBox.expand())),
+              WindowControlls(),
+            ],
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 8,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.resizeUpDown,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanStart: (_) => windowManager.startResizing(ResizeEdge.top),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

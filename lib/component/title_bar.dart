@@ -113,10 +113,7 @@ class _TitleBar_Medium extends StatelessWidget {
                 ),
                 const Expanded(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
+                    padding: EdgeInsets.fromLTRB(0, 22.0, 24.0, 18.0),
                     child: HorizontalLyricView(),
                   ),
                 ),
@@ -152,7 +149,7 @@ class _TitleBar_Large extends StatelessWidget {
                     width: 266,
                     child: Row(
                       children: [
-                        const BrandMark(size: 26, iconSize: 17),
+                        const BrandMark(size: 36, iconSize: 24),
                         const SizedBox(width: 10.0),
                         Text(
                           "Border Player",
