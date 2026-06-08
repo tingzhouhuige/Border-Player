@@ -279,7 +279,7 @@ class _ExclusiveModeSwitch extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: PlayService.instance.playbackService.wasapiExclusive,
       builder: (context, exclusive, _) => IconButton(
-        tooltip: "独占模式；现在：${exclusive ? "启用" : "禁用"}",
+
         onPressed: () {
           PlayService.instance.playbackService.useExclusiveMode(!exclusive);
         },
@@ -309,7 +309,7 @@ class _NowPlayingMoreAction extends StatelessWidget {
 
     if (nowPlaying == null) {
       return IconButton(
-        tooltip: "更多",
+
         onPressed: null,
         icon: const Icon(Symbols.more_vert),
         color: scheme.onSecondaryContainer,
@@ -317,7 +317,7 @@ class _NowPlayingMoreAction extends StatelessWidget {
     }
 
     return IconButton(
-      tooltip: "更多",
+
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,
@@ -426,7 +426,7 @@ class _DesktopLyricSwitch extends StatelessWidget {
         return FutureBuilder(
           future: desktopLyricService.desktopLyric,
           builder: (context, snapshot) => IconButton(
-            tooltip: "桌面歌词；现在：${snapshot.data == null ? "禁用" : "启用"}",
+
             onPressed: snapshot.data == null
                 ? desktopLyricService.startDesktopLyric
                 : desktopLyricService.isLocked
@@ -487,7 +487,7 @@ class _NowPlayingSongInfo extends StatelessWidget {
     final nowPlaying = playbackService.nowPlaying;
 
     return IconButton(
-      tooltip: "歌曲信息",
+
       onPressed: nowPlaying == null
           ? null
           : () {
@@ -606,7 +606,7 @@ class _NowPlayingVolDspSliderState extends State<_NowPlayingVolDspSlider> {
     final scheme = Theme.of(context).colorScheme;
 
     return IconButton(
-      tooltip: "音量",
+
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,
@@ -676,11 +676,6 @@ class _NowPlayingPlayModeSwitch extends StatelessWidget {
         }
 
         return IconButton(
-          tooltip: "播放模式；现在：${switch (playMode) {
-            PlayMode.forward => "顺序播放",
-            PlayMode.loop => "列表循环",
-            PlayMode.singleLoop => "单曲循环",
-          }}",
           onPressed: () {
             if (playMode == PlayMode.forward) {
               playbackService.setPlayMode(PlayMode.loop);
@@ -709,7 +704,7 @@ class _NowPlayingShuffleSwitch extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: playbackService.shuffle,
       builder: (context, shuffle, _) => IconButton(
-        tooltip: "随机；现在：${shuffle ? "启用" : "禁用"}",
+
         onPressed: () {
           playbackService.useShuffle(!shuffle);
         },
@@ -733,7 +728,7 @@ class _NowPlayingMainControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          tooltip: "上一曲",
+
           onPressed: playbackService.lastAudio,
           icon: const Icon(Symbols.skip_previous),
           style: LargeFilledIconButtonStyle(primary: false, scheme: scheme),
@@ -754,7 +749,7 @@ class _NowPlayingMainControls extends StatelessWidget {
             }
 
             return IconButton(
-              tooltip: playerState == PlayerState.playing ? "暂停" : "播放",
+
               onPressed: onTap,
               icon: Icon(
                 playerState == PlayerState.playing
@@ -767,7 +762,7 @@ class _NowPlayingMainControls extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         IconButton(
-          tooltip: "下一曲",
+
           onPressed: playbackService.nextAudio,
           icon: const Icon(Symbols.skip_next),
           style: LargeFilledIconButtonStyle(primary: false, scheme: scheme),

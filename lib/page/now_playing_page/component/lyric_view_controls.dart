@@ -95,7 +95,7 @@ class _LyricAlignSwitchBtn extends StatelessWidget {
 
     return IconButton(
       onPressed: lyricViewController.switchLyricTextAlign,
-      tooltip: "切换歌词对齐方向",
+
       color: scheme.onSecondaryContainer,
       icon: Icon(switch (lyricViewController.lyricTextAlign) {
         LyricTextAlign.left => Symbols.format_align_left,
@@ -116,7 +116,7 @@ class _IncreaseFontSizeBtn extends StatelessWidget {
 
     return IconButton(
       onPressed: lyricViewController.increaseFontSize,
-      tooltip: "增大歌词字体",
+
       color: scheme.onSecondaryContainer,
       icon: const Icon(Symbols.text_increase),
     );
@@ -133,7 +133,7 @@ class _DecreaseFontSizeBtn extends StatelessWidget {
 
     return IconButton(
       onPressed: lyricViewController.decreaseFontSize,
-      tooltip: "减小歌词字体",
+
       color: scheme.onSecondaryContainer,
       icon: const Icon(Symbols.text_decrease),
     );

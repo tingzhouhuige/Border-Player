@@ -186,7 +186,7 @@ class _OpenDrawerBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: "打开导航栏",
+
       onPressed: Scaffold.of(context).openDrawer,
       icon: const Icon(Symbols.side_navigation),
     );
@@ -199,7 +199,7 @@ class NavBackBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: "返回",
+
       onPressed: () {
         if (context.canPop()) {
           context.pop();
@@ -334,26 +334,26 @@ class _WindowControllsState extends State<WindowControlls> with WindowListener {
       spacing: 8.0,
       children: [
         IconButton(
-          tooltip: _isFullScreen ? "退出全屏" : "全屏",
+
           onPressed: _isProcessing ? null : _toggleFullScreen,
           icon: Icon(
             _isFullScreen ? Symbols.close_fullscreen : Symbols.open_in_full,
           ),
         ),
         IconButton(
-          tooltip: "最小化",
+
           onPressed: windowManager.minimize,
           icon: const Icon(Symbols.remove),
         ),
         IconButton(
-          tooltip: _isFullScreen ? "全屏模式下不可用" : (_isMaximized ? "还原" : "最大化"),
+
           onPressed: _isFullScreen || _isProcessing ? null : _toggleMaximized,
           icon: Icon(
             _isMaximized ? Symbols.fullscreen_exit : Symbols.fullscreen,
           ),
         ),
         IconButton(
-          tooltip: "退出",
+
           onPressed: AppLifecycle.instance.close,
           icon: const Icon(Symbols.close),
         ),

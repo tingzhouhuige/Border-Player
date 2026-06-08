@@ -180,60 +180,62 @@ class _UniDetailPageState<P, S, T> extends State<UniDetailPage<P, S, T>> {
               child: Material(
                 borderRadius: BorderRadius.circular(8.0),
                 type: MaterialType.transparency,
-                child: CustomScrollView(
-                  slivers: [
-                    // secondary content
-                    switch (currContentView) {
-                      ContentView.list => SliverFixedExtentList.builder(
-                          itemExtent: 64,
-                          itemCount: widget.secondaryContent.length,
-                          itemBuilder: (context, i) =>
-                              widget.secondaryContentBuilder(
-                            context,
-                            widget.secondaryContent[i],
-                            i,
-                            multiSelectController,
+                child: Scrollbar(
+                  child: CustomScrollView(
+                    slivers: [
+                      // secondary content
+                      switch (currContentView) {
+                        ContentView.list => SliverFixedExtentList.builder(
+                            itemExtent: 64,
+                            itemCount: widget.secondaryContent.length,
+                            itemBuilder: (context, i) =>
+                                widget.secondaryContentBuilder(
+                              context,
+                              widget.secondaryContent[i],
+                              i,
+                              multiSelectController,
+                            ),
                           ),
-                        ),
-                      ContentView.table => SliverGrid.builder(
-                          gridDelegate: gridDelegate,
-                          itemCount: widget.secondaryContent.length,
-                          itemBuilder: (context, i) =>
-                              widget.secondaryContentBuilder(
-                            context,
-                            widget.secondaryContent[i],
-                            i,
-                            multiSelectController,
+                        ContentView.table => SliverGrid.builder(
+                            gridDelegate: gridDelegate,
+                            itemCount: widget.secondaryContent.length,
+                            itemBuilder: (context, i) =>
+                                widget.secondaryContentBuilder(
+                              context,
+                              widget.secondaryContent[i],
+                              i,
+                              multiSelectController,
+                            ),
                           ),
-                        ),
-                    },
+                      },
 
-                    // tertiary content
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 16, 8, 18),
-                        child: Text(
-                          widget.tertiaryContentTitle,
-                          style: TextStyle(
-                            color: scheme.onSurface,
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.w900,
+                      // tertiary content
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 16, 8, 18),
+                          child: Text(
+                            widget.tertiaryContentTitle,
+                            style: TextStyle(
+                              color: scheme.onSurface,
+                              fontSize: 22.0,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SliverList.builder(
-                      itemCount: widget.tertiaryContent.length,
-                      itemBuilder: (context, i) =>
-                          widget.tertiaryContentBuilder(
-                        context,
-                        widget.tertiaryContent[i],
-                        i,
-                        null,
+                      SliverList.builder(
+                        itemCount: widget.tertiaryContent.length,
+                        itemBuilder: (context, i) =>
+                            widget.tertiaryContentBuilder(
+                          context,
+                          widget.tertiaryContent[i],
+                          i,
+                          null,
+                        ),
                       ),
-                    ),
-                    const SliverPadding(padding: EdgeInsets.only(bottom: 96.0)),
-                  ],
+                      const SliverPadding(padding: EdgeInsets.only(bottom: 96.0, right: 12.0)),
+                    ],
+                  ),
                 ),
               ),
             ),

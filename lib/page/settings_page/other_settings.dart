@@ -396,7 +396,7 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
                         ),
                       ),
                       IconButton(
-                        tooltip: "移除",
+
                         color: scheme.error,
                         iconSize: 25,
                         onPressed: () {

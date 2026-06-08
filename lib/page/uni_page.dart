@@ -279,32 +279,35 @@ class _UniPageState<T> extends State<UniPage<T>> {
         child: Row(
           children: [
             Expanded(
-              child: switch (currContentView) {
-                ContentView.list => ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.only(bottom: 96.0),
-                    itemCount: widget.contentList.length,
-                    itemExtent: 66,
-                    itemBuilder: (context, i) => widget.contentBuilder(
-                      context,
-                      widget.contentList[i],
-                      i,
-                      multiSelectController,
+              child: Scrollbar(
+                controller: scrollController,
+                child: switch (currContentView) {
+                  ContentView.list => ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.only(bottom: 96.0, right: 12.0),
+                      itemCount: widget.contentList.length,
+                      itemExtent: 66,
+                      itemBuilder: (context, i) => widget.contentBuilder(
+                        context,
+                        widget.contentList[i],
+                        i,
+                        multiSelectController,
+                      ),
                     ),
-                  ),
-                ContentView.table => GridView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.only(bottom: 96.0),
-                    gridDelegate: gridDelegate,
-                    itemCount: widget.contentList.length,
-                    itemBuilder: (context, i) => widget.contentBuilder(
-                      context,
-                      widget.contentList[i],
-                      i,
-                      multiSelectController,
+                  ContentView.table => GridView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.only(bottom: 96.0, right: 12.0),
+                      gridDelegate: gridDelegate,
+                      itemCount: widget.contentList.length,
+                      itemBuilder: (context, i) => widget.contentBuilder(
+                        context,
+                        widget.contentList[i],
+                        i,
+                        multiSelectController,
+                      ),
                     ),
-                  ),
-              },
+                },
+              ),
             ),
             if (showAlphaIndex)
               SizedBox(

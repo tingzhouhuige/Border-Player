@@ -142,6 +142,20 @@ class Entry extends StatelessWidget {
           fontSize: 14,
         ),
       ),
+      scrollbarTheme: ScrollbarThemeData(
+        thickness: WidgetStateProperty.all(6.0),
+        radius: const Radius.circular(3.0),
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return colorScheme.onSurfaceVariant.withOpacity(0.6);
+          }
+          return colorScheme.onSurfaceVariant.withOpacity(0.3);
+        }),
+        trackColor: WidgetStateProperty.all(Colors.transparent),
+        trackBorderColor: WidgetStateProperty.all(Colors.transparent),
+        crossAxisMargin: 4.0,
+        mainAxisMargin: 4.0,
+      ),
     );
   }
 

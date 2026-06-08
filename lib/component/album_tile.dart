@@ -20,50 +20,47 @@ class AlbumTile extends StatelessWidget {
       size: 48,
       color: scheme.onSurface,
     );
-    return Tooltip(
-      message: album.name,
-      child: InkWell(
-        onTap: () => context.push(app_paths.ALBUM_DETAIL_PAGE, extra: album),
-        borderRadius: BorderRadius.circular(8.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-          child: Row(
-            children: [
-              FutureBuilder(
-                future: album.works.first.cover,
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    return placeholder;
-                  }
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image(
-                      image: snapshot.data!,
-                      width: 48.0,
-                      height: 48.0,
-                      errorBuilder: (_, __, ___) => placeholder,
-                    ),
-                  );
-                },
-              ),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Text(
-                    album.name,
-                    softWrap: false,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: scheme.onSurface,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
+    return InkWell(
+      onTap: () => context.push(app_paths.ALBUM_DETAIL_PAGE, extra: album),
+      borderRadius: BorderRadius.circular(8.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+        child: Row(
+          children: [
+            FutureBuilder(
+              future: album.works.first.cover,
+              builder: (context, snapshot) {
+                if (snapshot.data == null) {
+                  return placeholder;
+                }
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image(
+                    image: snapshot.data!,
+                    width: 48.0,
+                    height: 48.0,
+                    errorBuilder: (_, __, ___) => placeholder,
+                  ),
+                );
+              },
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Text(
+                  album.name,
+                  softWrap: false,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: scheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

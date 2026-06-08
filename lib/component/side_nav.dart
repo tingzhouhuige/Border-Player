@@ -122,7 +122,7 @@ class _LargeSideNavContentState extends State<_LargeSideNavContent> {
             thumbVisibility: true,
             child: SingleChildScrollView(
               controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(28, 16, 24, 20),
+              padding: const EdgeInsets.fromLTRB(28, 16, 12, 20),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: constraints.maxHeight - 36,

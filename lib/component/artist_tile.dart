@@ -20,49 +20,46 @@ class ArtistTile extends StatelessWidget {
       color: scheme.onSurface,
       size: 48,
     );
-    return Tooltip(
-      message: artist.name,
-      child: InkWell(
-        onTap: () => context.push(app_paths.ARTIST_DETAIL_PAGE, extra: artist),
-        borderRadius: BorderRadius.circular(8.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-          child: Row(
-            children: [
-              FutureBuilder(
-                future: artist.works.first.cover,
-                builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    return placeholder;
-                  }
-                  return ClipOval(
-                    child: Image(
-                      image: snapshot.data!,
-                      width: 48.0,
-                      height: 48.0,
-                      errorBuilder: (_, __, ___) => placeholder,
-                    ),
-                  );
-                },
-              ),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 12.0),
-                  child: Text(
-                    artist.name,
-                    softWrap: false,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: scheme.onSurface,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
+    return InkWell(
+      onTap: () => context.push(app_paths.ARTIST_DETAIL_PAGE, extra: artist),
+      borderRadius: BorderRadius.circular(8.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+        child: Row(
+          children: [
+            FutureBuilder(
+              future: artist.works.first.cover,
+              builder: (context, snapshot) {
+                if (snapshot.data == null) {
+                  return placeholder;
+                }
+                return ClipOval(
+                  child: Image(
+                    image: snapshot.data!,
+                    width: 48.0,
+                    height: 48.0,
+                    errorBuilder: (_, __, ___) => placeholder,
+                  ),
+                );
+              },
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 12.0),
+                child: Text(
+                  artist.name,
+                  softWrap: false,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: scheme.onSurface,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

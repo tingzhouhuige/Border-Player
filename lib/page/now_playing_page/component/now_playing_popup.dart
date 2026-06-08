@@ -127,11 +127,21 @@ Future<T?> showNowPlayingGlassPopup<T>({
   final anchorSize = renderBox?.size ?? Size.zero;
   final overlaySize = overlay?.size ?? MediaQuery.sizeOf(context);
   final maxLeft = overlaySize.width - width - 16.0;
-  final maxTop = overlaySize.height - height - 16.0;
   final rawLeft = anchorOffset.dx + anchorSize.width - width;
-  final rawTop = anchorOffset.dy - height - 18;
   final left = rawLeft.clamp(16.0, maxLeft < 16.0 ? 16.0 : maxLeft).toDouble();
-  final top = rawTop.clamp(16.0, maxTop < 16.0 ? 16.0 : maxTop).toDouble();
+
+  final spaceAbove = anchorOffset.dy - 16.0;
+  final spaceBelow = overlaySize.height - anchorOffset.dy - anchorSize.height - 16.0;
+  final maxHeight = overlaySize.height - 32.0;
+  final effectiveHeight = height > maxHeight ? maxHeight : height;
+  final double top;
+  if (spaceBelow >= effectiveHeight) {
+    top = anchorOffset.dy + anchorSize.height + 8;
+  } else if (spaceAbove >= effectiveHeight) {
+    top = anchorOffset.dy - effectiveHeight - 18;
+  } else {
+    top = 16.0;
+  }
 
   return showGeneralDialog<T>(
     context: context,
@@ -152,7 +162,7 @@ Future<T?> showNowPlayingGlassPopup<T>({
                 child: NowPlayingGlassPanel(
                   title: title,
                   width: width,
-                  height: height,
+                  height: effectiveHeight,
                   padding: padding,
                   child: child,
                 ),

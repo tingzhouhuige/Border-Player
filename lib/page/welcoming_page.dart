@@ -142,7 +142,7 @@ class _FolderSelectorViewState extends State<FolderSelectorView> {
             itemBuilder: (context, i) => ListTile(
               title: Text(folders[i]),
               trailing: IconButton(
-                tooltip: "移除",
+
                 onPressed: () {
                   setState(() {
                     folders.removeAt(i);
@@ -237,7 +237,7 @@ class __WindowControllsState extends State<_WindowControlls>
       spacing: 8.0,
       children: [
         IconButton(
-          tooltip: "最小化",
+
           onPressed: windowManager.minimize,
           icon: const Icon(Symbols.remove),
         ),
@@ -246,7 +246,7 @@ class __WindowControllsState extends State<_WindowControlls>
           builder: (context, snapshot) {
             final isMaximized = snapshot.data ?? false;
             return IconButton(
-              tooltip: isMaximized ? "还原" : "最大化",
+
               onPressed: isMaximized
                   ? windowManager.unmaximize
                   : windowManager.maximize,
@@ -257,7 +257,7 @@ class __WindowControllsState extends State<_WindowControlls>
           },
         ),
         IconButton(
-          tooltip: "退出",
+
           onPressed: windowManager.close,
           icon: const Icon(Symbols.close),
         ),

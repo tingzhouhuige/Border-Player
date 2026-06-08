@@ -13,17 +13,19 @@ class SettingsPage extends StatelessWidget {
     return PageScaffold(
       title: "设置",
       actions: const [],
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 96.0),
-        children: const [
-          AudioLibraryEditor(),
-          PlayStatisticsControl(),
-          DefaultLyricSourceControl(),
-          AutoPlayOnStartupControl(),
-          ThemeModeControl(),
-          SelectFontCombobox(),
-          ArtistSeparatorEditor(),
-        ],
+      body: Scrollbar(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 96.0, right: 12.0),
+          children: const [
+            AudioLibraryEditor(),
+            PlayStatisticsControl(),
+            DefaultLyricSourceControl(),
+            AutoPlayOnStartupControl(),
+            ThemeModeControl(),
+            SelectFontCombobox(),
+            ArtistSeparatorEditor(),
+          ],
+        ),
       ),
     );
   }

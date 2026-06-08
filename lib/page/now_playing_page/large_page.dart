@@ -179,7 +179,7 @@ class _NowPlayingLargeViewSwitch extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return IconButton(
-      tooltip: "播放列表",
+
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,
