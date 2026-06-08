@@ -17,6 +17,7 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 96.0),
         children: const [
           AudioLibraryEditor(),
+          PlayStatisticsControl(),
           DefaultLyricSourceControl(),
           AutoPlayOnStartupControl(),
           ThemeModeControl(),

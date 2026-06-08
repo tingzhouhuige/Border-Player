@@ -9,25 +9,20 @@ class _NowPlayingPage_Small extends StatefulWidget {
 
 class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
   static const viewOnlyMain = [
-    NowPlayingViewMode.withPlaylist,
+    NowPlayingViewMode.withLyric,
     NowPlayingViewMode.onlyMain,
     NowPlayingViewMode.withLyric,
   ];
   static const viewWithLyric = [
     NowPlayingViewMode.onlyMain,
     NowPlayingViewMode.withLyric,
-    NowPlayingViewMode.withPlaylist,
-  ];
-  static const viewWithPlaylist = [
-    NowPlayingViewMode.withLyric,
-    NowPlayingViewMode.withPlaylist,
     NowPlayingViewMode.onlyMain,
   ];
   late var views =
       switch (AppPreference.instance.nowPlayingPagePref.nowPlayingViewMode) {
     NowPlayingViewMode.onlyMain => viewOnlyMain,
     NowPlayingViewMode.withLyric => viewWithLyric,
-    NowPlayingViewMode.withPlaylist => viewWithPlaylist,
+    NowPlayingViewMode.withPlaylist => viewOnlyMain,
   };
 
   IconData viewSwitchIcon(NowPlayingViewMode viewMode) {
@@ -48,7 +43,8 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
         desView = viewWithLyric;
         break;
       case NowPlayingViewMode.withPlaylist:
-        desView = viewWithPlaylist;
+        desView = viewOnlyMain;
+        viewMode = NowPlayingViewMode.onlyMain;
         break;
     }
     setState(() {
@@ -68,18 +64,32 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _NowPlayingSmallViewSwitch(
-                  onTap: () => changeView(views[0]),
-                  icon: viewSwitchIcon(views[0]),
-                ),
+                const SizedBox(width: 32),
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 150),
                     child: switch (views[1]) {
-                      NowPlayingViewMode.onlyMain => const _NowPlayingInfo(),
+                      NowPlayingViewMode.onlyMain => const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          child: _NowPlayingInfo(
+                            coverAlignment: Alignment.center,
+                            coverSizeInset: 56,
+                          ),
+                        ),
                       NowPlayingViewMode.withLyric => const VerticalLyricView(),
-                      NowPlayingViewMode.withPlaylist =>
-                        const CurrentPlaylistView(),
+                      NowPlayingViewMode.withPlaylist => const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          child: _NowPlayingInfo(
+                            coverAlignment: Alignment.center,
+                            coverSizeInset: 56,
+                          ),
+                        ),
                     },
                   ),
                 ),
@@ -105,6 +115,7 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
               _NowPlayingPlayModeSwitch(),
               _NowPlayingVolDspSlider(),
               _ExclusiveModeSwitch(),
+              _NowPlayingSmallPlaylistButton(),
               _NowPlayingSongInfo(),
               _DesktopLyricSwitch(),
               _NowPlayingMoreAction(),
@@ -112,6 +123,30 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
           )
         ],
       ),
+    );
+  }
+}
+
+class _NowPlayingSmallPlaylistButton extends StatelessWidget {
+  const _NowPlayingSmallPlaylistButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return IconButton(
+      tooltip: "播放列表",
+      onPressed: () {
+        showNowPlayingGlassPopup<void>(
+          context: context,
+          title: "播放列表",
+          width: 420,
+          height: 720,
+          child: const CurrentPlaylistView(showTitle: false),
+        );
+      },
+      icon: const Icon(Symbols.queue_music),
+      color: scheme.onSecondaryContainer,
     );
   }
 }

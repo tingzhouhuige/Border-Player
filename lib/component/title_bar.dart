@@ -63,10 +63,11 @@ class _TitleBar_Small extends StatelessWidget {
             const _OpenDrawerBtn(),
             const SizedBox(width: 8.0),
             const NavBackBtn(),
+            const SizedBox(width: 12.0),
             Expanded(
               child: DragToMoveArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.only(right: 8.0),
                   child: Text(
                     "Border Player",
                     style: TextStyle(

@@ -492,8 +492,9 @@ class _NowPlayingSongInfo extends StatelessWidget {
           ? null
           : () {
               final fileSize = _getFileLength(nowPlaying.path);
-              final bitrateStr =
-                  nowPlaying.bitrate != null ? '${nowPlaying.bitrate} kbps' : '-';
+              final bitrateStr = nowPlaying.bitrate != null
+                  ? '${nowPlaying.bitrate} kbps'
+                  : '-';
               final sampleRateStr = nowPlaying.sampleRate != null
                   ? '${nowPlaying.sampleRate} Hz'
                   : '-';
@@ -503,8 +504,7 @@ class _NowPlayingSongInfo extends StatelessWidget {
                 title: "歌曲信息",
                 width: 380,
                 height: 380,
-                padding:
-                    const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -522,12 +522,10 @@ class _NowPlayingSongInfo extends StatelessWidget {
                             nowPlaying.bitrate, nowPlaying.sampleRate)),
                     _InfoRow(
                         label: "大小",
-                        value: fileSize != null
-                            ? _formatFileSize(fileSize)
-                            : '-'),
+                        value:
+                            fileSize != null ? _formatFileSize(fileSize) : '-'),
                     _InfoRow(
-                        label: "格式",
-                        value: _formatFromPath(nowPlaying.path)),
+                        label: "格式", value: _formatFromPath(nowPlaying.path)),
                   ],
                 ),
               );
@@ -905,9 +903,15 @@ class _NowPlayingSliderState extends State<_NowPlayingSlider> {
 
 /// title, artist, album, cover
 class _NowPlayingInfo extends StatefulWidget {
-  const _NowPlayingInfo({this.coverSize});
+  const _NowPlayingInfo({
+    this.coverSize,
+    this.coverAlignment = Alignment.centerLeft,
+    this.coverSizeInset = 12,
+  });
 
   final double? coverSize;
+  final AlignmentGeometry coverAlignment;
+  final double coverSizeInset;
 
   @override
   State<_NowPlayingInfo> createState() => __NowPlayingInfoState();
@@ -954,7 +958,7 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final coverSize = widget.coverSize ??
-            (constraints.biggest.shortestSide - 12)
+            (constraints.biggest.shortestSide - widget.coverSizeInset)
                 .clamp(260.0, 680.0)
                 .toDouble();
 
@@ -993,7 +997,7 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
             ),
             Expanded(
               child: Align(
-                alignment: Alignment.centerLeft,
+                alignment: widget.coverAlignment,
                 child: SizedBox.square(
                   dimension: coverSize,
                   child: RepaintBoundary(

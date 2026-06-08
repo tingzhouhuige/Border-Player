@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/build_index_state_view.dart';
 import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/library/play_statistics.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:flutter/material.dart';
@@ -89,6 +90,7 @@ class _FolderSelectorViewState extends State<FolderSelectorView> {
                       await Future.wait([
                         AppSettings.instance.saveSettings(),
                         AudioLibrary.initFromIndex(),
+                        PlayStatistics.instance.load(),
                       ]);
                       if (context.mounted) {
                         context.go(app_paths.AUDIOS_PAGE);

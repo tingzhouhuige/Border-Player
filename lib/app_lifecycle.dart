@@ -1,6 +1,7 @@
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/hotkeys_helper.dart';
+import 'package:border_player/library/play_statistics.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/lyric/lyric_source.dart';
 import 'package:border_player/play_service/play_service.dart';
@@ -29,6 +30,7 @@ class AppLifecycle with WindowListener {
     await Future.wait([
       savePlaylists(),
       saveLyricSources(),
+      PlayStatistics.instance.save(),
       HotkeysHelper.unregisterAll(),
     ]);
 

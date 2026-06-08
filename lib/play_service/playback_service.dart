@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/library/play_statistics.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:border_player/src/bass/bass_player.dart';
 import 'package:border_player/src/rust/api/smtc_flutter.dart';
@@ -61,6 +62,7 @@ class PlaybackService extends ChangeNotifier {
 
     positionStream.listen((progress) {
       _smtc.updateTimeProperties(progress: (progress * 1000).floor());
+      _trackPlaybackProgress(progress);
     });
   }
 
@@ -106,6 +108,10 @@ class PlaybackService extends ChangeNotifier {
 
   double get volumeDsp => _player.volumeDsp;
 
+  String? _statisticsRecordedPath;
+  double _lastTrackedPosition = 0;
+  double _trackedPlaybackSeconds = 0;
+
   /// 修改解码时的音量（不影响 Windows 系统音量）
   void setVolumeDsp(double volume) {
     _player.setVolumeDsp(volume);
@@ -127,6 +133,9 @@ class PlaybackService extends ChangeNotifier {
     try {
       _playlistIndex = audioIndex;
       nowPlaying = playlist[audioIndex];
+      _statisticsRecordedPath = null;
+      _lastTrackedPosition = 0;
+      _trackedPlaybackSeconds = 0;
       _player.setSource(nowPlaying!.path);
       setVolumeDsp(AppPreference.instance.playbackPref.volumeDsp);
 
@@ -156,6 +165,25 @@ class PlaybackService extends ChangeNotifier {
       LOGGER.e("[load and play] $err");
       showTextOnSnackBar(err.toString());
     }
+  }
+
+  void _trackPlaybackProgress(double position) {
+    final audio = nowPlaying;
+    if (audio == null) return;
+    if (playerState != PlayerState.playing) return;
+    if (_statisticsRecordedPath == audio.path) return;
+
+    final delta = position - _lastTrackedPosition;
+    _lastTrackedPosition = position;
+
+    if (delta <= 0 || delta > 5) return;
+
+    _trackedPlaybackSeconds += delta;
+    final threshold = length * 0.75;
+    if (threshold <= 0 || _trackedPlaybackSeconds < threshold) return;
+
+    _statisticsRecordedPath = audio.path;
+    PlayStatistics.instance.recordPlay(audio);
   }
 
   /// 播放当前播放列表的第几项，只能用在播放列表界面
@@ -313,8 +341,7 @@ class PlaybackService extends ChangeNotifier {
   /// 保存当前播放状态到偏好
   void savePlaybackState() {
     _pref.lastPlayingPath = nowPlaying?.path;
-    _pref.lastPlaylistPaths =
-        playlist.value.map((a) => a.path).toList();
+    _pref.lastPlaylistPaths = playlist.value.map((a) => a.path).toList();
     _pref.lastPosition = position;
   }
 

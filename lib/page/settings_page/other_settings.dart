@@ -2,6 +2,7 @@ import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/build_index_state_view.dart';
 import 'package:border_player/component/settings_tile.dart';
 import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/library/play_statistics.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/lyric/lyric_source.dart';
 import 'package:border_player/page/settings_page/settings_dialog.dart';
@@ -51,6 +52,7 @@ class _DefaultLyricSourceControlState extends State<DefaultLyricSourceControl> {
     );
   }
 }
+
 class AudioLibraryEditor extends StatelessWidget {
   const AudioLibraryEditor({super.key});
 
@@ -74,6 +76,203 @@ class AudioLibraryEditor extends StatelessWidget {
   }
 }
 
+class PlayStatisticsControl extends StatelessWidget {
+  const PlayStatisticsControl({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsTile(
+      description: "听歌统计",
+      action: FilledButton.icon(
+        icon: const Icon(Symbols.bar_chart),
+        label: const Text("统计"),
+        onPressed: () {
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            barrierColor: Colors.black.withOpacity(0.46),
+            builder: (context) => const PlayStatisticsDialog(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class PlayStatisticsDialog extends StatefulWidget {
+  const PlayStatisticsDialog({super.key});
+
+  @override
+  State<PlayStatisticsDialog> createState() => _PlayStatisticsDialogState();
+}
+
+class _PlayStatisticsDialogState extends State<PlayStatisticsDialog> {
+  PlayStatRange _range = PlayStatRange.total;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return SettingsGlassDialog(
+      title: "听歌统计",
+      width: 720,
+      height: 580,
+      titleActions: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final range in PlayStatRange.values) ...[
+              _StatisticRangeButton(
+                range: range,
+                selected: _range == range,
+                onTap: () {
+                  setState(() {
+                    _range = range;
+                  });
+                },
+              ),
+              if (range != PlayStatRange.values.last) const SizedBox(width: 8),
+            ],
+          ],
+        ),
+      ],
+      actions: [
+        TextButton(
+          style: settingsDialogActionStyle(scheme),
+          onPressed: () => Navigator.pop(context),
+          child: const Text("关闭"),
+        ),
+      ],
+      child: FutureBuilder<List<AudioPlayStat>>(
+        future: PlayStatistics.instance.allStats(_range),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final stats = snapshot.data!;
+          if (stats.isEmpty) {
+            return Center(
+              child: Text(
+                "暂无听歌记录",
+                style: settingsDialogTextStyle(scheme),
+              ),
+            );
+          }
+
+          return ListView.separated(
+            padding: EdgeInsets.zero,
+            itemCount: stats.length,
+            separatorBuilder: (_, __) => Divider(
+              height: 1,
+              color: scheme.outlineVariant.withOpacity(0.45),
+            ),
+            itemBuilder: (context, i) {
+              final stat = stats[i];
+              return SizedBox(
+                height: 62,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 42,
+                      child: Text(
+                        "${i + 1}",
+                        style: TextStyle(
+                          color: scheme.onSurfaceVariant,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            stat.audio.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: settingsDialogTextStyle(scheme).copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            stat.audio.artist,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: scheme.onSurfaceVariant,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Text(
+                      "${stat.count} 次",
+                      style: TextStyle(
+                        color: scheme.onSurface,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _StatisticRangeButton extends StatelessWidget {
+  const _StatisticRangeButton({
+    required this.range,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final PlayStatRange range;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: selected ? scheme.secondaryContainer : scheme.surfaceContainer,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox.square(
+          dimension: 38,
+          child: Center(
+            child: Text(
+              range.label,
+              style: TextStyle(
+                color: selected
+                    ? scheme.onSecondaryContainer
+                    : scheme.onSurfaceVariant,
+                fontSize: 14,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                letterSpacing: 0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class AudioLibraryEditorDialog extends StatefulWidget {
   const AudioLibraryEditorDialog({super.key});
 
@@ -92,6 +291,38 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
 
   bool editing = true;
 
+  String? _pickFolder() {
+    final dirPicker = DirectoryPicker();
+    dirPicker.title = "选择文件夹";
+
+    final dir = dirPicker.getDirectory();
+    return dir?.path;
+  }
+
+  void _addFolderPath(String path) {
+    if (folders.contains(path)) return;
+    folders.add(path);
+  }
+
+  void _addFolder() {
+    final path = _pickFolder();
+    if (path == null) return;
+
+    setState(() {
+      _addFolderPath(path);
+    });
+  }
+
+  void _scanPickedFolder() {
+    final path = _pickFolder();
+    if (path == null) return;
+
+    setState(() {
+      _addFolderPath(path);
+      editing = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -100,20 +331,32 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
       title: "管理文件夹",
       width: 650,
       height: 560,
+      titleActions: [
+        if (editing)
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: scheme.secondaryContainer,
+              foregroundColor: scheme.onSecondaryContainer,
+              elevation: 0,
+              minimumSize: const Size(0, 36),
+              fixedSize: const Size.fromHeight(36),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              shape: const StadiumBorder(),
+              textStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0,
+              ),
+            ),
+            onPressed: _scanPickedFolder,
+            icon: const Icon(Symbols.search, size: 20),
+            label: const Text("扫描音乐"),
+          ),
+      ],
       actions: [
         TextButton(
           style: settingsDialogActionStyle(scheme),
-          onPressed: () async {
-            final dirPicker = DirectoryPicker();
-            dirPicker.title = "选择文件夹";
-
-            final dir = dirPicker.getDirectory();
-            if (dir == null) return;
-
-            setState(() {
-              folders.add(dir.path);
-            });
-          },
+          onPressed: editing ? _addFolder : null,
           child: const Text("添加"),
         ),
         TextButton(
@@ -123,11 +366,13 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
         ),
         TextButton(
           style: settingsDialogActionStyle(scheme),
-          onPressed: () {
-            setState(() {
-              editing = false;
-            });
-          },
+          onPressed: editing
+              ? () {
+                  setState(() {
+                    editing = false;
+                  });
+                }
+              : null,
           child: const Text("确定"),
         ),
       ],
@@ -184,6 +429,7 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
                       whenIndexBuilt: () async {
                         await Future.wait([
                           AudioLibrary.initFromIndex(),
+                          PlayStatistics.instance.load(),
                           readPlaylists(),
                           readLyricSources(),
                         ]);

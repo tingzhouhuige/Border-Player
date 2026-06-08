@@ -87,7 +87,7 @@ class SideNav extends StatelessWidget {
   }
 }
 
-class _LargeSideNavContent extends StatelessWidget {
+class _LargeSideNavContent extends StatefulWidget {
   const _LargeSideNavContent({
     required this.selected,
     required this.onDestinationSelected,
@@ -97,51 +97,80 @@ class _LargeSideNavContent extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
 
   @override
+  State<_LargeSideNavContent> createState() => _LargeSideNavContentState();
+}
+
+class _LargeSideNavContentState extends State<_LargeSideNavContent> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
     return SafeArea(
       bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 16, 24, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _HomePill(colorScheme: scheme),
-            const SizedBox(height: 36),
-            for (var i = 0; i < destinations.length; i++) ...[
-              _SideNavItem(
-                icon: destinations[i].icon,
-                label: destinations[i].label,
-                selected: selected == i,
-                onTap: () => onDestinationSelected(i),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.fromLTRB(28, 16, 24, 20),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 36,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _HomePill(colorScheme: scheme),
+                      const SizedBox(height: 36),
+                      for (var i = 0; i < destinations.length; i++) ...[
+                        _SideNavItem(
+                          icon: destinations[i].icon,
+                          label: destinations[i].label,
+                          selected: widget.selected == i,
+                          onTap: () => widget.onDestinationSelected(i),
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: scheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Border Player",
+                            style: TextStyle(
+                              color: scheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 14),
-            ],
-            const Spacer(),
-            Row(
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: scheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "Border Player",
-                  style: TextStyle(
-                    color: scheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
+            ),
+          );
+        },
       ),
     );
   }

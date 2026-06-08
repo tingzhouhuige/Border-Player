@@ -48,6 +48,18 @@ https://github.com/tingzhouhuige/Border-Player/releases
 - `BorderPlayerSetup-*.exe`：标准 Windows 安装包，可选择安装位置，会创建快捷方式和卸载入口。
 - `BorderPlayer-windows-x64-*.zip`：绿色便携版，解压后运行 `border_player.exe`。
 
+## 版本更新
+
+### v1.0.5
+
+- 优化左上角品牌标识显示，减少小尺寸图标锯齿，并清理无用图标预览资源。
+- 文件夹管理弹窗新增“扫描音乐”，可选择本地文件夹并立即扫描入库，同时自动加入文件夹目录。
+- 左侧边栏在窗口高度较低时支持上下滚动。
+- 设置页新增听歌统计，支持周、月、年、总四种统计范围；仅显示已有播放次数的歌曲，并按次数从高到低排序。
+- 歌曲播放累计达到总时长 75% 后记一次播放次数，未达到不计入统计。
+- 优化播放页小屏布局：播放列表改为底部按钮弹窗，右侧切换控件仅保留封面和歌词切换，封面居中并调整四周留白。
+- 优化播放页小屏标题栏返回按钮与歌曲名的间距。
+
 ## 构建
 
 推荐本地环境：
@@ -64,6 +76,12 @@ https://github.com/tingzhouhuige/Border-Player/releases
 ```
 
 输出目录：`release_packages\full-windows-x64`
+
+指定版本发布目录示例：
+
+```powershell
+.\tools\build_windows_release.ps1 -PackageName v1.0.5
+```
 
 如果 BASS DLL 缺失，加 `-DownloadBassIfMissing` 参数会自动下载：
 

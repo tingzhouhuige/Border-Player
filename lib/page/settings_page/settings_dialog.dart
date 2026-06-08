@@ -8,6 +8,7 @@ class SettingsGlassDialog extends StatelessWidget {
     required this.title,
     required this.child,
     required this.actions,
+    this.titleActions = const [],
     this.width = 650,
     this.height = 560,
   });
@@ -15,6 +16,7 @@ class SettingsGlassDialog extends StatelessWidget {
   final String title;
   final Widget child;
   final List<Widget> actions;
+  final List<Widget> titleActions;
   final double width;
   final double height;
 
@@ -55,7 +57,18 @@ class SettingsGlassDialog extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: settingsDialogTitleStyle(scheme)),
+                Row(
+                  children: [
+                    Expanded(
+                      child:
+                          Text(title, style: settingsDialogTitleStyle(scheme)),
+                    ),
+                    for (var i = 0; i < titleActions.length; i++) ...[
+                      if (i != 0) const SizedBox(width: 10),
+                      titleActions[i],
+                    ],
+                  ],
+                ),
                 const SizedBox(height: 22),
                 Expanded(child: child),
                 const SizedBox(height: 18),

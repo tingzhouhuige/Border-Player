@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/library/play_statistics.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/lyric/lyric_source.dart';
 import 'package:border_player/play_service/play_service.dart';
@@ -62,6 +63,7 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
   void whenIndexUpdated() async {
     await Future.wait([
       AudioLibrary.initFromIndex(),
+      PlayStatistics.instance.load(),
       readPlaylists(),
       readLyricSources(),
     ]);

@@ -46,7 +46,7 @@ Future<Directory> getAppDataDir() async {
 
 class AppSettings {
   static final github = GitHub();
-  static const String version = "1.5.1-v61";
+  static const String version = "1.0.5";
 
   /// 主题模式：亮 / 暗
   ThemeMode themeMode = getWindowsThemeMode();
