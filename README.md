@@ -86,7 +86,7 @@ https://github.com/tingzhouhuige/Border-Player/releases
 指定版本发布目录示例：
 
 ```powershell
-.\tools\build_windows_release.ps1 -PackageName v1.0.5
+.\tools\build_windows_release.ps1 -PackageName v1.0.6
 ```
 
 如果 BASS DLL 缺失，加 `-DownloadBassIfMissing` 参数会自动下载：
