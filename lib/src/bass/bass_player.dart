@@ -106,8 +106,16 @@ class BassPlayer {
     if (_fstream == null) return 0;
 
     final volDsp = ffi.malloc.allocate<ffi.Float>(ffi.sizeOf<ffi.Float>());
-    _bass.BASS_ChannelGetAttribute(_fstream!, BASS.BASS_ATTRIB_VOLDSP, volDsp);
-    return volDsp.value;
+    try {
+      _bass.BASS_ChannelGetAttribute(
+        _fstream!,
+        BASS.BASS_ATTRIB_VOLDSP,
+        volDsp,
+      );
+      return volDsp.value;
+    } finally {
+      ffi.malloc.free(volDsp);
+    }
   }
 
   /// update every 33ms
@@ -128,6 +136,11 @@ class BassPlayer {
         }
       },
     );
+  }
+
+  void _startPositionUpdater() {
+    _positionUpdater?.cancel();
+    _positionUpdater = _getPositionUpdater();
   }
 
   void _bassInit() {
@@ -206,6 +219,7 @@ class BassPlayer {
     for (final plugin in BASS_PLUGINS) {
       final pluginPathP = plugin.toNativeUtf16() as ffi.Pointer<ffi.Char>;
       final hplugin = _bass.BASS_PluginLoad(pluginPathP, BASS.BASS_UNICODE);
+      ffi.malloc.free(pluginPathP);
 
       if (hplugin == 0) {
         switch (_bass.BASS_ErrorGetCode()) {
@@ -274,6 +288,7 @@ class BassPlayer {
       0,
       wasapiExclusive ? exclusiveFlags : flags,
     );
+    ffi.malloc.free(pathPointer);
 
     if (handle != 0) {
       _fstream = handle;
@@ -407,7 +422,7 @@ class BassPlayer {
       }
     }
     _playerStateStreamController.add(playerState);
-    _positionUpdater = _getPositionUpdater();
+    _startPositionUpdater();
   }
 
   /// start/resume channel
@@ -434,7 +449,7 @@ class BassPlayer {
     }
 
     _playerStateStreamController.add(playerState);
-    _positionUpdater = _getPositionUpdater();
+    _startPositionUpdater();
   }
 
   void _pause_wasapiExclusive() {

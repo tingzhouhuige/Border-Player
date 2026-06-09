@@ -252,7 +252,11 @@ class _SideNavItem extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 13),
-              Icon(icon, size: 23, color: scheme.onSurface),
+              Icon(
+                icon,
+                size: 23,
+                color: scheme.onSurface,
+              ),
               const SizedBox(width: 20),
               Expanded(
                 child: Text(

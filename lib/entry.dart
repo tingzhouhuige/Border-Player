@@ -1,4 +1,5 @@
 import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/component/app_shell.dart';
 import 'package:border_player/page/album_detail_page.dart';
 import 'package:border_player/page/albums_page.dart';
@@ -34,8 +35,8 @@ class SlideTransitionPage<T> extends CustomTransitionPage<T> {
     super.key,
   }) : super(
           transitionsBuilder: _transitionsBuilder,
-          transitionDuration: const Duration(milliseconds: 150),
-          reverseTransitionDuration: const Duration(milliseconds: 150),
+          transitionDuration: AppMotion.page,
+          reverseTransitionDuration: AppMotion.pageReverse,
         );
 
   static Widget _transitionsBuilder(
@@ -44,15 +45,9 @@ class SlideTransitionPage<T> extends CustomTransitionPage<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final tween = Tween(
-      begin: const Offset(0, 0.10),
-      end: const Offset(0, 0),
-    );
-
-    return SlideTransition(
-      position: tween.animate(
-        CurvedAnimation(parent: animation, curve: Curves.fastOutSlowIn),
-      ),
+    return AppMotion.pageTransition(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
       child: child,
     );
   }
@@ -82,8 +77,8 @@ class Entry extends StatelessWidget {
       canvasColor: colorScheme.surface,
       scaffoldBackgroundColor: colorScheme.surface,
       cardColor: colorScheme.surface,
-      dividerColor: colorScheme.onSurface.withOpacity(0.12),
-      indicatorColor: onPrimarySurfaceColor,
+      dividerColor: colorScheme.onSurface.withValues(alpha: 0.12),
+      tabBarTheme: TabBarThemeData(indicatorColor: onPrimarySurfaceColor),
       applyElevationOverlayColor: isDark,
       useMaterial3: true,
       dialogTheme: DialogThemeData(backgroundColor: colorScheme.surface),
@@ -147,9 +142,9 @@ class Entry extends StatelessWidget {
         radius: const Radius.circular(3.0),
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.hovered)) {
-            return colorScheme.onSurfaceVariant.withOpacity(0.6);
+            return colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
           }
-          return colorScheme.onSurfaceVariant.withOpacity(0.3);
+          return colorScheme.onSurfaceVariant.withValues(alpha: 0.3);
         }),
         trackColor: WidgetStateProperty.all(Colors.transparent),
         trackBorderColor: WidgetStateProperty.all(Colors.transparent),
@@ -317,17 +312,13 @@ class Entry extends StatelessWidget {
       GoRoute(
         path: app_paths.NOW_PLAYING_PAGE,
         pageBuilder: (context, state) => CustomTransitionPage(
-          maintainState: false,
-          transitionsBuilder: (context, animation, _, child) {
-            final tween = Tween(
-              begin: const Offset(0, 1),
-              end: const Offset(0, 0),
-            );
-
-            return SlideTransition(
-              position: tween.animate(
-                CurvedAnimation(parent: animation, curve: Curves.fastOutSlowIn),
-              ),
+          maintainState: true,
+          transitionDuration: AppMotion.nowPlayingPage,
+          reverseTransitionDuration: AppMotion.nowPlayingPageReverse,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return AppMotion.nowPlayingPageTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
               child: child,
             );
           },

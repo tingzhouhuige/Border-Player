@@ -1,4 +1,5 @@
 import 'package:border_player/component/scroll_aware_future_builder.dart';
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:border_player/utils.dart';
 import 'package:border_player/library/audio_library.dart';
@@ -41,97 +42,121 @@ class AudioTile extends StatelessWidget {
       style: nowPlayingGlassMenuStyle(context),
       menuChildren: [
         /// artists
-        SubmenuButton(
-          style: nowPlayingGlassMenuItemStyle(context),
-          menuStyle: nowPlayingGlassSubmenuStyle(context),
-          menuChildren: List.generate(
-            audio.splitedArtists.length,
-            (i) => MenuItemButton(
-              style: nowPlayingGlassMenuItemStyle(context),
-              onPressed: () {
-                final Artist artist = AudioLibrary
-                    .instance.artistCollection[audio.splitedArtists[i]]!;
-                context.push(
-                  app_paths.ARTIST_DETAIL_PAGE,
-                  extra: artist,
-                );
-              },
-              leadingIcon: const Icon(Symbols.artist),
-              child: Text(audio.splitedArtists[i]),
+        AppMotion.menuEntryTransition(
+          index: 0,
+          child: SubmenuButton(
+            style: nowPlayingGlassMenuItemStyle(context),
+            menuStyle: nowPlayingGlassSubmenuStyle(context),
+            menuChildren: List.generate(
+              audio.splitedArtists.length,
+              (i) => AppMotion.menuEntryTransition(
+                index: i,
+                child: MenuItemButton(
+                  style: nowPlayingGlassMenuItemStyle(context),
+                  onPressed: () {
+                    final Artist artist = AudioLibrary
+                        .instance.artistCollection[audio.splitedArtists[i]]!;
+                    context.push(
+                      app_paths.ARTIST_DETAIL_PAGE,
+                      extra: artist,
+                    );
+                  },
+                  leadingIcon: const Icon(Symbols.artist),
+                  child: Text(audio.splitedArtists[i]),
+                ),
+              ),
             ),
+            child: const Text("艺术家"),
           ),
-          child: const Text("艺术家"),
         ),
 
         /// album
-        MenuItemButton(
-          style: nowPlayingGlassMenuItemStyle(context),
-          onPressed: () {
-            final Album album =
-                AudioLibrary.instance.albumCollection[audio.album]!;
-            context.push(app_paths.ALBUM_DETAIL_PAGE, extra: album);
-          },
-          leadingIcon: const Icon(Symbols.album),
-          child: Text(audio.album),
+        AppMotion.menuEntryTransition(
+          index: 1,
+          child: MenuItemButton(
+            style: nowPlayingGlassMenuItemStyle(context),
+            onPressed: () {
+              final Album album =
+                  AudioLibrary.instance.albumCollection[audio.album]!;
+              context.push(app_paths.ALBUM_DETAIL_PAGE, extra: album);
+            },
+            leadingIcon: const Icon(Symbols.album),
+            child: Text(audio.album),
+          ),
         ),
 
         /// 下一首播放
-        MenuItemButton(
-          style: nowPlayingGlassMenuItemStyle(context),
-          onPressed: () {
-            PlayService.instance.playbackService.addToNext(audio);
-          },
-          leadingIcon: const Icon(Symbols.plus_one),
-          child: const Text("下一首播放"),
+        AppMotion.menuEntryTransition(
+          index: 2,
+          child: MenuItemButton(
+            style: nowPlayingGlassMenuItemStyle(context),
+            onPressed: () {
+              PlayService.instance.playbackService.addToNext(audio);
+            },
+            leadingIcon: const Icon(Symbols.plus_one),
+            child: const Text("下一首播放"),
+          ),
         ),
 
         /// 多选
         if (multiSelectController != null)
-          MenuItemButton(
-            style: nowPlayingGlassMenuItemStyle(context),
-            onPressed: () {
-              multiSelectController!.useMultiSelectView(true);
-              multiSelectController!.select(audio);
-            },
-            leadingIcon: const Icon(Symbols.select),
-            child: const Text("多选"),
+          AppMotion.menuEntryTransition(
+            index: 3,
+            child: MenuItemButton(
+              style: nowPlayingGlassMenuItemStyle(context),
+              onPressed: () {
+                multiSelectController!.useMultiSelectView(true);
+                multiSelectController!.select(audio);
+              },
+              leadingIcon: const Icon(Symbols.select),
+              child: const Text("多选"),
+            ),
           ),
 
         /// add to playlist
-        SubmenuButton(
-          style: nowPlayingGlassMenuItemStyle(context),
-          menuStyle: nowPlayingGlassSubmenuStyle(context),
-          menuChildren: List.generate(
-            PLAYLISTS.length,
-            (i) => MenuItemButton(
-              style: nowPlayingGlassMenuItemStyle(context),
-              onPressed: () {
-                final added = PLAYLISTS[i].audios.containsKey(audio.path);
-                if (added) {
-                  showTextOnSnackBar("歌曲“${audio.title}”已存在");
-                  return;
-                }
+        AppMotion.menuEntryTransition(
+          index: multiSelectController != null ? 4 : 3,
+          child: SubmenuButton(
+            style: nowPlayingGlassMenuItemStyle(context),
+            menuStyle: nowPlayingGlassSubmenuStyle(context),
+            menuChildren: List.generate(
+              PLAYLISTS.length,
+              (i) => AppMotion.menuEntryTransition(
+                index: i,
+                child: MenuItemButton(
+                  style: nowPlayingGlassMenuItemStyle(context),
+                  onPressed: () {
+                    final added = PLAYLISTS[i].audios.containsKey(audio.path);
+                    if (added) {
+                      showTextOnSnackBar("歌曲“${audio.title}”已存在");
+                      return;
+                    }
 
-                PLAYLISTS[i].audios[audio.path] = audio;
-                showTextOnSnackBar(
-                  "成功将“${audio.title}”添加到歌单“${PLAYLISTS[i].name}”",
-                );
-              },
-              leadingIcon: const Icon(Symbols.queue_music),
-              child: Text(PLAYLISTS[i].name),
+                    PLAYLISTS[i].audios[audio.path] = audio;
+                    showTextOnSnackBar(
+                      "成功将“${audio.title}”添加到歌单“${PLAYLISTS[i].name}”",
+                    );
+                  },
+                  leadingIcon: const Icon(Symbols.queue_music),
+                  child: Text(PLAYLISTS[i].name),
+                ),
+              ),
             ),
+            child: const Text("添加到歌单"),
           ),
-          child: const Text("添加到歌单"),
         ),
 
         /// to detail page
-        MenuItemButton(
-          style: nowPlayingGlassMenuItemStyle(context),
-          onPressed: () {
-            context.push(app_paths.AUDIO_DETAIL_PAGE, extra: audio);
-          },
-          leadingIcon: const Icon(Symbols.info),
-          child: const Text("详细信息"),
+        AppMotion.menuEntryTransition(
+          index: multiSelectController != null ? 5 : 4,
+          child: MenuItemButton(
+            style: nowPlayingGlassMenuItemStyle(context),
+            onPressed: () {
+              context.push(app_paths.AUDIO_DETAIL_PAGE, extra: audio);
+            },
+            leadingIcon: const Icon(Symbols.info),
+            child: const Text("详细信息"),
+          ),
         ),
       ],
       builder: (context, controller, _) {
@@ -212,6 +237,7 @@ class AudioTile extends StatelessWidget {
 
                 /// cover
                 ScrollAwareFutureBuilder(
+                  cacheKey: audio.path,
                   future: () => audio.cover,
                   builder: (context, snapshot) {
                     if (snapshot.data == null) {

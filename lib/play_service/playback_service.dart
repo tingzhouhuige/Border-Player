@@ -33,6 +33,7 @@ class PlaybackService extends ChangeNotifier {
   final PlayService playService;
 
   late StreamSubscription _playerStateStreamSub;
+  late StreamSubscription _positionStreamSub;
   late StreamSubscription _smtcEventStreamSub;
 
   PlaybackService(this.playService) {
@@ -60,7 +61,7 @@ class PlaybackService extends ChangeNotifier {
       }
     });
 
-    positionStream.listen((progress) {
+    _positionStreamSub = positionStream.listen((progress) {
       _smtc.updateTimeProperties(progress: (progress * 1000).floor());
       _trackPlaybackProgress(progress);
     });
@@ -398,6 +399,7 @@ class PlaybackService extends ChangeNotifier {
   void close() {
     savePlaybackState();
     _playerStateStreamSub.cancel();
+    _positionStreamSub.cancel();
     _smtcEventStreamSub.cancel();
     _player.free();
     _smtc.close();

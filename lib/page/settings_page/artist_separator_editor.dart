@@ -17,9 +17,8 @@ class ArtistSeparatorEditor extends StatelessWidget {
         icon: const Icon(Symbols.edit),
         label: const Text("管理艺术家分隔符"),
         onPressed: () {
-          showDialog(
+          showSettingsGlassDialog(
             context: context,
-            barrierColor: Colors.black.withOpacity(0.46),
             builder: (context) => const _ArtistSeparatorEditDialog(),
           );
         },

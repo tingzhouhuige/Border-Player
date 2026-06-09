@@ -1,15 +1,21 @@
 param(
   [string]$PackageName = "full-windows-x64",
-  [switch]$DownloadBassIfMissing
+  [switch]$DownloadBassIfMissing,
+  [switch]$CleanBuild
 )
 
 $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
 $FlutterPath = "C:\src\flutter\bin"
+$FlutterCommand = "flutter"
 $GitPath = "C:\Program Files\Git\cmd"
 if (Test-Path $FlutterPath) {
   $env:Path = "$FlutterPath;$GitPath;$env:Path"
+  $FlutterBat = Join-Path $FlutterPath "flutter.bat"
+  if (Test-Path -LiteralPath $FlutterBat) {
+    $FlutterCommand = $FlutterBat
+  }
 }
 
 $MainRelease = Join-Path $Root "build\windows\x64\runner\Release"
@@ -22,6 +28,7 @@ $BassDownload = Join-Path $Root "build\bass_download"
 $BassExtract = Join-Path $Root "build\bass_extract"
 $BassX64 = Join-Path $BassExtract "x64"
 $Target = Join-Path $Root "release_packages\$PackageName"
+$LogPath = Join-Path $Root "release_packages\package_windows_release.last.log"
 $RequiredBassDlls = @(
   "bass.dll",
   "basswasapi.dll",
@@ -44,6 +51,21 @@ $BassArchives = @(
   @{ Name = "basswv24.zip"; Url = "https://www.un4seen.com/files/basswv24.zip" }
 )
 
+function Write-Step {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Message
+  )
+
+  $Line = "[{0:yyyy-MM-dd HH:mm:ss}] {1}" -f (Get-Date), $Message
+  Write-Host $Line
+  $LogDir = Split-Path -Parent $LogPath
+  if (-not (Test-Path -LiteralPath $LogDir)) {
+    New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+  }
+  Add-Content -LiteralPath $LogPath -Value $Line -Encoding UTF8
+}
+
 function Invoke-Checked {
   param(
     [Parameter(Mandatory = $true)]
@@ -52,27 +74,65 @@ function Invoke-Checked {
     [string[]]$Arguments
   )
 
+  $CommandLine = "$Command $($Arguments -join ' ')".Trim()
+  $StartedAt = Get-Date
+  Write-Step "START $CommandLine"
   & $Command @Arguments
+  $Elapsed = [int]((Get-Date) - $StartedAt).TotalSeconds
   if ($LASTEXITCODE -ne 0) {
     throw "Command failed with exit code $LASTEXITCODE`: $Command $($Arguments -join ' ')"
+  }
+  Write-Step "DONE  $CommandLine (${Elapsed}s)"
+}
+
+function Remove-DirectoryIfRequested {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path,
+    [Parameter(Mandatory = $true)]
+    [string]$Label
+  )
+
+  if (-not $CleanBuild) {
+    return
+  }
+
+  if (Test-Path -LiteralPath $Path) {
+    Write-Step "Clean $Label build cache"
+    Remove-Item -LiteralPath $Path -Recurse -Force
+  }
+}
+
+function Assert-DirectoryExists {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Path,
+    [Parameter(Mandatory = $true)]
+    [string]$Label
+  )
+
+  if (-not (Test-Path -LiteralPath $Path)) {
+    throw "$Label output was not found: $Path"
   }
 }
 
 Push-Location $Root
 try {
-  if (Test-Path -LiteralPath $MainWindowsBuild) {
-    Remove-Item -LiteralPath $MainWindowsBuild -Recurse -Force
+  if (Test-Path -LiteralPath $LogPath) {
+    Remove-Item -LiteralPath $LogPath -Force
   }
-  Invoke-Checked flutter pub get
-  Invoke-Checked flutter build windows --release
+  Write-Step "Package target: $Target"
+  Remove-DirectoryIfRequested -Path $MainWindowsBuild -Label "main app"
+  Invoke-Checked $FlutterCommand pub get
+  Invoke-Checked $FlutterCommand build windows --release
+  Assert-DirectoryExists -Path $MainRelease -Label "Main app"
 
   Push-Location $LyricRoot
   try {
-    if (Test-Path -LiteralPath $LyricWindowsBuild) {
-      Remove-Item -LiteralPath $LyricWindowsBuild -Recurse -Force
-    }
-    Invoke-Checked flutter pub get
-    Invoke-Checked flutter build windows --release
+    Remove-DirectoryIfRequested -Path $LyricWindowsBuild -Label "desktop lyric"
+    Invoke-Checked $FlutterCommand pub get
+    Invoke-Checked $FlutterCommand build windows --release
+    Assert-DirectoryExists -Path $LyricRelease -Label "Desktop lyric"
   } finally {
     Pop-Location
   }
@@ -115,16 +175,20 @@ try {
   }
 
   if (Test-Path -LiteralPath $Target) {
+    Write-Step "Replace existing package directory"
     Remove-Item -LiteralPath $Target -Recurse -Force
   }
 
+  Write-Step "Copy main app"
   Copy-Item -LiteralPath $MainRelease -Destination $Target -Recurse -Force
+  Write-Step "Copy desktop lyric"
   New-Item -ItemType Directory -Force -Path (Join-Path $Target "desktop_lyric") | Out-Null
   Copy-Item -Path (Join-Path $LyricRelease "*") -Destination (Join-Path $Target "desktop_lyric") -Recurse -Force
+  Write-Step "Copy BASS runtime"
   New-Item -ItemType Directory -Force -Path (Join-Path $Target "BASS") | Out-Null
   Copy-Item -Path (Join-Path $BassSource "*.dll") -Destination (Join-Path $Target "BASS") -Force
 
-  Write-Host "Packaged release: $Target"
+  Write-Step "Packaged release: $Target"
 } finally {
   Pop-Location
 }

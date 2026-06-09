@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/build_index_state_view.dart';
 import 'package:border_player/library/audio_library.dart';
@@ -71,7 +72,11 @@ class _FolderSelectorViewState extends State<FolderSelectorView> {
       width: 400,
       height: 400,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 150),
+        duration: AppMotion.switcher,
+        reverseDuration: AppMotion.quick,
+        switchInCurve: AppMotion.enter,
+        switchOutCurve: AppMotion.exit,
+        transitionBuilder: AppMotion.switcherTransition,
         child: selecting
             ? folderSelector(scheme)
             : FutureBuilder(

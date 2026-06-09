@@ -1,4 +1,5 @@
 import 'package:border_player/app_settings.dart';
+import 'package:border_player/page/settings_page/settings_dialog.dart';
 import 'package:border_player/src/rust/api/utils.dart';
 import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ class _CheckForUpdateState extends State<CheckForUpdate> {
                       0;
                   if (newestVer > currVer) {
                     if (context.mounted) {
-                      showDialog(
+                      showSettingsGlassDialog(
                         context: context,
                         builder: (context) => NewestUpdateView(release: newest),
                       );

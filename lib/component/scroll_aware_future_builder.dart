@@ -5,12 +5,14 @@ import 'package:flutter/scheduler.dart';
 
 class ScrollAwareFutureBuilder<T> extends StatefulWidget {
   final Future<T> Function() future;
-  final AsyncWidgetBuilder builder;
+  final AsyncWidgetBuilder<T> builder;
+  final Object? cacheKey;
 
   const ScrollAwareFutureBuilder({
     super.key,
     required this.future,
     required this.builder,
+    this.cacheKey,
   });
 
   @override
@@ -21,25 +23,11 @@ class ScrollAwareFutureBuilder<T> extends StatefulWidget {
 class _ScrollAwareFutureBuilderState<T>
     extends State<ScrollAwareFutureBuilder<T>> {
   Future<T>? _future;
+  bool _scheduled = false;
 
   void _createDeferredFuture() {
-    if (!context.mounted) {
-      // Polling: Wait until scrolling is done or context no longer recommends deferring loading
-      SchedulerBinding.instance.scheduleFrameCallback((_) {
-        scheduleMicrotask(_createDeferredFuture);
-      });
-      return;
-    }
-    // Check if loading should be deferred
     if (Scrollable.recommendDeferredLoadingForContext(context)) {
-      setState(() {
-        _future = null;
-      });
-
-      // Polling: Wait until scrolling is done or context no longer recommends deferring loading
-      SchedulerBinding.instance.scheduleFrameCallback((_) {
-        scheduleMicrotask(_createDeferredFuture);
-      });
+      _scheduleDeferredFuture();
       return;
     }
 
@@ -48,9 +36,32 @@ class _ScrollAwareFutureBuilderState<T>
     });
   }
 
+  void _scheduleDeferredFuture() {
+    if (_scheduled) return;
+    _scheduled = true;
+    SchedulerBinding.instance.scheduleFrameCallback((_) {
+      if (!mounted) return;
+      _scheduled = false;
+      scheduleMicrotask(_createDeferredFuture);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleDeferredFuture();
+  }
+
+  @override
+  void didUpdateWidget(covariant ScrollAwareFutureBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.cacheKey == oldWidget.cacheKey) return;
+    _future = null;
+    _scheduleDeferredFuture();
+  }
+
   @override
   Widget build(BuildContext context) {
-    _createDeferredFuture();
     if (_future == null) {
       return const Center(child: CircularProgressIndicator());
     }

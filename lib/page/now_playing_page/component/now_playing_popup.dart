@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:border_player/app_motion.dart';
 import 'package:flutter/material.dart';
 
 class NowPlayingGlassDialog extends StatelessWidget {
@@ -131,7 +132,8 @@ Future<T?> showNowPlayingGlassPopup<T>({
   final left = rawLeft.clamp(16.0, maxLeft < 16.0 ? 16.0 : maxLeft).toDouble();
 
   final spaceAbove = anchorOffset.dy - 16.0;
-  final spaceBelow = overlaySize.height - anchorOffset.dy - anchorSize.height - 16.0;
+  final spaceBelow =
+      overlaySize.height - anchorOffset.dy - anchorSize.height - 16.0;
   final maxHeight = overlaySize.height - 32.0;
   final effectiveHeight = height > maxHeight ? maxHeight : height;
   final double top;
@@ -148,7 +150,7 @@ Future<T?> showNowPlayingGlassPopup<T>({
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.transparent,
-    transitionDuration: const Duration(milliseconds: 130),
+    transitionDuration: AppMotion.popup,
     pageBuilder: (context, _, __) {
       return Stack(
         children: [
@@ -173,15 +175,10 @@ Future<T?> showNowPlayingGlassPopup<T>({
       );
     },
     transitionBuilder: (context, animation, _, child) {
-      return FadeTransition(
-        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.98, end: 1).animate(
-            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-          ),
-          alignment: Alignment.bottomRight,
-          child: child,
-        ),
+      return AppMotion.popupTransition(
+        animation: animation,
+        alignment: Alignment.bottomRight,
+        child: child,
       );
     },
   );

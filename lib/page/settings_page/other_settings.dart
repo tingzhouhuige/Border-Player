@@ -1,4 +1,5 @@
 import 'package:border_player/app_settings.dart';
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/component/build_index_state_view.dart';
 import 'package:border_player/component/settings_tile.dart';
 import 'package:border_player/library/audio_library.dart';
@@ -64,10 +65,9 @@ class AudioLibraryEditor extends StatelessWidget {
         icon: const Icon(Symbols.folder),
         label: const Text("文件夹管理"),
         onPressed: () {
-          showDialog(
+          showSettingsGlassDialog(
             context: context,
             barrierDismissible: false,
-            barrierColor: Colors.black.withOpacity(0.46),
             builder: (context) => const AudioLibraryEditorDialog(),
           );
         },
@@ -87,10 +87,9 @@ class PlayStatisticsControl extends StatelessWidget {
         icon: const Icon(Symbols.bar_chart),
         label: const Text("统计"),
         onPressed: () {
-          showDialog(
+          showSettingsGlassDialog(
             context: context,
             barrierDismissible: true,
-            barrierColor: Colors.black.withOpacity(0.46),
             builder: (context) => const PlayStatisticsDialog(),
           );
         },
@@ -377,7 +376,11 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
         ),
       ],
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 150),
+        duration: AppMotion.switcher,
+        reverseDuration: AppMotion.quick,
+        switchInCurve: AppMotion.enter,
+        switchOutCurve: AppMotion.exit,
+        transitionBuilder: AppMotion.switcherTransition,
         child: editing
             ? ListView.builder(
                 padding: EdgeInsets.zero,

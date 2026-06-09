@@ -29,7 +29,7 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
     return switch (viewMode) {
       NowPlayingViewMode.onlyMain => Symbols.music_note,
       NowPlayingViewMode.withLyric => Symbols.lyrics,
-      NowPlayingViewMode.withPlaylist => Symbols.queue_music,
+      NowPlayingViewMode.withPlaylist => Symbols.music_note,
     };
   }
 
@@ -67,7 +67,11 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
                 const SizedBox(width: 32),
                 Expanded(
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 150),
+                    duration: AppMotion.switcher,
+                    reverseDuration: AppMotion.quick,
+                    switchInCurve: AppMotion.enter,
+                    switchOutCurve: AppMotion.exit,
+                    transitionBuilder: AppMotion.switcherTransition,
                     child: switch (views[1]) {
                       NowPlayingViewMode.onlyMain => const Padding(
                           padding: EdgeInsets.symmetric(
@@ -135,7 +139,6 @@ class _NowPlayingSmallPlaylistButton extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return IconButton(
-
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,
@@ -181,9 +184,12 @@ class _NowPlayingSmallViewSwitchState
             opacity: visible ? 1.0 : 0.0,
             child: InkWell(
               borderRadius: BorderRadius.circular(16.0),
-              hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
-              highlightColor: scheme.onSecondaryContainer.withOpacity(0.12),
-              splashColor: scheme.onSecondaryContainer.withOpacity(0.12),
+              hoverColor:
+                  scheme.onSecondaryContainer.withValues(alpha: 0.08),
+              highlightColor:
+                  scheme.onSecondaryContainer.withValues(alpha: 0.12),
+              splashColor:
+                  scheme.onSecondaryContainer.withValues(alpha: 0.12),
               onTap: widget.onTap,
               onHover: (hasEntered) {
                 setState(() {

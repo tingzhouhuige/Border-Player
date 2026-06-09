@@ -5,22 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  ColorScheme lightScheme = ColorScheme.fromSeed(
-    seedColor: Color(AppSettings.instance.defaultTheme),
-    brightness: Brightness.light,
-    primary: const Color(0xFFE6AE22),
-    onPrimary: const Color(0xFF302600),
-    surface: const Color(0xFFFFFEFA),
-    surfaceContainer: const Color(0xFFFFFBF4),
-    secondaryContainer: const Color(0xFFFFF8DF),
-    onSurface: const Color(0xFF2E2A22),
-    onSurfaceVariant: const Color(0xFF6F695D),
-    onSecondaryContainer: const Color(0xFF3C3727),
+  ColorScheme lightScheme = _baseLightScheme(
+    Color(AppSettings.instance.defaultTheme),
   );
 
-  ColorScheme darkScheme = ColorScheme.fromSeed(
-    seedColor: Color(AppSettings.instance.defaultTheme),
-    brightness: Brightness.dark,
+  ColorScheme darkScheme = _baseDarkScheme(
+    Color(AppSettings.instance.defaultTheme),
   );
 
   String? fontFamily = AppSettings.instance.fontFamily;
@@ -29,6 +19,7 @@ class ThemeProvider extends ChangeNotifier {
       themeMode == ThemeMode.dark ? darkScheme : lightScheme;
 
   ThemeMode themeMode = AppSettings.instance.themeMode;
+  int _audioAccentRequestId = 0;
 
   static ThemeProvider? _instance;
 
@@ -39,16 +30,107 @@ class ThemeProvider extends ChangeNotifier {
     return _instance!;
   }
 
-  void applyTheme({required Color seedColor}) {
-    lightScheme = ColorScheme.fromSeed(
+  static ColorScheme _baseLightScheme(Color seedColor) {
+    return ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.light,
+      primary: const Color(0xFFE6AE22),
+      onPrimary: const Color(0xFF302600),
+      surface: const Color(0xFFFFFEFA),
+      surfaceContainer: const Color(0xFFFFFBF4),
+      secondaryContainer: const Color(0xFFFFF8DF),
+      onSurface: const Color(0xFF2E2A22),
+      onSurfaceVariant: const Color(0xFF6F695D),
+      onSecondaryContainer: const Color(0xFF3C3727),
     );
+  }
 
-    darkScheme = ColorScheme.fromSeed(
+  static ColorScheme _baseDarkScheme(Color seedColor) {
+    return ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,
     );
+  }
+
+  ColorScheme _baseSchemeFor(Brightness brightness) {
+    final seedColor = Color(AppSettings.instance.defaultTheme);
+    return brightness == Brightness.dark
+        ? _baseDarkScheme(seedColor)
+        : _baseLightScheme(seedColor);
+  }
+
+  ColorScheme _copyAccentOnly({
+    required ColorScheme base,
+    required ColorScheme accent,
+  }) {
+    final isLight = base.brightness == Brightness.light;
+    final primaryBlend = isLight ? 0.82 : 0.72;
+    final secondaryBlend = isLight ? 0.58 : 0.58;
+    final primaryContainerBlend = isLight ? 0.68 : 0.48;
+    final secondaryContainerBlend = isLight ? 0.58 : 0.38;
+    final tertiaryContainerBlend = isLight ? 0.42 : 0.42;
+    final brightener = isLight ? Colors.white : Colors.black;
+    final primaryContainer = Color.lerp(
+      base.secondaryContainer,
+      accent.primaryContainer,
+      primaryContainerBlend,
+    )!;
+    final controlSurface = Color.lerp(
+      base.surfaceContainer,
+      accent.primaryContainer,
+      isLight ? 0.08 : 0.18,
+    )!;
+    final secondaryContainer = Color.lerp(
+      base.surfaceContainer,
+      accent.primaryContainer,
+      secondaryContainerBlend,
+    )!;
+    final tertiaryContainer = Color.lerp(
+      base.tertiaryContainer,
+      accent.tertiaryContainer,
+      tertiaryContainerBlend,
+    )!;
+
+    return base.copyWith(
+      primary: Color.lerp(base.primary, accent.primary, primaryBlend)!,
+      onPrimary: base.onPrimary,
+      surfaceContainer: Color.lerp(
+        controlSurface,
+        brightener,
+        isLight ? 0.30 : 0.08,
+      )!,
+      primaryContainer: Color.lerp(
+        primaryContainer,
+        brightener,
+        isLight ? 0.16 : 0.08,
+      )!,
+      onPrimaryContainer: base.onPrimaryContainer,
+      secondary: Color.lerp(base.secondary, accent.secondary, secondaryBlend)!,
+      onSecondary: base.onSecondary,
+      secondaryContainer: Color.lerp(
+        secondaryContainer,
+        brightener,
+        isLight ? 0.14 : 0.08,
+      )!,
+      onSecondaryContainer: base.onSecondaryContainer,
+      tertiary: Color.lerp(base.tertiary, accent.tertiary, secondaryBlend)!,
+      onTertiary: base.onTertiary,
+      tertiaryContainer: Color.lerp(
+        tertiaryContainer,
+        brightener,
+        isLight ? 0.14 : 0.08,
+      )!,
+      onTertiaryContainer: base.onTertiaryContainer,
+      outline: Color.lerp(base.outline, accent.outline, isLight ? 0.20 : 0.32)!,
+      outlineVariant: Color.lerp(
+        base.outlineVariant,
+        accent.outlineVariant,
+        isLight ? 0.16 : 0.28,
+      )!,
+    );
+  }
+
+  void _notifyThemeChanged() {
     notifyListeners();
 
     PlayService.instance.desktopLyricService.canSendMessage.then((canSend) {
@@ -56,6 +138,17 @@ class ThemeProvider extends ChangeNotifier {
 
       PlayService.instance.desktopLyricService.sendThemeMessage(currScheme);
     });
+  }
+
+  void applyTheme({required Color seedColor}) {
+    lightScheme = _baseLightScheme(seedColor);
+    darkScheme = _baseDarkScheme(seedColor);
+    if (AppSettings.instance.dynamicTheme &&
+        PlayService.instance.playbackService.nowPlaying != null) {
+      applyThemeFromAudio(PlayService.instance.playbackService.nowPlaying!);
+      return;
+    }
+    _notifyThemeChanged();
   }
 
   /// 应用从 image 生成的主题。只在 themeMode == this.themeMode 时通知改变。
@@ -106,6 +199,11 @@ class ThemeProvider extends ChangeNotifier {
         themeMode == ThemeMode.dark,
       );
     });
+
+    if (AppSettings.instance.dynamicTheme &&
+        PlayService.instance.playbackService.nowPlaying != null) {
+      applyThemeFromAudio(PlayService.instance.playbackService.nowPlaying!);
+    }
   }
 
   void _updateWindowBackground() {
@@ -113,85 +211,69 @@ class ThemeProvider extends ChangeNotifier {
     windowManager.setBackgroundColor(color);
   }
 
+  void resetAudioAccentTheme() {
+    _audioAccentRequestId++;
+    lightScheme = _baseLightScheme(Color(AppSettings.instance.defaultTheme));
+    darkScheme = _baseDarkScheme(Color(AppSettings.instance.defaultTheme));
+    _notifyThemeChanged();
+  }
+
+  void setDynamicAudioAccentEnabled(bool enabled) {
+    if (enabled) {
+      final audio = PlayService.instance.playbackService.nowPlaying;
+      if (audio != null) {
+        applyThemeFromAudio(audio);
+      }
+      return;
+    }
+
+    resetAudioAccentTheme();
+  }
+
   void applyThemeFromAudio(Audio audio) {
-    return;
+    if (!AppSettings.instance.dynamicTheme) return;
+
+    final requestId = ++_audioAccentRequestId;
+    audio.cover.then((cover) {
+      if (requestId != _audioAccentRequestId) return;
+      if (cover == null) {
+        resetAudioAccentTheme();
+        return;
+      }
+
+      final brightness = switch (themeMode) {
+        ThemeMode.system => Brightness.light,
+        ThemeMode.light => Brightness.light,
+        ThemeMode.dark => Brightness.dark,
+      };
+
+      ColorScheme.fromImageProvider(
+        provider: cover,
+        brightness: brightness,
+      ).then((accentScheme) {
+        if (requestId != _audioAccentRequestId) return;
+        final base = _baseSchemeFor(brightness);
+        final merged = _copyAccentOnly(
+          base: base,
+          accent: accentScheme,
+        );
+
+        switch (brightness) {
+          case Brightness.light:
+            lightScheme = merged;
+            break;
+          case Brightness.dark:
+            darkScheme = merged;
+            break;
+        }
+
+        _notifyThemeChanged();
+      });
+    });
   }
 
   void changeFontFamily(String? fontFamily) {
     this.fontFamily = fontFamily;
     notifyListeners();
   }
-
-  // ButtonStyle get primaryButtonStyle => ButtonStyle(
-  //       backgroundColor: WidgetStatePropertyAll(scheme.primary),
-  //       foregroundColor: WidgetStatePropertyAll(scheme.onPrimary),
-  //       fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40.0)),
-  //       overlayColor:
-  //           WidgetStatePropertyAll(scheme.onPrimary.withOpacity(0.08)),
-  //     );
-
-  // ButtonStyle get secondaryButtonStyle => ButtonStyle(
-  //       backgroundColor: WidgetStatePropertyAll(scheme.secondaryContainer),
-  //       foregroundColor: WidgetStatePropertyAll(scheme.onSecondaryContainer),
-  //       fixedSize: const WidgetStatePropertyAll(Size.fromHeight(40.0)),
-  //       overlayColor: WidgetStatePropertyAll(
-  //           scheme.onSecondaryContainer.withOpacity(0.08)),
-  //     );
-
-  // ButtonStyle get primaryIconButtonStyle => ButtonStyle(
-  //       backgroundColor: WidgetStatePropertyAll(scheme.primary),
-  //       foregroundColor: WidgetStatePropertyAll(scheme.onPrimary),
-  //       overlayColor: WidgetStatePropertyAll(
-  //         scheme.onPrimary.withOpacity(0.08),
-  //       ),
-  //     );
-
-  // ButtonStyle get secondaryIconButtonStyle => ButtonStyle(
-  //       backgroundColor: WidgetStatePropertyAll(scheme.secondaryContainer),
-  //       foregroundColor: WidgetStatePropertyAll(scheme.onSecondaryContainer),
-  //       overlayColor: WidgetStatePropertyAll(
-  //         scheme.onSecondaryContainer.withOpacity(0.08),
-  //       ),
-  //     );
-
-  // ButtonStyle get menuItemStyle => ButtonStyle(
-  //       backgroundColor: WidgetStatePropertyAll(scheme.secondaryContainer),
-  //       foregroundColor: WidgetStatePropertyAll(scheme.onSecondaryContainer),
-  //       padding: const WidgetStatePropertyAll(
-  //         EdgeInsets.symmetric(horizontal: 16.0),
-  //       ),
-  //       overlayColor: WidgetStatePropertyAll(
-  //         scheme.onSecondaryContainer.withOpacity(0.08),
-  //       ),
-  //     );
-
-  // MenuStyle get menuStyleWithFixedSize => MenuStyle(
-  //       backgroundColor: WidgetStatePropertyAll(scheme.secondaryContainer),
-  //       surfaceTintColor: WidgetStatePropertyAll(scheme.secondaryContainer),
-  //       shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(20.0),
-  //       )),
-  //       fixedSize: const WidgetStatePropertyAll(Size.fromWidth(149.0)),
-  //     );
-
-  // MenuStyle get menuStyle => MenuStyle(
-  //       shape: WidgetStatePropertyAll(
-  //         RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //       ),
-  //       backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainer),
-  //       surfaceTintColor: WidgetStatePropertyAll(scheme.surfaceContainer),
-  //     );
-
-  // InputDecoration inputDecoration(String labelText) => InputDecoration(
-  //       enabledBorder: OutlineInputBorder(
-  //         borderSide: BorderSide(color: scheme.outline, width: 2),
-  //       ),
-  //       focusedBorder: OutlineInputBorder(
-  //         borderSide: BorderSide(color: scheme.primary, width: 2),
-  //       ),
-  //       labelText: labelText,
-  //       labelStyle: TextStyle(color: scheme.onSurfaceVariant),
-  //       floatingLabelStyle: TextStyle(color: scheme.primary),
-  //       focusColor: scheme.primary,
-  //     );
 }

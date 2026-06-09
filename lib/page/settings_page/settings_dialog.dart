@@ -1,6 +1,29 @@
 import 'dart:ui';
 
+import 'package:border_player/app_motion.dart';
 import 'package:flutter/material.dart';
+
+Future<T?> showSettingsGlassDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color? barrierColor,
+}) {
+  return showGeneralDialog<T>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: barrierColor ?? Colors.black.withValues(alpha: 0.46),
+    transitionDuration: AppMotion.popup,
+    pageBuilder: (context, _, __) => builder(context),
+    transitionBuilder: (context, animation, _, child) {
+      return AppMotion.popupTransition(
+        animation: animation,
+        child: child,
+      );
+    },
+  );
+}
 
 class SettingsGlassDialog extends StatelessWidget {
   const SettingsGlassDialog({

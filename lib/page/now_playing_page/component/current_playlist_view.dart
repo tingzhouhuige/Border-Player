@@ -1,3 +1,4 @@
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 
@@ -18,8 +19,8 @@ class _CurrentPlaylistViewState extends State<CurrentPlaylistView> {
     if (scrollController.hasClients) {
       scrollController.animateTo(
         playbackService.playlistIndex * 64.0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.fastOutSlowIn,
+        duration: AppMotion.page,
+        curve: AppMotion.enter,
       );
     }
   }
@@ -104,7 +105,8 @@ class _PlaylistViewItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 3),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
+          duration: AppMotion.quick,
+          curve: AppMotion.emphasized,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
           decoration: BoxDecoration(
             color: selected

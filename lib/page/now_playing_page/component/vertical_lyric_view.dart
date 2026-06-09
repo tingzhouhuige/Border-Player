@@ -5,6 +5,7 @@ import 'package:border_player/lyric/lrc.dart';
 import 'package:border_player/lyric/lyric.dart';
 import 'package:border_player/page/now_playing_page/component/lyric_view_controls.dart';
 import 'package:border_player/page/now_playing_page/component/lyric_view_tile.dart';
+import 'package:border_player/page/now_playing_page/now_playing_render_phase.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,8 @@ class _VerticalLyricViewState extends State<VerticalLyricView> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final heavyVisualsReady =
+        NowPlayingRenderPhase.heavyVisualsReadyOf(context);
 
     const loadingWidget = Center(
       child: SizedBox(
@@ -51,42 +54,46 @@ class _VerticalLyricViewState extends State<VerticalLyricView> {
           behavior: const ScrollBehavior().copyWith(scrollbars: false),
           child: ChangeNotifierProvider.value(
             value: lyricViewController,
-            child: ListenableBuilder(
-              listenable: PlayService.instance.lyricService,
-              builder: (context, _) => FutureBuilder(
-                future: PlayService.instance.lyricService.currLyricFuture,
-                builder: (context, snapshot) {
-                  final lyricNullable = snapshot.data;
-                  final noLyricWidget = Center(
-                    child: Text(
-                      "无歌词",
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: scheme.onSecondaryContainer,
-                      ),
-                    ),
-                  );
+            child: heavyVisualsReady
+                ? ListenableBuilder(
+                    listenable: PlayService.instance.lyricService,
+                    builder: (context, _) => FutureBuilder(
+                      future: PlayService.instance.lyricService.currLyricFuture,
+                      builder: (context, snapshot) {
+                        final lyricNullable = snapshot.data;
+                        final noLyricWidget = Center(
+                          child: Text(
+                            "无歌词",
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: scheme.onSecondaryContainer,
+                            ),
+                          ),
+                        );
 
-                  return Stack(
-                    children: [
-                      switch (snapshot.connectionState) {
-                        ConnectionState.none => loadingWidget,
-                        ConnectionState.waiting => loadingWidget,
-                        ConnectionState.active => loadingWidget,
-                        ConnectionState.done => lyricNullable == null
-                            ? noLyricWidget
-                            : _VerticalLyricScrollView(lyric: lyricNullable),
+                        return Stack(
+                          children: [
+                            switch (snapshot.connectionState) {
+                              ConnectionState.none => loadingWidget,
+                              ConnectionState.waiting => loadingWidget,
+                              ConnectionState.active => loadingWidget,
+                              ConnectionState.done => lyricNullable == null
+                                  ? noLyricWidget
+                                  : _VerticalLyricScrollView(
+                                      lyric: lyricNullable,
+                                    ),
+                            },
+                            if (isHovering || ALWAYS_SHOW_LYRIC_VIEW_CONTROLS)
+                              const Align(
+                                alignment: Alignment.bottomRight,
+                                child: LyricViewControls(),
+                              )
+                          ],
+                        );
                       },
-                      if (isHovering || ALWAYS_SHOW_LYRIC_VIEW_CONTROLS)
-                        const Align(
-                          alignment: Alignment.bottomRight,
-                          child: LyricViewControls(),
-                        )
-                    ],
-                  );
-                },
-              ),
-            ),
+                    ),
+                  )
+                : loadingWidget,
           ),
         ),
       ),

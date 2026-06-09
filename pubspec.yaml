@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^14.0.1 
-  material_color_utilities: ^0.13.0
   window_manager: ^0.3.8
   provider: ^6.1.1
   # rust_builder:
@@ -52,7 +51,7 @@ flutter:
   assets:
     - app_icon.ico
     - assets/fonts/
-    - assets/images/
+    - assets/images/brand_note.png
   fonts:
     - family: Inter
       fonts:

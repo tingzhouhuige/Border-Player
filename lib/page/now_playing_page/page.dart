@@ -1,9 +1,11 @@
 // ignore_for_file: camel_case_types
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:border_player/app_preference.dart';
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/component/title_bar.dart';
 import 'package:border_player/utils.dart';
 import 'package:border_player/library/audio_library.dart';
@@ -12,6 +14,7 @@ import 'package:border_player/page/now_playing_page/component/current_playlist_v
 import 'package:border_player/page/now_playing_page/component/filled_icon_button_style.dart';
 import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:border_player/page/now_playing_page/component/vertical_lyric_view.dart';
+import 'package:border_player/page/now_playing_page/now_playing_render_phase.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:border_player/play_service/play_service.dart';
 import 'package:border_player/play_service/playback_service.dart';
@@ -56,26 +59,45 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   final playbackService = PlayService.instance.playbackService;
   ImageProvider<Object>? nowPlayingCover;
   ColorScheme? nowPlayingScheme;
+  int _coverRequestId = 0;
+  Timer? _heavyVisualsTimer;
+  bool _heavyVisualsReady = false;
+  bool _didRequestInitialCover = false;
 
   void updateCover() {
-    playbackService.nowPlaying?.cover.then((cover) {
-      if (mounted) {
+    final requestId = ++_coverRequestId;
+    final coverFuture = playbackService.nowPlaying?.cover;
+    if (coverFuture == null) {
+      setState(() {
+        nowPlayingCover = null;
+        nowPlayingScheme = null;
+      });
+      return;
+    }
+
+    coverFuture.then((cover) {
+      if (!mounted || requestId != _coverRequestId) return;
+
+      if (_heavyVisualsReady) {
         setState(() {
           nowPlayingCover = cover;
+          nowPlayingScheme = null;
         });
+      } else {
+        nowPlayingCover = cover;
+        nowPlayingScheme = null;
       }
-      if (cover != null) {
-        ColorScheme.fromImageProvider(
-          provider: cover,
-          brightness: Theme.of(context).brightness,
-        ).then((scheme) {
-          if (mounted) {
-            setState(() {
-              nowPlayingScheme = scheme;
-            });
-          }
+      if (cover == null) return;
+
+      ColorScheme.fromImageProvider(
+        provider: cover,
+        brightness: Theme.of(context).brightness,
+      ).then((scheme) {
+        if (!mounted || requestId != _coverRequestId) return;
+        setState(() {
+          nowPlayingScheme = scheme;
         });
-      }
+      });
     });
   }
 
@@ -83,11 +105,29 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   void initState() {
     super.initState();
     playbackService.addListener(updateCover);
+    _heavyVisualsTimer = Timer(
+      AppMotion.nowPlayingPage + const Duration(milliseconds: 48),
+      () {
+        if (!mounted) return;
+        setState(() {
+          _heavyVisualsReady = true;
+        });
+        updateCover();
+      },
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didRequestInitialCover) return;
+    _didRequestInitialCover = true;
     updateCover();
   }
 
   @override
   void dispose() {
+    _heavyVisualsTimer?.cancel();
     playbackService.removeListener(updateCover);
     super.dispose();
   }
@@ -101,43 +141,50 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
       colorScheme: nowPlayingScheme ?? scheme,
     );
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56.0),
-        child: Theme(
-          data: contentTheme,
-          child: const _NowPlayingTopBar(),
+    return NowPlayingRenderPhase(
+      heavyVisualsReady: _heavyVisualsReady,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(56.0),
+          child: AnimatedTheme(
+            data: contentTheme,
+            duration: const Duration(milliseconds: 360),
+            curve: AppMotion.enter,
+            child: const _NowPlayingTopBar(),
+          ),
         ),
-      ),
-      backgroundColor: scheme.secondaryContainer,
-      body: Stack(
-        fit: StackFit.expand,
-        alignment: AlignmentDirectional.center,
-        children: [
-          _NowPlayingBackdrop(
-            cover: nowPlayingCover,
-            scheme: nowPlayingScheme ?? scheme,
-            brightness: brightness,
-          ),
-          ChangeNotifierProvider.value(
-            value: PlayService.instance.playbackService,
-            builder: (context, _) {
-              return Theme(
-                data: contentTheme,
-                child: ResponsiveBuilder2(builder: (context, screenType) {
-                  switch (screenType) {
-                    case ScreenType.small:
-                      return const _NowPlayingPage_Small();
-                    case ScreenType.medium:
-                    case ScreenType.large:
-                      return const _NowPlayingPage_Large();
-                  }
-                }),
-              );
-            },
-          ),
-        ],
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          fit: StackFit.expand,
+          alignment: AlignmentDirectional.center,
+          children: [
+            _NowPlayingBackdrop(
+              cover: _heavyVisualsReady ? nowPlayingCover : null,
+              scheme: nowPlayingScheme ?? scheme,
+              brightness: brightness,
+            ),
+            ChangeNotifierProvider.value(
+              value: PlayService.instance.playbackService,
+              builder: (context, _) {
+                return AnimatedTheme(
+                  data: contentTheme,
+                  duration: const Duration(milliseconds: 360),
+                  curve: AppMotion.enter,
+                  child: ResponsiveBuilder2(builder: (context, screenType) {
+                    switch (screenType) {
+                      case ScreenType.small:
+                        return const _NowPlayingPage_Small();
+                      case ScreenType.medium:
+                      case ScreenType.large:
+                        return const _NowPlayingPage_Large();
+                    }
+                  }),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -150,10 +197,10 @@ class _NowPlayingTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: Row(
-            children: const [
+            children: [
               NavBackBtn(),
               Expanded(child: DragToMoveArea(child: SizedBox.expand())),
               WindowControlls(),
@@ -197,10 +244,16 @@ class _NowPlayingBackdrop extends StatelessWidget {
     final shade = isDark ? Colors.black : scheme.onSecondaryContainer;
 
     if (cover == null) {
-      return ColoredBox(color: base);
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 360),
+        curve: AppMotion.enter,
+        color: base,
+      );
     }
 
-    return ColoredBox(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 360),
+      curve: AppMotion.enter,
       color: base,
       child: Stack(
         fit: StackFit.expand,
@@ -239,9 +292,9 @@ class _NowPlayingBackdrop extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  wash.withOpacity(isDark ? 0.16 : 0.38),
-                  base.withOpacity(isDark ? 0.12 : 0.24),
-                  wash.withOpacity(isDark ? 0.20 : 0.44),
+                  wash.withValues(alpha: isDark ? 0.16 : 0.38),
+                  base.withValues(alpha: isDark ? 0.12 : 0.24),
+                  wash.withValues(alpha: isDark ? 0.20 : 0.44),
                 ],
                 stops: const [0.0, 0.48, 1.0],
               ),
@@ -254,15 +307,15 @@ class _NowPlayingBackdrop extends StatelessWidget {
                 radius: 1.08,
                 colors: [
                   Colors.transparent,
-                  shade.withOpacity(isDark ? 0.18 : 0.08),
-                  shade.withOpacity(isDark ? 0.42 : 0.17),
+                  shade.withValues(alpha: isDark ? 0.18 : 0.08),
+                  shade.withValues(alpha: isDark ? 0.42 : 0.17),
                 ],
                 stops: const [0.50, 0.78, 1.0],
               ),
             ),
           ),
           ColoredBox(
-            color: wash.withOpacity(isDark ? 0.06 : 0.14),
+            color: wash.withValues(alpha: isDark ? 0.06 : 0.14),
           ),
         ],
       ),
@@ -279,7 +332,6 @@ class _ExclusiveModeSwitch extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: PlayService.instance.playbackService.wasapiExclusive,
       builder: (context, exclusive, _) => IconButton(
-
         onPressed: () {
           PlayService.instance.playbackService.useExclusiveMode(!exclusive);
         },
@@ -309,7 +361,6 @@ class _NowPlayingMoreAction extends StatelessWidget {
 
     if (nowPlaying == null) {
       return IconButton(
-
         onPressed: null,
         icon: const Icon(Symbols.more_vert),
         color: scheme.onSecondaryContainer,
@@ -317,7 +368,6 @@ class _NowPlayingMoreAction extends StatelessWidget {
     }
 
     return IconButton(
-
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,
@@ -426,7 +476,6 @@ class _DesktopLyricSwitch extends StatelessWidget {
         return FutureBuilder(
           future: desktopLyricService.desktopLyric,
           builder: (context, snapshot) => IconButton(
-
             onPressed: snapshot.data == null
                 ? desktopLyricService.startDesktopLyric
                 : desktopLyricService.isLocked
@@ -487,7 +536,6 @@ class _NowPlayingSongInfo extends StatelessWidget {
     final nowPlaying = playbackService.nowPlaying;
 
     return IconButton(
-
       onPressed: nowPlaying == null
           ? null
           : () {
@@ -606,7 +654,6 @@ class _NowPlayingVolDspSliderState extends State<_NowPlayingVolDspSlider> {
     final scheme = Theme.of(context).colorScheme;
 
     return IconButton(
-
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,
@@ -704,7 +751,6 @@ class _NowPlayingShuffleSwitch extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: playbackService.shuffle,
       builder: (context, shuffle, _) => IconButton(
-
         onPressed: () {
           playbackService.useShuffle(!shuffle);
         },
@@ -728,7 +774,6 @@ class _NowPlayingMainControls extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-
           onPressed: playbackService.lastAudio,
           icon: const Icon(Symbols.skip_previous),
           style: LargeFilledIconButtonStyle(primary: false, scheme: scheme),
@@ -749,7 +794,6 @@ class _NowPlayingMainControls extends StatelessWidget {
             }
 
             return IconButton(
-
               onPressed: onTap,
               icon: Icon(
                 playerState == PlayerState.playing
@@ -762,7 +806,6 @@ class _NowPlayingMainControls extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         IconButton(
-
           onPressed: playbackService.nextAudio,
           icon: const Icon(Symbols.skip_next),
           style: LargeFilledIconButtonStyle(primary: false, scheme: scheme),
@@ -915,8 +958,11 @@ class _NowPlayingInfo extends StatefulWidget {
 class __NowPlayingInfoState extends State<_NowPlayingInfo> {
   final playbackService = PlayService.instance.playbackService;
   Future<ImageProvider<Object>?>? nowPlayingCover;
+  bool _heavyVisualsWereReady = false;
 
   void updateCover() {
+    if (!_heavyVisualsWereReady) return;
+
     setState(() {
       nowPlayingCover = playbackService.nowPlaying?.largeCover;
     });
@@ -926,7 +972,17 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
   void initState() {
     super.initState();
     playbackService.addListener(updateCover);
-    nowPlayingCover = playbackService.nowPlaying?.largeCover;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final heavyVisualsReady =
+        NowPlayingRenderPhase.heavyVisualsReadyOf(context);
+    if (heavyVisualsReady && !_heavyVisualsWereReady) {
+      _heavyVisualsWereReady = true;
+      nowPlayingCover = playbackService.nowPlaying?.largeCover;
+    }
   }
 
   @override
@@ -996,7 +1052,7 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
                 child: SizedBox.square(
                   dimension: coverSize,
                   child: RepaintBoundary(
-                    child: nowPlayingCover == null
+                    child: !_heavyVisualsWereReady || nowPlayingCover == null
                         ? placeholder
                         : FutureBuilder(
                             future: nowPlayingCover,

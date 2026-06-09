@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/component/alpha_index_bar.dart';
 import 'package:border_player/page/uni_page_components.dart';
@@ -319,8 +320,8 @@ class _UniPageState<T> extends State<UniPage<T>> {
                     final offset = index * 66.0;
                     scrollController.animateTo(
                       offset.clamp(0, scrollController.position.maxScrollExtent),
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
+                      duration: AppMotion.page,
+                      curve: AppMotion.enter,
                     );
                   },
                 ),

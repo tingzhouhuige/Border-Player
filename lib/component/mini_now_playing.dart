@@ -33,14 +33,16 @@ class MiniNowPlaying extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.08),
                     blurRadius: 30,
                     spreadRadius: 3,
                     offset: const Offset(0, 8),
                   ),
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.40),
+                    color: Colors.white.withValues(alpha: 0.40),
                     blurRadius: 26,
                     spreadRadius: -8,
                   ),

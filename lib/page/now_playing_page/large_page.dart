@@ -7,6 +7,8 @@ class _NowPlayingPage_Large extends StatelessWidget {
   Widget build(BuildContext context) {
     const spacer = SizedBox(width: 8.0);
     final scheme = Theme.of(context).colorScheme;
+    final heavyVisualsReady =
+        NowPlayingRenderPhase.heavyVisualsReadyOf(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(32.0, _largePageTopGap, 32.0, 32.0),
       child: Column(
@@ -50,7 +52,11 @@ class _NowPlayingPage_Large extends StatelessWidget {
                         child: ValueListenableBuilder(
                           valueListenable: NOW_PLAYING_VIEW_MODE,
                           builder: (context, value, _) => AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 150),
+                            duration: AppMotion.switcher,
+                            reverseDuration: AppMotion.quick,
+                            switchInCurve: AppMotion.enter,
+                            switchOutCurve: AppMotion.exit,
+                            transitionBuilder: AppMotion.switcherTransition,
                             child: switch (value) {
                               NowPlayingViewMode.onlyMain =>
                                 const VerticalLyricView(),
@@ -92,12 +98,17 @@ class _NowPlayingPage_Large extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(34),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+                  filter: ImageFilter.blur(
+                    sigmaX: heavyVisualsReady ? 58 : 0.001,
+                    sigmaY: heavyVisualsReady ? 58 : 0.001,
+                  ),
                   child: Container(
                     height: 176,
                     padding: const EdgeInsets.fromLTRB(30, 22, 30, 20),
                     decoration: BoxDecoration(
-                      color: scheme.surface.withOpacity(0.34),
+                      color: scheme.surface.withOpacity(
+                        heavyVisualsReady ? 0.34 : 0.46,
+                      ),
                       borderRadius: BorderRadius.circular(34),
                       border: Border.all(
                         color: Colors.white.withOpacity(0.10),
@@ -179,7 +190,6 @@ class _NowPlayingLargeViewSwitch extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return IconButton(
-
       onPressed: () {
         showNowPlayingGlassPopup<void>(
           context: context,

@@ -1,3 +1,4 @@
+import 'package:border_player/app_motion.dart';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/settings_tile.dart';
 import 'package:border_player/page/settings_page/settings_dialog.dart';
@@ -17,14 +18,14 @@ class ThemeSelector extends StatelessWidget {
       description: "修改主题",
       action: FilledButton.icon(
         onPressed: () async {
-          final seedColor = await showDialog<Color>(
+          final seedColor = await showSettingsGlassDialog<Color>(
             context: context,
             builder: (context) => const ThemePickerDialog(),
           );
           if (seedColor == null) return;
 
           ThemeProvider.instance.applyTheme(seedColor: seedColor);
-          AppSettings.instance.defaultTheme = seedColor.value;
+          AppSettings.instance.defaultTheme = seedColor.toARGB32();
           await AppSettings.instance.saveSettings();
         },
         label: const Text("主题选择器"),
@@ -33,6 +34,7 @@ class ThemeSelector extends StatelessWidget {
     );
   }
 }
+
 class ThemeModeControl extends StatefulWidget {
   const ThemeModeControl({super.key});
 
@@ -87,13 +89,31 @@ class _DynamicThemeSwitchState extends State<DynamicThemeSwitch> {
   @override
   Widget build(BuildContext context) {
     return SettingsTile(
-      description: "动态主题",
-      action: Switch(
-        value: settings.dynamicTheme,
-        onChanged: (_) async {
+      description: "主页强调色跟随歌曲封面",
+      action: SegmentedButton<bool>(
+        showSelectedIcon: false,
+        segments: const [
+          ButtonSegment<bool>(
+            value: false,
+            icon: Icon(Symbols.music_note),
+            label: Text("关闭"),
+          ),
+          ButtonSegment<bool>(
+            value: true,
+            icon: Icon(Symbols.album),
+            label: Text("开启"),
+          ),
+        ],
+        selected: {settings.dynamicTheme},
+        onSelectionChanged: (selection) async {
+          final enabled = selection.first;
+          if (enabled == settings.dynamicTheme) return;
           setState(() {
-            settings.dynamicTheme = !settings.dynamicTheme;
+            settings.dynamicTheme = enabled;
           });
+          ThemeProvider.instance.setDynamicAudioAccentEnabled(
+            settings.dynamicTheme,
+          );
           await settings.saveSettings();
         },
       ),
@@ -166,9 +186,8 @@ class SelectFontCombobox extends StatelessWidget {
       action: FilledButton.icon(
         onPressed: () async {
           if (context.mounted) {
-            final selectedFont = await showDialog<_FontOption>(
+            final selectedFont = await showSettingsGlassDialog<_FontOption>(
               context: context,
-              barrierColor: Colors.black.withOpacity(0.46),
               builder: (context) => const _FontSelector(),
             );
             if (selectedFont == null) return;
@@ -240,7 +259,7 @@ class _FontSelector extends StatelessWidget {
           Text(
             "当前字体：${currentFont.label}",
             style: settingsDialogTextStyle(scheme).copyWith(
-              color: scheme.onSurface.withOpacity(0.72),
+              color: scheme.onSurface.withValues(alpha: 0.72),
               fontSize: 15,
             ),
           ),
@@ -259,11 +278,12 @@ class _FontSelector extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     onTap: () => Navigator.pop(context, option),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
+                      duration: AppMotion.quick,
+                      curve: AppMotion.emphasized,
                       padding: const EdgeInsets.symmetric(horizontal: 18),
                       decoration: BoxDecoration(
                         color: selected
-                            ? scheme.primaryContainer.withOpacity(0.38)
+                            ? scheme.primaryContainer.withValues(alpha: 0.38)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -275,7 +295,8 @@ class _FontSelector extends StatelessWidget {
                         style: settingsDialogTextStyle(scheme).copyWith(
                           fontFamily: option.family,
                           fontSize: 18,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w500,
                         ),
                       ),
                     ),
