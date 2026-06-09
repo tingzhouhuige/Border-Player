@@ -7,8 +7,6 @@ class _NowPlayingPage_Large extends StatelessWidget {
   Widget build(BuildContext context) {
     const spacer = SizedBox(width: 8.0);
     final scheme = Theme.of(context).colorScheme;
-    final heavyVisualsReady =
-        NowPlayingRenderPhase.heavyVisualsReadyOf(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(32.0, _largePageTopGap, 32.0, 32.0),
       child: Column(
@@ -99,15 +97,15 @@ class _NowPlayingPage_Large extends StatelessWidget {
                 borderRadius: BorderRadius.circular(34),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
-                    sigmaX: heavyVisualsReady ? 58 : 0.001,
-                    sigmaY: heavyVisualsReady ? 58 : 0.001,
+                    sigmaX: 58,
+                    sigmaY: 58,
                   ),
                   child: Container(
                     height: 176,
                     padding: const EdgeInsets.fromLTRB(30, 22, 30, 20),
                     decoration: BoxDecoration(
                       color: scheme.surface.withOpacity(
-                        heavyVisualsReady ? 0.34 : 0.46,
+                        0.34,
                       ),
                       borderRadius: BorderRadius.circular(34),
                       border: Border.all(

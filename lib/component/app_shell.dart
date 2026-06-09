@@ -120,6 +120,7 @@ class _HomeCoverBackdrop extends StatefulWidget {
 class _HomeCoverBackdropState extends State<_HomeCoverBackdrop> {
   final playbackService = PlayService.instance.playbackService;
   ImageProvider<Object>? _cover;
+  String? _coverPath;
   int _requestId = 0;
 
   @override
@@ -134,6 +135,7 @@ class _HomeCoverBackdropState extends State<_HomeCoverBackdrop> {
     super.didUpdateWidget(oldWidget);
     if (!_useHomeCoverBackdrop()) {
       _requestId++;
+      _coverPath = null;
       if (_cover != null) {
         setState(() {
           _cover = null;
@@ -146,8 +148,15 @@ class _HomeCoverBackdropState extends State<_HomeCoverBackdrop> {
 
   void _updateCover() {
     if (!_useHomeCoverBackdrop()) return;
+    final nowPlaying = playbackService.nowPlaying;
+    final coverPath = nowPlaying?.path;
+    if (coverPath != null && coverPath == _coverPath && _cover != null) {
+      return;
+    }
+
     final requestId = ++_requestId;
-    final coverFuture = playbackService.nowPlaying?.cover;
+    _coverPath = coverPath;
+    final coverFuture = nowPlaying?.cover;
     if (coverFuture == null) {
       if (mounted) {
         setState(() {
@@ -193,69 +202,78 @@ class _HomeCoverBackdropState extends State<_HomeCoverBackdrop> {
       duration: AppMotion.page,
       curve: AppMotion.enter,
       color: base,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Opacity(
-            opacity: isDark ? 0.72 : 0.84,
-            child: Transform.scale(
-              scale: 1.10,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-                child: Image(
-                  image: cover,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 420),
+        reverseDuration: AppMotion.quick,
+        switchInCurve: AppMotion.enter,
+        switchOutCurve: AppMotion.exit,
+        child: RepaintBoundary(
+          key: ValueKey(_coverPath),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: isDark ? 0.72 : 0.84,
+                child: Transform.scale(
+                  scale: 1.10,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                    child: Image(
+                      image: cover,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Opacity(
-            opacity: isDark ? 0.28 : 0.30,
-            child: Transform.scale(
-              scale: 1.36,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
-                child: Image(
-                  image: cover,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              Opacity(
+                opacity: isDark ? 0.28 : 0.30,
+                child: Transform.scale(
+                  scale: 1.36,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+                    child: Image(
+                      image: cover,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  wash.withValues(alpha: isDark ? 0.18 : 0.40),
-                  base.withValues(alpha: isDark ? 0.10 : 0.22),
-                  wash.withValues(alpha: isDark ? 0.22 : 0.48),
-                ],
-                stops: const [0.0, 0.48, 1.0],
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      wash.withValues(alpha: isDark ? 0.18 : 0.40),
+                      base.withValues(alpha: isDark ? 0.10 : 0.22),
+                      wash.withValues(alpha: isDark ? 0.22 : 0.48),
+                    ],
+                    stops: const [0.0, 0.48, 1.0],
+                  ),
+                ),
               ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(-0.22, -0.18),
-                radius: 1.12,
-                colors: [
-                  Colors.transparent,
-                  shade.withValues(alpha: isDark ? 0.16 : 0.07),
-                  shade.withValues(alpha: isDark ? 0.38 : 0.14),
-                ],
-                stops: const [0.48, 0.78, 1.0],
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(-0.22, -0.18),
+                    radius: 1.12,
+                    colors: [
+                      Colors.transparent,
+                      shade.withValues(alpha: isDark ? 0.16 : 0.07),
+                      shade.withValues(alpha: isDark ? 0.38 : 0.14),
+                    ],
+                    stops: const [0.48, 0.78, 1.0],
+                  ),
+                ),
               ),
-            ),
+              ColoredBox(
+                color: wash.withValues(alpha: isDark ? 0.05 : 0.12),
+              ),
+            ],
           ),
-          ColoredBox(
-            color: wash.withValues(alpha: isDark ? 0.05 : 0.12),
-          ),
-        ],
+        ),
       ),
     );
   }

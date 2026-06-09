@@ -20,6 +20,8 @@ class ThemeProvider extends ChangeNotifier {
 
   ThemeMode themeMode = AppSettings.instance.themeMode;
   int _audioAccentRequestId = 0;
+  String? _audioAccentPath;
+  Brightness? _audioAccentBrightness;
 
   static ThemeProvider? _instance;
 
@@ -145,6 +147,8 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   void applyTheme({required Color seedColor}) {
+    _audioAccentPath = null;
+    _audioAccentBrightness = null;
     lightScheme = _baseLightScheme(seedColor);
     darkScheme = _baseDarkScheme(seedColor);
     if (AppSettings.instance.dynamicTheme &&
@@ -217,6 +221,8 @@ class ThemeProvider extends ChangeNotifier {
 
   void resetAudioAccentTheme() {
     _audioAccentRequestId++;
+    _audioAccentPath = null;
+    _audioAccentBrightness = null;
     lightScheme = _baseLightScheme(Color(AppSettings.instance.defaultTheme));
     darkScheme = _baseDarkScheme(Color(AppSettings.instance.defaultTheme));
     _notifyThemeChanged();
@@ -237,19 +243,25 @@ class ThemeProvider extends ChangeNotifier {
   void applyThemeFromAudio(Audio audio) {
     if (!AppSettings.instance.dynamicTheme) return;
 
+    final brightness = switch (themeMode) {
+      ThemeMode.system => Brightness.light,
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+    };
+    if (_audioAccentPath == audio.path &&
+        _audioAccentBrightness == brightness) {
+      return;
+    }
+
     final requestId = ++_audioAccentRequestId;
+    _audioAccentPath = audio.path;
+    _audioAccentBrightness = brightness;
     audio.cover.then((cover) {
       if (requestId != _audioAccentRequestId) return;
       if (cover == null) {
         resetAudioAccentTheme();
         return;
       }
-
-      final brightness = switch (themeMode) {
-        ThemeMode.system => Brightness.light,
-        ThemeMode.light => Brightness.light,
-        ThemeMode.dark => Brightness.dark,
-      };
 
       ColorScheme.fromImageProvider(
         provider: cover,

@@ -88,26 +88,28 @@ class NowPlayingGlassPanel extends StatelessWidget {
               ),
             ],
           ),
-          child: title == null
-              ? child
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 18),
-                      child: Text(
-                        title!,
-                        style: TextStyle(
-                          color: scheme.onSurface,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          height: 1.0,
+          child: RepaintBoundary(
+            child: title == null
+                ? child
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 18),
+                        child: Text(
+                          title!,
+                          style: TextStyle(
+                            color: scheme.onSurface,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            height: 1.0,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(child: child),
-                  ],
-                ),
+                      Expanded(child: child),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

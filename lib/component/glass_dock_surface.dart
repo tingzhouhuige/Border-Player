@@ -81,7 +81,7 @@ class GlassDockSurface extends StatelessWidget {
                 stops: const [0.0, 0.58, 1.0],
               ),
             ),
-            child: child,
+            child: RepaintBoundary(child: child),
           ),
         ),
       ),

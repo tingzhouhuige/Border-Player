@@ -1,6 +1,5 @@
 // ignore_for_file: camel_case_types
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -60,8 +59,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   ImageProvider<Object>? nowPlayingCover;
   ColorScheme? nowPlayingScheme;
   int _coverRequestId = 0;
-  Timer? _heavyVisualsTimer;
-  bool _heavyVisualsReady = false;
   bool _didRequestInitialCover = false;
 
   void updateCover() {
@@ -78,15 +75,10 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     coverFuture.then((cover) {
       if (!mounted || requestId != _coverRequestId) return;
 
-      if (_heavyVisualsReady) {
-        setState(() {
-          nowPlayingCover = cover;
-          nowPlayingScheme = null;
-        });
-      } else {
+      setState(() {
         nowPlayingCover = cover;
         nowPlayingScheme = null;
-      }
+      });
       if (cover == null) return;
 
       ColorScheme.fromImageProvider(
@@ -105,16 +97,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   void initState() {
     super.initState();
     playbackService.addListener(updateCover);
-    _heavyVisualsTimer = Timer(
-      AppMotion.nowPlayingPage + const Duration(milliseconds: 48),
-      () {
-        if (!mounted) return;
-        setState(() {
-          _heavyVisualsReady = true;
-        });
-        updateCover();
-      },
-    );
   }
 
   @override
@@ -127,7 +109,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
 
   @override
   void dispose() {
-    _heavyVisualsTimer?.cancel();
     playbackService.removeListener(updateCover);
     super.dispose();
   }
@@ -142,7 +123,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     );
 
     return NowPlayingRenderPhase(
-      heavyVisualsReady: _heavyVisualsReady,
+      heavyVisualsReady: true,
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: PreferredSize(
@@ -160,7 +141,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
           alignment: AlignmentDirectional.center,
           children: [
             _NowPlayingBackdrop(
-              cover: _heavyVisualsReady ? nowPlayingCover : null,
+              cover: nowPlayingCover,
               scheme: nowPlayingScheme ?? scheme,
               brightness: brightness,
             ),
@@ -255,69 +236,71 @@ class _NowPlayingBackdrop extends StatelessWidget {
       duration: const Duration(milliseconds: 360),
       curve: AppMotion.enter,
       color: base,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Opacity(
-            opacity: isDark ? 0.78 : 0.92,
-            child: Transform.scale(
-              scale: 1.08,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: Image(
-                  image: cover!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      child: RepaintBoundary(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Opacity(
+              opacity: isDark ? 0.78 : 0.92,
+              child: Transform.scale(
+                scale: 1.08,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                  child: Image(
+                    image: cover!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),
-          ),
-          Opacity(
-            opacity: isDark ? 0.30 : 0.34,
-            child: Transform.scale(
-              scale: 1.34,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 56, sigmaY: 56),
-                child: Image(
-                  image: cover!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            Opacity(
+              opacity: isDark ? 0.30 : 0.34,
+              child: Transform.scale(
+                scale: 1.34,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 56, sigmaY: 56),
+                  child: Image(
+                    image: cover!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  wash.withValues(alpha: isDark ? 0.16 : 0.38),
-                  base.withValues(alpha: isDark ? 0.12 : 0.24),
-                  wash.withValues(alpha: isDark ? 0.20 : 0.44),
-                ],
-                stops: const [0.0, 0.48, 1.0],
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    wash.withValues(alpha: isDark ? 0.16 : 0.38),
+                    base.withValues(alpha: isDark ? 0.12 : 0.24),
+                    wash.withValues(alpha: isDark ? 0.20 : 0.44),
+                  ],
+                  stops: const [0.0, 0.48, 1.0],
+                ),
               ),
             ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(-0.18, -0.18),
-                radius: 1.08,
-                colors: [
-                  Colors.transparent,
-                  shade.withValues(alpha: isDark ? 0.18 : 0.08),
-                  shade.withValues(alpha: isDark ? 0.42 : 0.17),
-                ],
-                stops: const [0.50, 0.78, 1.0],
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(-0.18, -0.18),
+                  radius: 1.08,
+                  colors: [
+                    Colors.transparent,
+                    shade.withValues(alpha: isDark ? 0.18 : 0.08),
+                    shade.withValues(alpha: isDark ? 0.42 : 0.17),
+                  ],
+                  stops: const [0.50, 0.78, 1.0],
+                ),
               ),
             ),
-          ),
-          ColoredBox(
-            color: wash.withValues(alpha: isDark ? 0.06 : 0.14),
-          ),
-        ],
+            ColoredBox(
+              color: wash.withValues(alpha: isDark ? 0.06 : 0.14),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -958,11 +941,8 @@ class _NowPlayingInfo extends StatefulWidget {
 class __NowPlayingInfoState extends State<_NowPlayingInfo> {
   final playbackService = PlayService.instance.playbackService;
   Future<ImageProvider<Object>?>? nowPlayingCover;
-  bool _heavyVisualsWereReady = false;
 
   void updateCover() {
-    if (!_heavyVisualsWereReady) return;
-
     setState(() {
       nowPlayingCover = playbackService.nowPlaying?.largeCover;
     });
@@ -971,18 +951,8 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
   @override
   void initState() {
     super.initState();
+    nowPlayingCover = playbackService.nowPlaying?.largeCover;
     playbackService.addListener(updateCover);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final heavyVisualsReady =
-        NowPlayingRenderPhase.heavyVisualsReadyOf(context);
-    if (heavyVisualsReady && !_heavyVisualsWereReady) {
-      _heavyVisualsWereReady = true;
-      nowPlayingCover = playbackService.nowPlaying?.largeCover;
-    }
   }
 
   @override
@@ -1052,7 +1022,7 @@ class __NowPlayingInfoState extends State<_NowPlayingInfo> {
                 child: SizedBox.square(
                   dimension: coverSize,
                   child: RepaintBoundary(
-                    child: !_heavyVisualsWereReady || nowPlayingCover == null
+                    child: nowPlayingCover == null
                         ? placeholder
                         : FutureBuilder(
                             future: nowPlayingCover,

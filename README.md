@@ -50,6 +50,15 @@ https://github.com/tingzhouhuige/Border-Player/releases
 
 ## 版本更新
 
+### v2.0
+
+- 新增三种主页软件风格：基础、取色、质感，可在设置页一键切换。
+- 质感风格支持使用当前歌曲封面生成主页模糊背景，并将主页按钮、迷你播放栏、弹窗等统一为玻璃质感。
+- 优化播放详情页进入/退出动画、右键菜单动画和启动过渡，减少闪烁、残影和白屏突兀感。
+- 优化主页封面取色、左上角品牌标识、迷你播放栏上一曲/播放/下一曲控制，以及多处按钮样式一致性。
+- 优化质感风格下的主页背景切歌过渡、播放页首帧渲染和局部重绘性能，在不改变功能和视觉效果的前提下提升流畅度。
+- 修复艺术家、专辑、歌单、搜索和详细信息等页面在质感风格下的背景和弹窗样式不统一问题。
+
 ### v1.0.6
 
 - 修复播放列表弹窗下方超出窗口边界的问题，弹窗位置自动适配窗口大小。
@@ -86,7 +95,7 @@ https://github.com/tingzhouhuige/Border-Player/releases
 指定版本发布目录示例：
 
 ```powershell
-.\tools\build_windows_release.ps1 -PackageName v1.0.6
+.\tools\build_windows_release.ps1 -PackageName v2.0
 ```
 
 如果 BASS DLL 缺失，加 `-DownloadBassIfMissing` 参数会自动下载：

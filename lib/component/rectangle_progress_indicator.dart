@@ -46,13 +46,14 @@ class _RectangleProgressIndicatorState
         scheme: scheme,
         transparentTrack: widget.transparentTrack,
       ),
-      child: widget.child,
+      child: RepaintBoundary(child: widget.child),
     );
   }
 
   @override
   void dispose() {
     subscription.cancel();
+    progress.dispose();
     super.dispose();
   }
 }
