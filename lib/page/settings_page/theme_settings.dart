@@ -76,44 +76,69 @@ class _ThemeModeControlState extends State<ThemeModeControl> {
   }
 }
 
-class DynamicThemeSwitch extends StatefulWidget {
-  const DynamicThemeSwitch({super.key});
-
-  @override
-  State<DynamicThemeSwitch> createState() => _DynamicThemeSwitchState();
+enum HomeStyle {
+  basic,
+  coverAccent,
+  glass,
 }
 
-class _DynamicThemeSwitchState extends State<DynamicThemeSwitch> {
+class HomeStyleControl extends StatefulWidget {
+  const HomeStyleControl({super.key});
+
+  @override
+  State<HomeStyleControl> createState() => _HomeStyleControlState();
+}
+
+class _HomeStyleControlState extends State<HomeStyleControl> {
   final settings = AppSettings.instance;
+
+  HomeStyle get _style {
+    if (!settings.dynamicTheme) return HomeStyle.basic;
+    if (!settings.homeCoverBackdrop) return HomeStyle.coverAccent;
+    return HomeStyle.glass;
+  }
 
   @override
   Widget build(BuildContext context) {
     return SettingsTile(
-      description: "主页强调色跟随歌曲封面",
-      action: SegmentedButton<bool>(
+      description: "软件风格",
+      action: SegmentedButton<HomeStyle>(
         showSelectedIcon: false,
         segments: const [
-          ButtonSegment<bool>(
-            value: false,
+          ButtonSegment<HomeStyle>(
+            value: HomeStyle.basic,
             icon: Icon(Symbols.music_note),
-            label: Text("关闭"),
+            label: Text("基础"),
           ),
-          ButtonSegment<bool>(
-            value: true,
+          ButtonSegment<HomeStyle>(
+            value: HomeStyle.coverAccent,
             icon: Icon(Symbols.album),
-            label: Text("开启"),
+            label: Text("取色"),
+          ),
+          ButtonSegment<HomeStyle>(
+            value: HomeStyle.glass,
+            icon: Icon(Symbols.wallpaper),
+            label: Text("质感"),
           ),
         ],
-        selected: {settings.dynamicTheme},
+        selected: {_style},
         onSelectionChanged: (selection) async {
-          final enabled = selection.first;
-          if (enabled == settings.dynamicTheme) return;
+          final style = selection.first;
+          if (style == _style) return;
+
+          final dynamicTheme = switch (style) {
+            HomeStyle.basic => false,
+            HomeStyle.coverAccent || HomeStyle.glass => true,
+          };
+          final homeCoverBackdrop = style == HomeStyle.glass;
+
           setState(() {
-            settings.dynamicTheme = enabled;
+            settings.dynamicTheme = dynamicTheme;
+            settings.homeCoverBackdrop = homeCoverBackdrop;
           });
-          ThemeProvider.instance.setDynamicAudioAccentEnabled(
-            settings.dynamicTheme,
-          );
+
+          ThemeProvider.instance.setDynamicAudioAccentEnabled(dynamicTheme);
+          ThemeProvider.instance.notifyShellChanged();
           await settings.saveSettings();
         },
       ),
@@ -135,11 +160,26 @@ class _UseSystemThemeSwitchState extends State<UseSystemThemeSwitch> {
   Widget build(BuildContext context) {
     return SettingsTile(
       description: "启动时使用系统主题",
-      action: Switch(
-        value: settings.useSystemTheme,
-        onChanged: (_) async {
+      action: SegmentedButton<bool>(
+        showSelectedIcon: false,
+        segments: const [
+          ButtonSegment<bool>(
+            value: false,
+            icon: Icon(Symbols.palette),
+            label: Text("关闭"),
+          ),
+          ButtonSegment<bool>(
+            value: true,
+            icon: Icon(Symbols.auto_awesome),
+            label: Text("开启"),
+          ),
+        ],
+        selected: {settings.useSystemTheme},
+        onSelectionChanged: (selection) async {
+          final enabled = selection.first;
+          if (enabled == settings.useSystemTheme) return;
           setState(() {
-            settings.useSystemTheme = !settings.useSystemTheme;
+            settings.useSystemTheme = enabled;
           });
           await settings.saveSettings();
         },
@@ -163,11 +203,26 @@ class _UseSystemThemeModeSwitchState extends State<UseSystemThemeModeSwitch> {
   Widget build(BuildContext context) {
     return SettingsTile(
       description: "启动时使用系统主题模式",
-      action: Switch(
-        value: settings.useSystemThemeMode,
-        onChanged: (_) async {
+      action: SegmentedButton<bool>(
+        showSelectedIcon: false,
+        segments: const [
+          ButtonSegment<bool>(
+            value: false,
+            icon: Icon(Symbols.light_mode),
+            label: Text("关闭"),
+          ),
+          ButtonSegment<bool>(
+            value: true,
+            icon: Icon(Symbols.auto_mode),
+            label: Text("开启"),
+          ),
+        ],
+        selected: {settings.useSystemThemeMode},
+        onSelectionChanged: (selection) async {
+          final enabled = selection.first;
+          if (enabled == settings.useSystemThemeMode) return;
           setState(() {
-            settings.useSystemThemeMode = !settings.useSystemThemeMode;
+            settings.useSystemThemeMode = enabled;
           });
           await settings.saveSettings();
         },

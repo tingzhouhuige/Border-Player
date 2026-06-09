@@ -1,3 +1,4 @@
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/album_tile.dart';
 import 'package:border_player/component/artist_tile.dart';
 import 'package:border_player/component/audio_tile.dart';
@@ -35,8 +36,10 @@ class _SearchResultPageState extends State<SearchResultPage> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
     return ColoredBox(
-      color: scheme.surface,
+      color: useGlassBackdrop ? Colors.transparent : scheme.surface,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: DefaultTabController(
@@ -46,7 +49,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
               Focus(
                 onFocusChange: HotkeysHelper.onFocusChanges,
                 child: Hero(
-                  tag: SEARCH_BAR_KEY,
+                  tag: searchBarKey,
                   child: TextField(
                     controller: searchBarController,
                     decoration: const InputDecoration(

@@ -1,3 +1,4 @@
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/utils.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/component/album_tile.dart';
@@ -30,9 +31,11 @@ class AudioDetailPage extends StatelessWidget {
       color: scheme.onSurface,
       size: 200,
     );
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
 
     return Material(
-      color: scheme.surface,
+      color: useGlassBackdrop ? Colors.transparent : scheme.surface,
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 96.0),
         child: Column(

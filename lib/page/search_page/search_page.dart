@@ -1,4 +1,6 @@
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/hotkeys_helper.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +45,29 @@ class UnionSearchResult {
   }
 }
 
-final SEARCH_BAR_KEY = GlobalKey();
+final searchBarKey = GlobalKey();
+
+InputBorder _searchInputBorder(
+  ColorScheme scheme,
+  bool useGlassBackdrop, {
+  double alpha = 0.0,
+  double width = 0.0,
+}) {
+  if (useGlassBackdrop) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(25),
+      borderSide: BorderSide.none,
+    );
+  }
+
+  return OutlineInputBorder(
+    borderRadius: BorderRadius.circular(25),
+    borderSide: BorderSide(
+      color: scheme.primary.withValues(alpha: alpha),
+      width: width,
+    ),
+  );
+}
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -51,9 +75,11 @@ class SearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
 
     return ColoredBox(
-      color: scheme.surface,
+      color: useGlassBackdrop ? Colors.transparent : scheme.surface,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Transform.translate(
@@ -72,13 +98,14 @@ class SearchPage extends StatelessWidget {
               ),
               const SizedBox(height: 24.0),
               _SearchFieldGlow(
+                useGlassBackdrop: useGlassBackdrop,
                 child: SizedBox(
                   width: 448,
                   height: 50,
                   child: Focus(
                     onFocusChange: HotkeysHelper.onFocusChanges,
                     child: Hero(
-                      tag: SEARCH_BAR_KEY,
+                      tag: searchBarKey,
                       child: TextField(
                         autofocus: true,
                         style: TextStyle(
@@ -88,7 +115,9 @@ class SearchPage extends StatelessWidget {
                         ),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: scheme.surfaceContainer.withOpacity(0.82),
+                          fillColor: useGlassBackdrop
+                              ? Colors.transparent
+                              : scheme.surfaceContainer.withValues(alpha: 0.82),
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(right: 12.0),
                             child: Icon(
@@ -105,27 +134,30 @@ class SearchPage extends StatelessWidget {
                           ),
                           contentPadding:
                               const EdgeInsets.fromLTRB(24, 14, 12, 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(
-                              color: scheme.primary.withOpacity(0.22),
-                              width: 0.8,
-                            ),
+                          border: _searchInputBorder(
+                            scheme,
+                            useGlassBackdrop,
+                            alpha: 0.22,
+                            width: 0.8,
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(
-                              color: scheme.primary.withOpacity(0.20),
-                              width: 0.8,
-                            ),
+                          enabledBorder: _searchInputBorder(
+                            scheme,
+                            useGlassBackdrop,
+                            alpha: 0.20,
+                            width: 0.8,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(
-                              color: scheme.primary.withOpacity(0.30),
-                              width: 0.9,
-                            ),
+                          focusedBorder: _searchInputBorder(
+                            scheme,
+                            useGlassBackdrop,
+                            alpha: 0.30,
+                            width: 0.9,
                           ),
+                          disabledBorder:
+                              _searchInputBorder(scheme, useGlassBackdrop),
+                          errorBorder:
+                              _searchInputBorder(scheme, useGlassBackdrop),
+                          focusedErrorBorder:
+                              _searchInputBorder(scheme, useGlassBackdrop),
                         ),
                         onSubmitted: (String query) {
                           context.push(
@@ -147,13 +179,25 @@ class SearchPage extends StatelessWidget {
 }
 
 class _SearchFieldGlow extends StatelessWidget {
-  const _SearchFieldGlow({required this.child});
+  const _SearchFieldGlow({
+    required this.child,
+    required this.useGlassBackdrop,
+  });
 
   final Widget child;
+  final bool useGlassBackdrop;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+
+    if (useGlassBackdrop) {
+      return GlassDockSurface(
+        borderRadius: BorderRadius.circular(25),
+        shadowScale: 0.34,
+        child: child,
+      );
+    }
 
     return Stack(
       alignment: Alignment.center,
@@ -163,12 +207,12 @@ class _SearchFieldGlow extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: scheme.primary.withOpacity(0.055),
+                color: scheme.primary.withValues(alpha: 0.055),
                 blurRadius: 24,
                 spreadRadius: 1,
               ),
               BoxShadow(
-                color: Colors.white.withOpacity(0.34),
+                color: Colors.white.withValues(alpha: 0.34),
                 blurRadius: 18,
                 spreadRadius: -4,
               ),

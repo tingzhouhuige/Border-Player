@@ -22,7 +22,7 @@ class SettingsPage extends StatelessWidget {
             DefaultLyricSourceControl(),
             AutoPlayOnStartupControl(),
             ThemeModeControl(),
-            DynamicThemeSwitch(),
+            HomeStyleControl(),
             SelectFontCombobox(),
             ArtistSeparatorEditor(),
           ],

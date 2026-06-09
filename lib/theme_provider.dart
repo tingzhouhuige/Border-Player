@@ -140,6 +140,10 @@ class ThemeProvider extends ChangeNotifier {
     });
   }
 
+  void notifyShellChanged() {
+    notifyListeners();
+  }
+
   void applyTheme({required Color seedColor}) {
     lightScheme = _baseLightScheme(seedColor);
     darkScheme = _baseDarkScheme(seedColor);

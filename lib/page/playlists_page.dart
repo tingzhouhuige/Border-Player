@@ -66,13 +66,11 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-
               onPressed: () => editPlaylist(context, PLAYLISTS[i]),
               icon: const Icon(Symbols.edit),
             ),
             const SizedBox(width: 8.0),
             IconButton(
-
               onPressed: () => setState(() {
                 PLAYLISTS.remove(PLAYLISTS[i]);
               }),
@@ -89,19 +87,10 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
           extra: PLAYLISTS[i],
         ),
       ),
-      primaryAction: FilledButton(
+      primaryAction: PageActionButton(
         onPressed: () => newPlaylist(context),
-        style: const ButtonStyle(
-          fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
-          textStyle: WidgetStatePropertyAll(
-            TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              height: 1.0,
-            ),
-          ),
-        ),
-        child: pageActionContent(icon: Symbols.add, label: "新建歌单"),
+        icon: Symbols.add,
+        label: "新建歌单",
       ),
       enableShufflePlay: false,
       enableSortMethod: true,

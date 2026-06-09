@@ -1,7 +1,9 @@
 // ignore_for_file: camel_case_types
 
 import 'package:border_player/app_preference.dart';
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/brand_mark.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/component/responsive_builder.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:flutter/material.dart';
@@ -31,6 +33,8 @@ class SideNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
     final location = GoRouterState.of(context).uri.toString();
     int selected = destinations.indexWhere(
       (desc) => location.startsWith(desc.desPath),
@@ -53,7 +57,9 @@ class SideNav extends StatelessWidget {
         switch (screenType) {
           case ScreenType.small:
             return Drawer(
-              backgroundColor: scheme.surfaceContainer,
+              backgroundColor: useGlassBackdrop
+                  ? scheme.surface.withValues(alpha: 0.34)
+                  : scheme.surfaceContainer,
               shape: const RoundedRectangleBorder(),
               child: _LargeSideNavContent(
                 selected: selected,
@@ -70,7 +76,9 @@ class SideNav extends StatelessWidget {
             );
           case ScreenType.medium:
             return NavigationRail(
-              backgroundColor: scheme.surfaceContainer,
+              backgroundColor: useGlassBackdrop
+                  ? scheme.surface.withValues(alpha: 0.20)
+                  : scheme.surfaceContainer,
               selectedIndex: selected,
               onDestinationSelected: onDestinationSelected,
               destinations: List.generate(
@@ -183,11 +191,15 @@ class _HomePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+    final content = Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer,
+        color: useGlassBackdrop
+            ? Colors.transparent
+            : colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
@@ -222,6 +234,17 @@ class _HomePill extends StatelessWidget {
         ],
       ),
     );
+
+    if (useGlassBackdrop) {
+      return GlassDockSurface(
+        borderRadius: BorderRadius.circular(24),
+        child: content,
+      );
+    }
+
+    return Container(
+      child: content,
+    );
   }
 }
 
@@ -241,8 +264,12 @@ class _SideNavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: selected ? scheme.secondaryContainer : Colors.transparent,
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+    final item = Material(
+      color: selected && !useGlassBackdrop
+          ? scheme.secondaryContainer
+          : Colors.transparent,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -283,5 +310,14 @@ class _SideNavItem extends StatelessWidget {
         ),
       ),
     );
+
+    if (selected && useGlassBackdrop) {
+      return GlassDockSurface(
+        borderRadius: BorderRadius.circular(20),
+        child: item,
+      );
+    }
+
+    return item;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/app_motion.dart';
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/app_shell.dart';
 import 'package:border_player/page/album_detail_page.dart';
 import 'package:border_player/page/albums_page.dart';
@@ -27,7 +28,7 @@ import 'package:provider/provider.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
 
 class SlideTransitionPage<T> extends CustomTransitionPage<T> {
-  const SlideTransitionPage({
+  SlideTransitionPage({
     required super.child,
     super.name,
     super.arguments,
@@ -35,8 +36,14 @@ class SlideTransitionPage<T> extends CustomTransitionPage<T> {
     super.key,
   }) : super(
           transitionsBuilder: _transitionsBuilder,
-          transitionDuration: AppMotion.page,
-          reverseTransitionDuration: AppMotion.pageReverse,
+          transitionDuration: AppSettings.instance.dynamicTheme &&
+                  AppSettings.instance.homeCoverBackdrop
+              ? Duration.zero
+              : AppMotion.page,
+          reverseTransitionDuration: AppSettings.instance.dynamicTheme &&
+                  AppSettings.instance.homeCoverBackdrop
+              ? Duration.zero
+              : AppMotion.pageReverse,
         );
 
   static Widget _transitionsBuilder(
@@ -45,6 +52,11 @@ class SlideTransitionPage<T> extends CustomTransitionPage<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    if (AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop) {
+      return child;
+    }
+
     return AppMotion.pageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
@@ -68,6 +80,17 @@ class Entry extends StatelessWidget {
         isDark ? colorScheme.surface : colorScheme.primary;
     final Color onPrimarySurfaceColor =
         isDark ? colorScheme.onSurface : colorScheme.onPrimary;
+    final bool useHomeGlass = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+    final Color selectedControlColor = useHomeGlass
+        ? Color.alphaBlend(
+            colorScheme.primaryContainer.withValues(alpha: 0.16),
+            colorScheme.surface.withValues(alpha: 0.34),
+          )
+        : colorScheme.secondaryContainer;
+    final Color unselectedControlColor = useHomeGlass
+        ? colorScheme.surface.withValues(alpha: 0.22)
+        : colorScheme.surfaceContainer;
 
     return ThemeData(
       fontFamily: fontFamily,
@@ -84,9 +107,15 @@ class Entry extends StatelessWidget {
       dialogTheme: DialogThemeData(backgroundColor: colorScheme.surface),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.secondaryContainer,
+          backgroundColor: selectedControlColor,
           foregroundColor: colorScheme.onSecondaryContainer,
           elevation: 0,
+          side: useHomeGlass
+              ? BorderSide(
+                  color: Colors.white.withValues(alpha: 0.10),
+                  width: 0.8,
+                )
+              : BorderSide.none,
           minimumSize: const Size(0, 40),
           fixedSize: const Size.fromHeight(40),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 0),
@@ -103,13 +132,20 @@ class Entry extends StatelessWidget {
           backgroundColor:
               WidgetStateProperty.resolveWith((Set<WidgetState> states) {
             if (states.contains(WidgetState.selected)) {
-              return colorScheme.secondaryContainer;
+              return selectedControlColor;
             }
-            return colorScheme.surfaceContainer;
+            return unselectedControlColor;
           }),
           foregroundColor:
               WidgetStatePropertyAll(colorScheme.onSecondaryContainer),
-          side: const WidgetStatePropertyAll(BorderSide.none),
+          side: WidgetStatePropertyAll(
+            useHomeGlass
+                ? BorderSide(
+                    color: Colors.white.withValues(alpha: 0.10),
+                    width: 0.8,
+                  )
+                : BorderSide.none,
+          ),
           textStyle: const WidgetStatePropertyAll(
             TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
@@ -175,6 +211,9 @@ class Entry extends StatelessWidget {
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           supportedLocales: supportedLocales,
           routerConfig: config,
+          builder: (context, child) => _StartupSplash(
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );
@@ -194,14 +233,20 @@ class Entry extends StatelessWidget {
             pageBuilder: (context, state) {
               if (state.extra != null) {
                 return SlideTransitionPage(
-                    child: AudiosPage(locateTo: state.extra as Audio));
+                  key: state.pageKey,
+                  child: AudiosPage(locateTo: state.extra as Audio),
+                );
               }
-              return const SlideTransitionPage(child: AudiosPage());
+              return SlideTransitionPage(
+                key: state.pageKey,
+                child: const AudiosPage(),
+              );
             },
             routes: [
               GoRoute(
                 path: "detail",
                 pageBuilder: (context, state) => SlideTransitionPage(
+                  key: state.pageKey,
                   child: AudioDetailPage(audio: state.extra as Audio),
                 ),
               ),
@@ -211,13 +256,15 @@ class Entry extends StatelessWidget {
           /// artists page
           GoRoute(
             path: app_paths.ARTISTS_PAGE,
-            pageBuilder: (context, state) => const SlideTransitionPage(
-              child: ArtistsPage(),
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const ArtistsPage(),
             ),
             routes: [
               GoRoute(
                 path: "detail",
                 pageBuilder: (context, state) => SlideTransitionPage(
+                  key: state.pageKey,
                   child: ArtistDetailPage(artist: state.extra as Artist),
                 ),
               ),
@@ -227,13 +274,15 @@ class Entry extends StatelessWidget {
           /// albums page
           GoRoute(
             path: app_paths.ALBUMS_PAGE,
-            pageBuilder: (context, state) => const SlideTransitionPage(
-              child: AlbumsPage(),
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const AlbumsPage(),
             ),
             routes: [
               GoRoute(
                 path: "detail",
                 pageBuilder: (context, state) => SlideTransitionPage(
+                  key: state.pageKey,
                   child: AlbumDetailPage(album: state.extra as Album),
                 ),
               ),
@@ -243,8 +292,9 @@ class Entry extends StatelessWidget {
           /// folders page
           GoRoute(
             path: app_paths.FOLDERS_PAGE,
-            pageBuilder: (context, state) => const SlideTransitionPage(
-              child: FoldersPage(),
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const FoldersPage(),
             ),
             routes: [
               /// folder detail page
@@ -253,6 +303,7 @@ class Entry extends StatelessWidget {
                 pageBuilder: (context, state) {
                   final folder = state.extra as AudioFolder;
                   return SlideTransitionPage(
+                    key: state.pageKey,
                     child: FolderDetailPage(folder: folder),
                   );
                 },
@@ -263,8 +314,9 @@ class Entry extends StatelessWidget {
           /// playlists page
           GoRoute(
             path: app_paths.PLAYLISTS_PAGE,
-            pageBuilder: (context, state) => const SlideTransitionPage(
-              child: PlaylistsPage(),
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const PlaylistsPage(),
             ),
             routes: [
               GoRoute(
@@ -272,6 +324,7 @@ class Entry extends StatelessWidget {
                 pageBuilder: (context, state) {
                   final playlist = state.extra as Playlist;
                   return SlideTransitionPage(
+                    key: state.pageKey,
                     child: PlaylistDetailPage(playlist: playlist),
                   );
                 },
@@ -282,8 +335,9 @@ class Entry extends StatelessWidget {
           /// search page
           GoRoute(
             path: app_paths.SEARCH_PAGE,
-            pageBuilder: (context, state) => const SlideTransitionPage(
-              child: SearchPage(),
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const SearchPage(),
             ),
             routes: [
               GoRoute(
@@ -291,6 +345,7 @@ class Entry extends StatelessWidget {
                 pageBuilder: (context, state) {
                   final result = state.extra as UnionSearchResult;
                   return SlideTransitionPage(
+                    key: state.pageKey,
                     child: SearchResultPage(searchResult: result),
                   );
                 },
@@ -301,8 +356,9 @@ class Entry extends StatelessWidget {
           /// settings page
           GoRoute(
             path: app_paths.SETTINGS_PAGE,
-            pageBuilder: (context, state) => const SlideTransitionPage(
-              child: SettingsPage(),
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const SettingsPage(),
             ),
           ),
         ],
@@ -329,16 +385,18 @@ class Entry extends StatelessWidget {
       /// welcoming page
       GoRoute(
         path: app_paths.WELCOMING_PAGE,
-        pageBuilder: (context, state) => const SlideTransitionPage(
-          child: WelcomingPage(),
+        pageBuilder: (context, state) => SlideTransitionPage(
+          key: state.pageKey,
+          child: const WelcomingPage(),
         ),
       ),
 
       /// updating dialog
       GoRoute(
         path: app_paths.UPDATING_DIALOG,
-        pageBuilder: (context, state) => const SlideTransitionPage(
-          child: UpdatingPage(),
+        pageBuilder: (context, state) => SlideTransitionPage(
+          key: state.pageKey,
+          child: const UpdatingPage(),
         ),
       ),
     ],
@@ -356,4 +414,124 @@ class Entry extends StatelessWidget {
         languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
     Locale("en", "US"),
   ];
+}
+
+class _StartupSplash extends StatefulWidget {
+  const _StartupSplash({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_StartupSplash> createState() => _StartupSplashState();
+}
+
+class _StartupSplashState extends State<_StartupSplash> {
+  static const _holdDuration = Duration(milliseconds: 850);
+  static const _fadeDuration = Duration(milliseconds: 360);
+
+  bool _visible = true;
+  bool _removed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(_holdDuration, () {
+      if (!mounted) return;
+      setState(() {
+        _visible = false;
+      });
+      Future<void>.delayed(_fadeDuration, () {
+        if (!mounted) return;
+        setState(() {
+          _removed = true;
+        });
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_removed) return widget.child;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        widget.child,
+        IgnorePointer(
+          ignoring: !_visible,
+          child: AnimatedOpacity(
+            opacity: _visible ? 1 : 0,
+            duration: _fadeDuration,
+            curve: AppMotion.enter,
+            child: const _StartupSplashView(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StartupSplashView extends StatelessWidget {
+  const _StartupSplashView();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return ColoredBox(
+      color: scheme.surface,
+      child: Center(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: AppMotion.page,
+          curve: AppMotion.enter,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, (1 - value) * 10),
+                child: child,
+              ),
+            );
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset("app_icon.ico", width: 54, height: 54),
+              const SizedBox(height: 18),
+              Text(
+                "Border Player",
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "软件启动中",
+                style: TextStyle(
+                  color: scheme.onSurfaceVariant,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: 118,
+                child: LinearProgressIndicator(
+                  minHeight: 3,
+                  borderRadius: BorderRadius.circular(999),
+                  backgroundColor:
+                      scheme.secondaryContainer.withValues(alpha: 0.46),
+                  valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

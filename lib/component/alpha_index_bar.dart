@@ -1,10 +1,36 @@
+import 'package:border_player/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pinyin/pinyin.dart';
 
 const indexLetters = [
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#',
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+  '#',
 ];
 
 String getFirstLetter(String text) {
@@ -85,6 +111,8 @@ class _AlphaIndexBarState extends State<AlphaIndexBar> {
             final letter = indexLetters[i];
             final available = widget.letterIndexMap.containsKey(letter);
             final active = letter == _activeLetter;
+            final useGlassAccent = AppSettings.instance.dynamicTheme &&
+                AppSettings.instance.homeCoverBackdrop;
             return Expanded(
               child: Center(
                 child: Container(
@@ -92,7 +120,12 @@ class _AlphaIndexBarState extends State<AlphaIndexBar> {
                   height: active ? 26 : 18,
                   decoration: BoxDecoration(
                     color: active
-                        ? scheme.secondaryContainer
+                        ? useGlassAccent
+                            ? Color.alphaBlend(
+                                scheme.primaryContainer.withValues(alpha: 0.16),
+                                scheme.surface.withValues(alpha: 0.34),
+                              )
+                            : scheme.secondaryContainer
                         : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
@@ -106,7 +139,7 @@ class _AlphaIndexBarState extends State<AlphaIndexBar> {
                           ? scheme.onSecondaryContainer
                           : available
                               ? scheme.onSurface
-                              : scheme.onSurface.withOpacity(0.15),
+                              : scheme.onSurface.withValues(alpha: 0.15),
                     ),
                   ),
                 ),

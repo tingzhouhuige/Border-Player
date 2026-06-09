@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/lyric/lrc.dart';
 import 'package:border_player/lyric/lyric.dart';
 import 'package:border_player/play_service/play_service.dart';
@@ -13,25 +15,37 @@ class HorizontalLyricView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+    final borderRadius = BorderRadius.circular(18.0);
+
+    final lyricContent = ListenableBuilder(
+      listenable: PlayService.instance.lyricService,
+      builder: (context, _) => FutureBuilder(
+        future: PlayService.instance.lyricService.currLyricFuture,
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            return const SizedBox.expand();
+          }
+
+          return _LyricHorizontalScrollArea(snapshot.data!);
+        },
+      ),
+    );
+
+    if (useGlassBackdrop) {
+      return GlassDockSurface(
+        borderRadius: borderRadius,
+        child: lyricContent,
+      );
+    }
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(18.0),
+        borderRadius: borderRadius,
       ),
-      child: ListenableBuilder(
-        listenable: PlayService.instance.lyricService,
-        builder: (context, _) => FutureBuilder(
-          future: PlayService.instance.lyricService.currLyricFuture,
-          builder: (context, snapshot) {
-            if (snapshot.data == null) {
-              return const SizedBox.expand();
-            }
-
-            return _LyricHorizontalScrollArea(snapshot.data!);
-          },
-        ),
-      ),
+      child: lyricContent,
     );
   }
 }

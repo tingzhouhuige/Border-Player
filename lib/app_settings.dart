@@ -52,10 +52,11 @@ class AppSettings {
   ThemeMode themeMode = getWindowsThemeMode();
 
   /// 启动时 / 封面主题色不适合当主题时的主题
-  int defaultTheme = const Color(0xFFE7C94E).value;
+  int defaultTheme = const Color(0xFFE7C94E).toARGB32();
 
   /// 跟随歌曲封面的动态主题
   bool dynamicTheme = false;
+  bool homeCoverBackdrop = false;
 
   /// 跟随系统主题色
   bool useSystemTheme = false;
@@ -96,12 +97,12 @@ class AppSettings {
       systemTheme.accent.$2,
       systemTheme.accent.$3,
       systemTheme.accent.$4,
-    ).value;
+    ).toARGB32();
   }
 
   AppSettings._();
 
-  static Future<void> _readFromJson_old(Map settingsMap) async {
+  static Future<void> _readFromJsonOld(Map settingsMap) async {
     final ust = settingsMap["UseSystemTheme"];
     if (ust != null) {
       _instance.useSystemTheme = ust == 1 ? true : false;
@@ -121,6 +122,8 @@ class AppSettings {
     }
 
     _instance.dynamicTheme = settingsMap["DynamicTheme"] == 1 ? true : false;
+    _instance.homeCoverBackdrop =
+        settingsMap["HomeCoverBackdrop"] == 1 ? true : false;
     _instance.artistSeparator = settingsMap["ArtistSeparator"];
     _instance.artistSplitPattern = _instance.artistSeparator.join("|");
 
@@ -151,7 +154,7 @@ class AppSettings {
       Map settingsMap = json.decode(settingsStr);
 
       if (settingsMap["Version"] == null) {
-        return _readFromJson_old(settingsMap);
+        return _readFromJsonOld(settingsMap);
       }
 
       final ust = settingsMap["UseSystemTheme"];
@@ -176,6 +179,11 @@ class AppSettings {
       final dt = settingsMap["DynamicTheme"];
       if (dt != null) {
         _instance.dynamicTheme = dt;
+      }
+
+      final hcb = settingsMap["HomeCoverBackdrop"];
+      if (hcb != null) {
+        _instance.homeCoverBackdrop = hcb;
       }
 
       final as = settingsMap["ArtistSeparator"];
@@ -220,6 +228,7 @@ class AppSettings {
         "Version": version,
         "ThemeMode": themeMode == ThemeMode.dark,
         "DynamicTheme": dynamicTheme,
+        "HomeCoverBackdrop": homeCoverBackdrop,
         "UseSystemTheme": useSystemTheme,
         "UseSystemThemeMode": useSystemThemeMode,
         "DefaultTheme": defaultTheme,

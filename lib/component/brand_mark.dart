@@ -1,4 +1,5 @@
 import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:flutter/material.dart';
 
 class BrandMark extends StatelessWidget {
@@ -16,6 +17,8 @@ class BrandMark extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final isDark = scheme.brightness == Brightness.dark;
     final useDynamicAccent = AppSettings.instance.dynamicTheme;
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
     final shadow = isDark ? Colors.black : scheme.onSecondaryContainer;
     final dynamicDiscBase = Color.lerp(
       scheme.secondaryContainer,
@@ -42,6 +45,37 @@ class BrandMark extends StatelessWidget {
             Color(0xFFFFF3A8),
             Color(0xFFFFE98F),
           ];
+
+    final note = Center(
+      child: SizedBox(
+        width: iconSize * 1.04,
+        height: iconSize * 1.04,
+        child: OverflowBox(
+          maxWidth: size,
+          maxHeight: size,
+          child: Image.asset(
+            'assets/images/brand_note.png',
+            width: size,
+            height: size,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            isAntiAlias: true,
+          ),
+        ),
+      ),
+    );
+
+    if (useGlassBackdrop) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: GlassDockSurface(
+          borderRadius: BorderRadius.circular(size / 2),
+          shadowScale: 0.28,
+          child: note,
+        ),
+      );
+    }
 
     return SizedBox(
       width: size,
@@ -72,24 +106,7 @@ class BrandMark extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Center(
-          child: SizedBox(
-            width: iconSize * 1.04,
-            height: iconSize * 1.04,
-            child: OverflowBox(
-              maxWidth: size,
-              maxHeight: size,
-              child: Image.asset(
-                'assets/images/brand_note.png',
-                width: size,
-                height: size,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-                isAntiAlias: true,
-              ),
-            ),
-          ),
-        ),
+        child: note,
       ),
     );
   }

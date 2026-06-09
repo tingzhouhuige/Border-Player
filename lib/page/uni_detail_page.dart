@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/page/uni_page.dart';
 import 'package:border_player/page/uni_page_components.dart';
@@ -158,8 +159,11 @@ class _UniDetailPageState<P, S, T> extends State<UniDetailPage<P, S, T>> {
 
   Widget result(MultiSelectController<S>? multiSelectController,
       List<Widget> actions, ColorScheme scheme) {
+    final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+
     return ColoredBox(
-      color: scheme.surface,
+      color: useGlassBackdrop ? Colors.transparent : scheme.surface,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 16.0),
         child: Column(
@@ -233,7 +237,8 @@ class _UniDetailPageState<P, S, T> extends State<UniDetailPage<P, S, T>> {
                           null,
                         ),
                       ),
-                      const SliverPadding(padding: EdgeInsets.only(bottom: 96.0, right: 12.0)),
+                      const SliverPadding(
+                          padding: EdgeInsets.only(bottom: 96.0, right: 12.0)),
                     ],
                   ),
                 ),
@@ -276,8 +281,8 @@ class _UniDetailPageHeader extends StatelessWidget {
     final scheme = theme.colorScheme;
     final brightness = theme.brightness;
     final headerControlFill = brightness == Brightness.dark
-        ? Colors.white.withOpacity(0.12)
-        : Colors.white.withOpacity(0.42);
+        ? Colors.white.withValues(alpha: 0.12)
+        : Colors.white.withValues(alpha: 0.42);
     final headerControlTheme = theme.copyWith(
       colorScheme: scheme.copyWith(
         secondaryContainer: headerControlFill,
@@ -324,7 +329,7 @@ class _UniDetailPageHeader extends StatelessWidget {
             switch (brightness) {
               Brightness.dark => const ColoredBox(color: Colors.black38),
               Brightness.light => ColoredBox(
-                  color: scheme.surface.withOpacity(0.32),
+                  color: scheme.surface.withValues(alpha: 0.32),
                 ),
             },
             BackdropFilter(

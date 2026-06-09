@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 
@@ -7,10 +8,12 @@ class RectangleProgressIndicator extends StatefulWidget {
     super.key,
     required this.size,
     required this.child,
+    this.transparentTrack = false,
   });
 
   final Size size;
   final Widget child;
+  final bool transparentTrack;
 
   @override
   State<RectangleProgressIndicator> createState() =>
@@ -19,10 +22,8 @@ class RectangleProgressIndicator extends StatefulWidget {
 
 class _RectangleProgressIndicatorState
     extends State<RectangleProgressIndicator> {
-  /// [positionStream] 的订阅，在dispose取消订阅
   late StreamSubscription<double> subscription;
 
-  /// position / length, [0, 1]
   final progress = ValueNotifier<double>(0);
 
   @override
@@ -30,7 +31,8 @@ class _RectangleProgressIndicatorState
     super.initState();
     subscription =
         PlayService.instance.playbackService.positionStream.listen((event) {
-      progress.value = event / PlayService.instance.playbackService.length;
+      final length = PlayService.instance.playbackService.length;
+      progress.value = length == 0 ? 0 : event / length;
     });
   }
 
@@ -39,42 +41,47 @@ class _RectangleProgressIndicatorState
     final scheme = Theme.of(context).colorScheme;
     return CustomPaint(
       size: widget.size,
-      painter: RectangleProgressPainter(progress: progress, scheme: scheme),
+      painter: RectangleProgressPainter(
+        progress: progress,
+        scheme: scheme,
+        transparentTrack: widget.transparentTrack,
+      ),
       child: widget.child,
     );
   }
 
   @override
   void dispose() {
-    super.dispose();
     subscription.cancel();
+    super.dispose();
   }
 }
 
 class RectangleProgressPainter extends CustomPainter {
-  /// position / length, [0, 1]
+  RectangleProgressPainter({
+    required this.progress,
+    required this.scheme,
+    required this.transparentTrack,
+  }) : super(repaint: progress);
+
   final ValueNotifier<double> progress;
-
   final ColorScheme scheme;
-
-  RectangleProgressPainter({required this.progress, required this.scheme})
-      : super(repaint: progress);
+  final bool transparentTrack;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final progressPainter = Paint();
-    progressPainter.color = scheme.primary.withOpacity(0.18);
+    if (!transparentTrack) {
+      final trackPainter = Paint()..color = scheme.secondaryContainer;
+      canvas.drawRect(
+        Rect.fromLTWH(0.0, 0.0, size.width, size.height),
+        trackPainter,
+      );
+    }
 
-    final trackPainter = Paint();
-    trackPainter.color = scheme.secondaryContainer;
-
-    /// 进度条背景
-    canvas.drawRect(
-      Rect.fromLTWH(0.0, 0.0, size.width, size.height),
-      trackPainter,
-    );
-
-    /// 进度
+    final progressPainter = Paint()
+      ..color = scheme.primary.withValues(
+        alpha: transparentTrack ? 0.10 : 0.18,
+      );
     canvas.drawRect(
       Rect.fromLTWH(0.0, 0.0, size.width * progress.value, size.height),
       progressPainter,

@@ -26,6 +26,7 @@ Future<void> initWindow() async {
     titleBarStyle: TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     if (AppSettings.instance.isWindowMaximized) {
       await windowManager.maximize();
     }

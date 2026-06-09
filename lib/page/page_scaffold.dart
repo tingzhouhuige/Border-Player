@@ -1,3 +1,5 @@
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/component/responsive_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -68,6 +70,17 @@ class PageScaffold extends StatelessWidget {
                 ),
               );
 
+              final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+                  AppSettings.instance.homeCoverBackdrop;
+              final moreButtonStyle = IconButton.styleFrom(
+                backgroundColor: useGlassBackdrop
+                    ? Colors.transparent
+                    : scheme.secondaryContainer,
+                fixedSize: const Size.square(40),
+                padding: EdgeInsets.zero,
+                shape: const CircleBorder(),
+              );
+
               rowChildren = [
                 subtitle == null ? onlyTitle(scheme) : withSubtitle(scheme),
                 const SizedBox(width: 16.0),
@@ -78,15 +91,25 @@ class PageScaffold extends StatelessWidget {
                     child: MenuAnchor(
                       style: menuStyle,
                       menuChildren: foldedColumn,
-                      builder: (_, controller, __) => IconButton.filledTonal(
+                      builder: (_, controller, __) {
+                        final button = IconButton.filledTonal(
+                          style: moreButtonStyle,
+                          onPressed: () {
+                            controller.isOpen
+                                ? controller.close()
+                                : controller.open();
+                          },
+                          icon: const Icon(Symbols.more_vert),
+                        );
 
-                        onPressed: () {
-                          controller.isOpen
-                              ? controller.close()
-                              : controller.open();
-                        },
-                        icon: const Icon(Symbols.more_vert),
-                      ),
+                        if (!useGlassBackdrop) return button;
+
+                        return GlassDockSurface(
+                          borderRadius: BorderRadius.circular(20),
+                          shadowScale: 0.24,
+                          child: button,
+                        );
+                      },
                     ),
                   ),
               ];
@@ -104,8 +127,11 @@ class PageScaffold extends StatelessWidget {
         }
       }
 
-      return ColoredBox(
-        color: scheme.surface,
+      final useGlassBackdrop = AppSettings.instance.dynamicTheme &&
+          AppSettings.instance.homeCoverBackdrop;
+
+      final content = ColoredBox(
+        color: useGlassBackdrop ? Colors.transparent : scheme.surface,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 14.0,
@@ -126,6 +152,10 @@ class PageScaffold extends StatelessWidget {
           ),
         ),
       );
+
+      if (!useGlassBackdrop) return content;
+
+      return content;
     });
   }
 

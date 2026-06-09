@@ -22,14 +22,14 @@ class _AutoPlayOnStartupControlState extends State<AutoPlayOnStartupControl> {
         showSelectedIcon: false,
         segments: const [
           ButtonSegment<bool>(
-            value: true,
-            icon: Icon(Symbols.play_circle),
-            label: Text("开启"),
-          ),
-          ButtonSegment<bool>(
             value: false,
             icon: Icon(Symbols.pause_circle),
             label: Text("关闭"),
+          ),
+          ButtonSegment<bool>(
+            value: true,
+            icon: Icon(Symbols.play_circle),
+            label: Text("开启"),
           ),
         ],
         selected: {pref.autoPlayOnStartup},

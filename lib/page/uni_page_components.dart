@@ -1,3 +1,5 @@
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/library/playlist.dart';
 import 'package:border_player/page/uni_page.dart';
@@ -8,12 +10,27 @@ import 'package:material_symbols_icons/symbols.dart';
 
 ButtonStyle _selectIconButtonStyle(ColorScheme scheme) => IconButton.styleFrom(
       fixedSize: const Size(40, 40),
-      backgroundColor: scheme.secondaryContainer,
+      backgroundColor:
+          _useHomeGlassAccent() ? Colors.transparent : _accentFill(scheme),
       foregroundColor: scheme.onSecondaryContainer,
-      hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
+      hoverColor: scheme.onSecondaryContainer.withValues(alpha: 0.08),
       shape: const CircleBorder(),
       padding: EdgeInsets.zero,
     );
+
+bool _useHomeGlassAccent() {
+  final settings = AppSettings.instance;
+  return settings.dynamicTheme && settings.homeCoverBackdrop;
+}
+
+Color _accentFill(ColorScheme scheme) {
+  return _useHomeGlassAccent()
+      ? Color.alphaBlend(
+          scheme.primaryContainer.withValues(alpha: 0.22),
+          scheme.surface.withValues(alpha: 0.34),
+        )
+      : scheme.secondaryContainer;
+}
 
 const _pageActionTextStyle = TextStyle(
   fontSize: 15,
@@ -25,6 +42,27 @@ const _pageActionButtonStyle = ButtonStyle(
   fixedSize: WidgetStatePropertyAll(Size.fromHeight(40)),
   textStyle: WidgetStatePropertyAll(_pageActionTextStyle),
 );
+
+ButtonStyle _pageActionButtonStyleFor(bool useGlass) {
+  return _pageActionButtonStyle.copyWith(
+    backgroundColor:
+        useGlass ? const WidgetStatePropertyAll(Colors.transparent) : null,
+    side: useGlass ? const WidgetStatePropertyAll(BorderSide.none) : null,
+  );
+}
+
+Widget _dockAccent({
+  required Widget child,
+  required BorderRadius borderRadius,
+  double shadowScale = 0.34,
+}) {
+  if (!_useHomeGlassAccent()) return child;
+  return GlassDockSurface(
+    borderRadius: borderRadius,
+    shadowScale: shadowScale,
+    child: child,
+  );
+}
 
 Widget pageActionContent({
   required IconData icon,
@@ -57,12 +95,42 @@ class ShufflePlay<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () => PlayService.instance.playbackService.shuffleAndPlay(
-        contentList as List<Audio>,
+    final useGlass = _useHomeGlassAccent();
+    return _dockAccent(
+      borderRadius: BorderRadius.circular(20),
+      child: FilledButton(
+        onPressed: () => PlayService.instance.playbackService.shuffleAndPlay(
+          contentList as List<Audio>,
+        ),
+        style: _pageActionButtonStyleFor(useGlass),
+        child: pageActionContent(icon: Symbols.shuffle, label: "随机播放"),
       ),
-      style: _pageActionButtonStyle,
-      child: pageActionContent(icon: Symbols.shuffle, label: "随机播放"),
+    );
+  }
+}
+
+class PageActionButton extends StatelessWidget {
+  const PageActionButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final useGlass = _useHomeGlassAccent();
+    return _dockAccent(
+      borderRadius: BorderRadius.circular(20),
+      child: FilledButton(
+        onPressed: onPressed,
+        style: _pageActionButtonStyleFor(useGlass),
+        child: pageActionContent(icon: icon, label: label),
+      ),
     );
   }
 }
@@ -104,13 +172,15 @@ class SortMethodComboBox<T> extends StatelessWidget {
       builder: (context, menuController, _) {
         final borderRadius = BorderRadius.circular(20.0);
 
-        return SizedBox(
+        final button = SizedBox(
           height: 40.0,
           child: Material(
-            color: scheme.secondaryContainer,
+            color: _useHomeGlassAccent()
+                ? Colors.transparent
+                : _accentFill(scheme),
             shape: const StadiumBorder(),
             child: InkWell(
-              hoverColor: scheme.onSecondaryContainer.withOpacity(0.08),
+              hoverColor: scheme.onSecondaryContainer.withValues(alpha: 0.08),
               borderRadius: borderRadius,
               onTap: () {
                 if (menuController.isOpen) {
@@ -141,6 +211,13 @@ class SortMethodComboBox<T> extends StatelessWidget {
             ),
           ),
         );
+        if (_useHomeGlassAccent()) {
+          return GlassDockSurface(
+            borderRadius: BorderRadius.circular(20),
+            child: button,
+          );
+        }
+        return button;
       },
     );
   }
@@ -156,13 +233,16 @@ class SortOrderSwitch<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     var isAscending = sortOrder == SortOrder.ascending;
-    return IconButton.filledTonal(
-      style: _selectIconButtonStyle(scheme),
-
-      onPressed: () => setSortOrder(
-        isAscending ? SortOrder.decending : SortOrder.ascending,
+    return _dockAccent(
+      borderRadius: BorderRadius.circular(20),
+      shadowScale: 0.24,
+      child: IconButton.filledTonal(
+        style: _selectIconButtonStyle(scheme),
+        onPressed: () => setSortOrder(
+          isAscending ? SortOrder.decending : SortOrder.ascending,
+        ),
+        icon: Icon(isAscending ? Symbols.arrow_upward : Symbols.arrow_downward),
       ),
-      icon: Icon(isAscending ? Symbols.arrow_upward : Symbols.arrow_downward),
     );
   }
 }
@@ -177,13 +257,16 @@ class ContentViewSwitch<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     var isListView = contentView == ContentView.list;
-    return IconButton.filledTonal(
-      style: _selectIconButtonStyle(scheme),
-
-      onPressed: () => setContentView(
-        isListView ? ContentView.table : ContentView.list,
+    return _dockAccent(
+      borderRadius: BorderRadius.circular(20),
+      shadowScale: 0.24,
+      child: IconButton.filledTonal(
+        style: _selectIconButtonStyle(scheme),
+        onPressed: () => setContentView(
+          isListView ? ContentView.table : ContentView.list,
+        ),
+        icon: Icon(isListView ? Symbols.list : Symbols.table),
       ),
-      icon: Icon(isListView ? Symbols.list : Symbols.table),
     );
   }
 }
@@ -195,6 +278,7 @@ class AddAllToPlaylist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final useGlass = _useHomeGlassAccent();
     return MenuAnchor(
       style: MenuStyle(
         shape: WidgetStatePropertyAll(
@@ -216,22 +300,25 @@ class AddAllToPlaylist extends StatelessWidget {
               }
             }
             showTextOnSnackBar(
-              "成功将${multiSelectController.selected.length}首添加到歌单“${PLAYLISTS[i].name}”",
+              "成功将 ${multiSelectController.selected.length} 首添加到歌单 ${PLAYLISTS[i].name}",
             );
           },
           child: Text(PLAYLISTS[i].name),
         ),
       ),
-      builder: (context, controller, _) => FilledButton(
-        onPressed: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
-        style: _pageActionButtonStyle,
-        child: pageActionContent(icon: Symbols.add, label: "添加到歌单"),
+      builder: (context, controller, _) => _dockAccent(
+        borderRadius: BorderRadius.circular(20),
+        child: FilledButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          style: _pageActionButtonStyleFor(useGlass),
+          child: pageActionContent(icon: Symbols.add, label: "添加到歌单"),
+        ),
       ),
     );
   }
@@ -251,20 +338,23 @@ class MultiSelectSelectOrClearAll<T> extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return ListenableBuilder(
       listenable: multiSelectController,
-      builder: (context, _) => IconButton.filledTonal(
-        style: _selectIconButtonStyle(scheme),
-
-        onPressed: () {
-          if (multiSelectController.selected.isEmpty) {
-            multiSelectController.selectAll(contentList);
-          } else {
-            multiSelectController.clear();
-          }
-        },
-        icon: Icon(
-          multiSelectController.selected.isEmpty
-              ? Symbols.select_all
-              : Symbols.clear_all,
+      builder: (context, _) => _dockAccent(
+        borderRadius: BorderRadius.circular(20),
+        shadowScale: 0.24,
+        child: IconButton.filledTonal(
+          style: _selectIconButtonStyle(scheme),
+          onPressed: () {
+            if (multiSelectController.selected.isEmpty) {
+              multiSelectController.selectAll(contentList);
+            } else {
+              multiSelectController.clear();
+            }
+          },
+          icon: Icon(
+            multiSelectController.selected.isEmpty
+                ? Symbols.select_all
+                : Symbols.clear_all,
+          ),
         ),
       ),
     );
@@ -279,14 +369,17 @@ class MultiSelectExit<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return IconButton.filledTonal(
-      style: _selectIconButtonStyle(scheme),
-
-      onPressed: () {
-        multiSelectController.useMultiSelectView(false);
-        multiSelectController.clear();
-      },
-      icon: const Icon(Symbols.cancel),
+    return _dockAccent(
+      borderRadius: BorderRadius.circular(20),
+      shadowScale: 0.24,
+      child: IconButton.filledTonal(
+        style: _selectIconButtonStyle(scheme),
+        onPressed: () {
+          multiSelectController.useMultiSelectView(false);
+          multiSelectController.clear();
+        },
+        icon: const Icon(Symbols.cancel),
+      ),
     );
   }
 }
