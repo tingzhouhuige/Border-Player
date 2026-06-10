@@ -1,6 +1,9 @@
 import 'dart:ui';
 
 import 'package:border_player/app_motion.dart';
+import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
+import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:flutter/material.dart';
 
 Future<T?> showSettingsGlassDialog<T>({
@@ -9,11 +12,16 @@ Future<T?> showSettingsGlassDialog<T>({
   bool barrierDismissible = true,
   Color? barrierColor,
 }) {
+  final useHomeGlass = AppSettings.instance.dynamicTheme &&
+      AppSettings.instance.homeCoverBackdrop;
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: barrierColor ?? Colors.black.withValues(alpha: 0.46),
+    barrierColor: barrierColor ??
+        (useHomeGlass
+            ? Colors.transparent
+            : Colors.black.withValues(alpha: 0.46)),
     transitionDuration: AppMotion.popup,
     pageBuilder: (context, _, __) => builder(context),
     transitionBuilder: (context, animation, _, child) {
@@ -46,6 +54,58 @@ class SettingsGlassDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useHomeGlass = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+    final useAudioAccent = AppSettings.instance.dynamicTheme;
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (titleActions.isNotEmpty) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              for (var i = 0; i < titleActions.length; i++) ...[
+                if (i != 0) const SizedBox(width: 10),
+                titleActions[i],
+              ],
+            ],
+          ),
+          const SizedBox(height: 18),
+        ],
+        Expanded(child: child),
+        const SizedBox(height: 18),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            for (var i = 0; i < actions.length; i++) ...[
+              if (i != 0) const SizedBox(width: 18),
+              GlassDockSurface(
+                borderRadius: BorderRadius.circular(999),
+                height: 38,
+                shadowScale: 0.16,
+                child: actions[i],
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+
+    if (useHomeGlass) {
+      return Dialog(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 42, vertical: 36),
+        child: NowPlayingGlassPanel(
+          title: title,
+          width: width,
+          height: height,
+          padding: const EdgeInsets.fromLTRB(30, 28, 30, 24),
+          child: content,
+        ),
+      );
+    }
 
     return Dialog(
       elevation: 0,
@@ -60,19 +120,26 @@ class SettingsGlassDialog extends StatelessWidget {
             height: height,
             padding: const EdgeInsets.fromLTRB(30, 28, 30, 24),
             decoration: BoxDecoration(
-              color: scheme.surface.withOpacity(0.9),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  scheme.surface.withOpacity(0.94),
-                  scheme.surfaceContainerHighest.withOpacity(0.78),
-                ],
-              ),
+              color: useAudioAccent
+                  ? scheme.secondaryContainer.withValues(alpha: 0.88)
+                  : scheme.surface.withOpacity(0.9),
+              gradient: useAudioAccent
+                  ? null
+                  : LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        scheme.surface.withOpacity(0.94),
+                        scheme.surfaceContainerHighest.withOpacity(0.78),
+                      ],
+                    ),
               boxShadow: [
                 BoxShadow(
-                  color: scheme.shadow.withOpacity(0.14),
-                  blurRadius: 38,
+                  color: useAudioAccent
+                      ? scheme.shadow.withValues(alpha: 0.10)
+                      : scheme.shadow.withOpacity(0.14),
+                  blurRadius: useAudioAccent ? 42 : 38,
+                  spreadRadius: useAudioAccent ? -8 : 0,
                   offset: const Offset(0, 18),
                 ),
               ],

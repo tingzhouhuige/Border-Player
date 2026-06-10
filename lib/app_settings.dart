@@ -49,14 +49,14 @@ class AppSettings {
   static const String version = "1.0.6";
 
   /// 主题模式：亮 / 暗
-  ThemeMode themeMode = getWindowsThemeMode();
+  ThemeMode themeMode = ThemeMode.light;
 
   /// 启动时 / 封面主题色不适合当主题时的主题
   int defaultTheme = const Color(0xFFE7C94E).toARGB32();
 
   /// 跟随歌曲封面的动态主题
-  bool dynamicTheme = false;
-  bool homeCoverBackdrop = false;
+  bool dynamicTheme = true;
+  bool homeCoverBackdrop = true;
 
   /// 跟随系统主题色
   bool useSystemTheme = false;

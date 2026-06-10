@@ -1,6 +1,7 @@
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/app_motion.dart';
 import 'package:border_player/component/build_index_state_view.dart';
+import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/component/settings_tile.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/library/play_statistics.dart';
@@ -244,6 +245,36 @@ class _StatisticRangeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useHomeGlass = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
+
+    if (useHomeGlass) {
+      return GlassDockSurface(
+        borderRadius: BorderRadius.circular(999),
+        height: 38,
+        width: 38,
+        shadowScale: selected ? 0.28 : 0.16,
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: Center(
+              child: Text(
+                range.label,
+                style: TextStyle(
+                  color: selected ? scheme.onSurface : scheme.onSurfaceVariant,
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  letterSpacing: 0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Material(
       color: selected ? scheme.secondaryContainer : scheme.surfaceContainer,
@@ -325,6 +356,8 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final useHomeGlass = AppSettings.instance.dynamicTheme &&
+        AppSettings.instance.homeCoverBackdrop;
 
     return SettingsGlassDialog(
       title: "管理文件夹",
@@ -332,25 +365,52 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
       height: 560,
       titleActions: [
         if (editing)
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: scheme.secondaryContainer,
-              foregroundColor: scheme.onSecondaryContainer,
-              elevation: 0,
-              minimumSize: const Size(0, 36),
-              fixedSize: const Size.fromHeight(36),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              shape: const StadiumBorder(),
-              textStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0,
-              ),
-            ),
-            onPressed: _scanPickedFolder,
-            icon: const Icon(Symbols.search, size: 20),
-            label: const Text("扫描音乐"),
-          ),
+          useHomeGlass
+              ? GlassDockSurface(
+                  borderRadius: BorderRadius.circular(999),
+                  height: 44,
+                  shadowScale: 0.24,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: scheme.onSurface,
+                      shadowColor: Colors.transparent,
+                      disabledBackgroundColor: Colors.transparent,
+                      elevation: 0,
+                      minimumSize: const Size(0, 44),
+                      fixedSize: const Size.fromHeight(44),
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      shape: const StadiumBorder(),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    onPressed: _scanPickedFolder,
+                    icon: const Icon(Symbols.search, size: 20),
+                    label: const Text("扫描音乐"),
+                  ),
+                )
+              : FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: scheme.secondaryContainer,
+                    foregroundColor: scheme.onSecondaryContainer,
+                    elevation: 0,
+                    minimumSize: const Size(0, 36),
+                    fixedSize: const Size.fromHeight(36),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    shape: const StadiumBorder(),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                  onPressed: _scanPickedFolder,
+                  icon: const Icon(Symbols.search, size: 20),
+                  label: const Text("扫描音乐"),
+                ),
       ],
       actions: [
         TextButton(
@@ -399,7 +459,6 @@ class _AudioLibraryEditorDialogState extends State<AudioLibraryEditorDialog> {
                         ),
                       ),
                       IconButton(
-
                         color: scheme.error,
                         iconSize: 25,
                         onPressed: () {

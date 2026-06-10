@@ -72,7 +72,7 @@ class PlaybackPreference {
   PlaybackPreference(this.playMode, this.volumeDsp,
       {this.shuffle = false,
       this.wasapiExclusive = false,
-      this.autoPlayOnStartup = true,
+      this.autoPlayOnStartup = false,
       this.lastPlayingPath,
       this.lastPlaylistPaths = const [],
       this.lastPosition = 0});
@@ -93,7 +93,7 @@ class PlaybackPreference {
         map["volumeDsp"] ?? 1.0,
         shuffle: map["shuffle"] ?? false,
         wasapiExclusive: map["wasapiExclusive"] ?? false,
-        autoPlayOnStartup: map["autoPlayOnStartup"] ?? true,
+        autoPlayOnStartup: map["autoPlayOnStartup"] ?? false,
         lastPlayingPath: map["lastPlayingPath"],
         lastPlaylistPaths:
             (map["lastPlaylistPaths"] as List?)?.cast<String>() ?? [],
