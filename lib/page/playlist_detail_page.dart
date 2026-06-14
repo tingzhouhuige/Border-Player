@@ -19,20 +19,12 @@ class PlaylistDetailPage extends StatefulWidget {
 
 class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   final multiSelectController = MultiSelectController<Audio>();
-  late List<Audio> _contentList;
+
+  List<Audio> get _contentList => widget.playlist.audios.values.toList();
 
   @override
   void initState() {
     super.initState();
-    _contentList = widget.playlist.audios.values.toList();
-  }
-
-  @override
-  void didUpdateWidget(covariant PlaylistDetailPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.playlist != widget.playlist) {
-      _contentList = widget.playlist.audios.values.toList();
-    }
   }
 
   @override

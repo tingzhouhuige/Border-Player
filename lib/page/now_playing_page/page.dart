@@ -258,6 +258,15 @@ class _CachedBackdropLayerState extends State<_CachedBackdropLayer> {
   ImageProvider<Object>? _currentProvider;
 
   @override
+  void initState() {
+    super.initState();
+    _currentProvider = widget.imageProvider;
+    if (widget.imageProvider != null) {
+      _rebuildCache();
+    }
+  }
+
+  @override
   void didUpdateWidget(_CachedBackdropLayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.imageProvider != _currentProvider) {
