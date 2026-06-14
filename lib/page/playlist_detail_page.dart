@@ -19,20 +19,34 @@ class PlaylistDetailPage extends StatefulWidget {
 
 class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
   final multiSelectController = MultiSelectController<Audio>();
+  late List<Audio> _contentList;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentList = widget.playlist.audios.values.toList();
+  }
+
+  @override
+  void didUpdateWidget(covariant PlaylistDetailPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.playlist != widget.playlist) {
+      _contentList = widget.playlist.audios.values.toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final contentList = widget.playlist.audios.values.toList();
     final scheme = Theme.of(context).colorScheme;
 
     return UniPage<Audio>(
       pref: AppPreference.instance.playlistDetailPagePref,
       title: widget.playlist.name,
-      subtitle: "${contentList.length} 首乐曲",
-      contentList: contentList,
+      subtitle: "${_contentList.length} 首乐曲",
+      contentList: _contentList,
       contentBuilder: (context, item, i, multiSelectController) => AudioTile(
         audioIndex: i,
-        playlist: contentList,
+        playlist: _contentList,
         multiSelectController: multiSelectController,
       ),
       enableShufflePlay: true,
@@ -59,7 +73,7 @@ class _PlaylistDetailPageState extends State<PlaylistDetailPage> {
         ),
         MultiSelectSelectOrClearAll(
           multiSelectController: multiSelectController,
-          contentList: contentList,
+          contentList: _contentList,
         ),
         MultiSelectExit(multiSelectController: multiSelectController),
       ],
