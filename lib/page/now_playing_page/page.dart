@@ -1,7 +1,8 @@
 // ignore_for_file: camel_case_types
 
+import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:border_player/app_preference.dart';
 import 'package:border_player/app_motion.dart';
@@ -60,11 +61,21 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   ColorScheme? nowPlayingScheme;
   int _coverRequestId = 0;
   bool _didRequestInitialCover = false;
+  String? _coverPath;
+  Brightness? _coverBrightness;
+  int _visualPrecacheRequestId = 0;
+  late final Timer _cacheCleanupTimer;
 
-  void updateCover() {
+  void updateCover() async {
+    final audio = playbackService.nowPlaying;
+    final brightness = Theme.of(context).brightness;
+    if (_coverPath == audio?.path && _coverBrightness == brightness) return;
+
     final requestId = ++_coverRequestId;
-    final coverFuture = playbackService.nowPlaying?.cover;
-    if (coverFuture == null) {
+    _coverPath = audio?.path;
+    _coverBrightness = brightness;
+
+    if (audio == null) {
       setState(() {
         nowPlayingCover = null;
         nowPlayingScheme = null;
@@ -72,24 +83,39 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
       return;
     }
 
-    coverFuture.then((cover) {
-      if (!mounted || requestId != _coverRequestId) return;
+    final cover = await audio.cover;
+    final scheme = cover == null ? null : await audio.coverScheme(brightness);
+    if (!mounted || requestId != _coverRequestId) return;
 
-      setState(() {
-        nowPlayingCover = cover;
-        nowPlayingScheme = null;
-      });
-      if (cover == null) return;
+    setState(() {
+      nowPlayingCover = cover;
+      nowPlayingScheme = scheme;
+    });
+    _scheduleNextVisualPrecache();
+  }
 
-      ColorScheme.fromImageProvider(
-        provider: cover,
-        brightness: Theme.of(context).brightness,
-      ).then((scheme) {
-        if (!mounted || requestId != _coverRequestId) return;
-        setState(() {
-          nowPlayingScheme = scheme;
-        });
-      });
+  void _scheduleNextVisualPrecache() {
+    final requestId = ++_visualPrecacheRequestId;
+
+    Future<void>.delayed(const Duration(milliseconds: 300), () async {
+      if (!mounted || requestId != _visualPrecacheRequestId) return;
+
+      final audio = playbackService.nextAudioForPreload;
+      if (audio == null) return;
+
+      try {
+        final cover = await audio.largeCover;
+        if (!mounted ||
+            requestId != _visualPrecacheRequestId ||
+            cover == null) {
+          return;
+        }
+
+        playbackService.retainPreloadedLargeCover(audio);
+        await precacheImage(cover, context);
+      } catch (_) {
+        audio.evictLargeCover();
+      }
     });
   }
 
@@ -97,6 +123,10 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   void initState() {
     super.initState();
     playbackService.addListener(updateCover);
+    _cacheCleanupTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      imageCache.clearLiveImages();
+    });
   }
 
   @override
@@ -109,6 +139,8 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
 
   @override
   void dispose() {
+    _cacheCleanupTimer.cancel();
+    _visualPrecacheRequestId++;
     playbackService.removeListener(updateCover);
     super.dispose();
   }
@@ -206,6 +238,128 @@ class _NowPlayingTopBar extends StatelessWidget {
   }
 }
 
+class _CachedBackdropLayer extends StatefulWidget {
+  const _CachedBackdropLayer({
+    required this.imageProvider,
+    required this.sigma,
+    required this.scale,
+  });
+
+  final ImageProvider<Object>? imageProvider;
+  final double sigma;
+  final double scale;
+
+  @override
+  State<_CachedBackdropLayer> createState() => _CachedBackdropLayerState();
+}
+
+class _CachedBackdropLayerState extends State<_CachedBackdropLayer> {
+  ui.Image? _cachedBlur;
+  ImageProvider<Object>? _currentProvider;
+
+  @override
+  void didUpdateWidget(_CachedBackdropLayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageProvider != _currentProvider) {
+      _currentProvider = widget.imageProvider;
+      _rebuildCache();
+    }
+  }
+
+  Future<void> _rebuildCache() async {
+    final provider = widget.imageProvider;
+    if (provider == null) {
+      setState(() {
+        _cachedBlur?.dispose();
+        _cachedBlur = null;
+      });
+      return;
+    }
+
+    final imageStream = provider.resolve(const ImageConfiguration());
+    final completer = Completer<ui.Image>();
+    late ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (info, _) {
+        if (!completer.isCompleted) completer.complete(info.image);
+        imageStream.removeListener(listener);
+      },
+      onError: (_, __) {
+        if (!completer.isCompleted) completer.completeError('failed');
+        imageStream.removeListener(listener);
+      },
+    );
+    imageStream.addListener(listener);
+
+    ui.Image sourceImage;
+    try {
+      sourceImage = await completer.future;
+    } catch (_) {
+      return;
+    }
+
+    if (_currentProvider != provider || !mounted) {
+      sourceImage.dispose();
+      return;
+    }
+
+    final cached = await _preBlur(sourceImage, widget.sigma, widget.scale);
+    sourceImage.dispose();
+
+    if (_currentProvider != provider || !mounted) {
+      cached?.dispose();
+      return;
+    }
+
+    setState(() {
+      _cachedBlur?.dispose();
+      _cachedBlur = cached;
+    });
+  }
+
+  static Future<ui.Image?> _preBlur(
+      ui.Image source, double sigma, double scale) async {
+    const targetWidth = 480;
+    final aspectRatio = source.height / source.width;
+    final targetHeight = (targetWidth * aspectRatio).ceil();
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(
+      recorder,
+      Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble()),
+    );
+
+    final sx = targetWidth / source.width;
+    final sy = targetHeight / source.height;
+    canvas.scale(sx, sy);
+    canvas.scale(scale);
+
+    final paint = Paint()
+      ..imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma);
+    canvas.drawImage(source, Offset.zero, paint);
+
+    final picture = recorder.endRecording();
+    return picture.toImage(targetWidth, targetHeight);
+  }
+
+  @override
+  void dispose() {
+    _cachedBlur?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_cachedBlur == null) return const SizedBox.shrink();
+    return RawImage(
+      image: _cachedBlur,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+    );
+  }
+}
+
 class _NowPlayingBackdrop extends StatelessWidget {
   const _NowPlayingBackdrop({
     required this.cover,
@@ -236,70 +390,68 @@ class _NowPlayingBackdrop extends StatelessWidget {
       duration: const Duration(milliseconds: 360),
       curve: AppMotion.enter,
       color: base,
-      child: RepaintBoundary(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Opacity(
-              opacity: isDark ? 0.78 : 0.92,
-              child: Transform.scale(
-                scale: 1.08,
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: Image(
-                    image: cover!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        reverseDuration: const Duration(milliseconds: 220),
+        switchInCurve: AppMotion.enter,
+        switchOutCurve: AppMotion.exit,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child: RepaintBoundary(
+          key: ValueKey(cover),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: isDark ? 0.78 : 0.92,
+                child: _CachedBackdropLayer(
+                  imageProvider: cover!,
+                  sigma: 18,
+                  scale: 1.08,
+                ),
+              ),
+              Opacity(
+                opacity: isDark ? 0.30 : 0.34,
+                child: _CachedBackdropLayer(
+                  imageProvider: cover!,
+                  sigma: 56,
+                  scale: 1.34,
+                ),
+              ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      wash.withValues(alpha: isDark ? 0.16 : 0.38),
+                      base.withValues(alpha: isDark ? 0.12 : 0.24),
+                      wash.withValues(alpha: isDark ? 0.20 : 0.44),
+                    ],
+                    stops: const [0.0, 0.48, 1.0],
                   ),
                 ),
               ),
-            ),
-            Opacity(
-              opacity: isDark ? 0.30 : 0.34,
-              child: Transform.scale(
-                scale: 1.34,
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 56, sigmaY: 56),
-                  child: Image(
-                    image: cover!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(-0.18, -0.18),
+                    radius: 1.08,
+                    colors: [
+                      Colors.transparent,
+                      shade.withValues(alpha: isDark ? 0.18 : 0.08),
+                      shade.withValues(alpha: isDark ? 0.42 : 0.17),
+                    ],
+                    stops: const [0.50, 0.78, 1.0],
                   ),
                 ),
               ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    wash.withValues(alpha: isDark ? 0.16 : 0.38),
-                    base.withValues(alpha: isDark ? 0.12 : 0.24),
-                    wash.withValues(alpha: isDark ? 0.20 : 0.44),
-                  ],
-                  stops: const [0.0, 0.48, 1.0],
-                ),
+              ColoredBox(
+                color: wash.withValues(alpha: isDark ? 0.06 : 0.14),
               ),
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: const Alignment(-0.18, -0.18),
-                  radius: 1.08,
-                  colors: [
-                    Colors.transparent,
-                    shade.withValues(alpha: isDark ? 0.18 : 0.08),
-                    shade.withValues(alpha: isDark ? 0.42 : 0.17),
-                  ],
-                  stops: const [0.50, 0.78, 1.0],
-                ),
-              ),
-            ),
-            ColoredBox(
-              color: wash.withValues(alpha: isDark ? 0.06 : 0.14),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -855,37 +1007,6 @@ class _NowPlayingSliderState extends State<_NowPlayingSlider> {
                     playbackService.seek(value);
                   },
                 ),
-                // builder: (context, positionSnapshot) => SquigglySlider(
-                //   thumbColor: scheme.primary,
-                //   activeColor: scheme.primary,
-                //   inactiveColor: scheme.outline,
-                //   useLineThumb: true,
-                //   squiggleAmplitude:
-                //       playerStateSnapshot.data == PlayerState.playing ? 6.0 : 0,
-                //   squiggleWavelength: 10.0,
-                //   squiggleSpeed: 0.08,
-                //   min: 0.0,
-                //   max: nowPlayingLength,
-                //   value: isDragging
-                //       ? dragPosition.value
-                //       : positionSnapshot.data! > nowPlayingLength
-                //           ? nowPlayingLength
-                //           : positionSnapshot.data!,
-                //   label: Duration(
-                //     milliseconds: (dragPosition.value * 1000).toInt(),
-                //   ).toStringHMMSS(),
-                //   onChangeStart: (value) {
-                //     isDragging = true;
-                //     dragPosition.value = value;
-                //   },
-                //   onChanged: (value) {
-                //     dragPosition.value = value;
-                //   },
-                //   onChangeEnd: (value) {
-                //     isDragging = false;
-                //     playbackService.seek(value);
-                //   },
-                // ),
               ),
             ),
           ),
@@ -941,17 +1062,24 @@ class _NowPlayingInfo extends StatefulWidget {
 class __NowPlayingInfoState extends State<_NowPlayingInfo> {
   final playbackService = PlayService.instance.playbackService;
   Future<ImageProvider<Object>?>? nowPlayingCover;
+  String? _coverPath;
 
   void updateCover() {
+    final audio = playbackService.nowPlaying;
+    if (_coverPath == audio?.path) return;
+
+    _coverPath = audio?.path;
     setState(() {
-      nowPlayingCover = playbackService.nowPlaying?.largeCover;
+      nowPlayingCover = audio?.largeCover;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    nowPlayingCover = playbackService.nowPlaying?.largeCover;
+    final audio = playbackService.nowPlaying;
+    _coverPath = audio?.path;
+    nowPlayingCover = audio?.largeCover;
     playbackService.addListener(updateCover);
   }
 

@@ -256,35 +256,29 @@ class ThemeProvider extends ChangeNotifier {
     final requestId = ++_audioAccentRequestId;
     _audioAccentPath = audio.path;
     _audioAccentBrightness = brightness;
-    audio.cover.then((cover) {
+    audio.coverScheme(brightness).then((accentScheme) {
       if (requestId != _audioAccentRequestId) return;
-      if (cover == null) {
+      if (accentScheme == null) {
         resetAudioAccentTheme();
         return;
       }
 
-      ColorScheme.fromImageProvider(
-        provider: cover,
-        brightness: brightness,
-      ).then((accentScheme) {
-        if (requestId != _audioAccentRequestId) return;
-        final base = _baseSchemeFor(brightness);
-        final merged = _copyAccentOnly(
-          base: base,
-          accent: accentScheme,
-        );
+      final base = _baseSchemeFor(brightness);
+      final merged = _copyAccentOnly(
+        base: base,
+        accent: accentScheme,
+      );
 
-        switch (brightness) {
-          case Brightness.light:
-            lightScheme = merged;
-            break;
-          case Brightness.dark:
-            darkScheme = merged;
-            break;
-        }
+      switch (brightness) {
+        case Brightness.light:
+          lightScheme = merged;
+          break;
+        case Brightness.dark:
+          darkScheme = merged;
+          break;
+      }
 
-        _notifyThemeChanged();
-      });
+      _notifyThemeChanged();
     });
   }
 

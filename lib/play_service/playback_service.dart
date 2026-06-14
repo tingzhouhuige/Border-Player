@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:border_player/app_preference.dart';
+import 'package:border_player/app_settings.dart';
 import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/library/play_statistics.dart';
 import 'package:border_player/play_service/play_service.dart';
@@ -8,7 +9,7 @@ import 'package:border_player/src/bass/bass_player.dart';
 import 'package:border_player/src/rust/api/smtc_flutter.dart';
 import 'package:border_player/theme_provider.dart';
 import 'package:border_player/utils.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 enum PlayMode {
   /// 顺序播放到播放列表结尾
@@ -112,6 +113,8 @@ class PlaybackService extends ChangeNotifier {
   String? _statisticsRecordedPath;
   double _lastTrackedPosition = 0;
   double _trackedPlaybackSeconds = 0;
+  int _preloadRequestId = 0;
+  final List<Audio> _largeCoverCacheWindow = [];
 
   /// 修改解码时的音量（不影响 Windows 系统音量）
   void setVolumeDsp(double volume) {
@@ -162,9 +165,71 @@ class PlaybackService extends ChangeNotifier {
             .sendPlayerStateMessage(playerState == PlayerState.playing);
         playService.desktopLyricService.sendNowPlayingMessage(nowPlaying!);
       });
+      _retainLargeCoverFor(nowPlaying!);
+      _scheduleNextAudioPreload();
     } catch (err) {
       LOGGER.e("[load and play] $err");
       showTextOnSnackBar(err.toString());
+    }
+  }
+
+  Brightness _currentBrightness() {
+    return switch (ThemeProvider.instance.themeMode) {
+      ThemeMode.system => Brightness.light,
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+    };
+  }
+
+  Audio? _nextAudioForPreload() {
+    final index = _playlistIndex;
+    final items = playlist.value;
+    if (index == null || items.isEmpty) return null;
+
+    if (playMode.value == PlayMode.singleLoop) return null;
+    if (playMode.value == PlayMode.forward && index >= items.length - 1) {
+      return null;
+    }
+
+    var nextIndex = index + 1;
+    if (nextIndex >= items.length) nextIndex = 0;
+    final audio = items[nextIndex];
+    if (audio.path == nowPlaying?.path) return null;
+    return audio;
+  }
+
+  Audio? get nextAudioForPreload => _nextAudioForPreload();
+
+  void retainPreloadedLargeCover(Audio audio) {
+    _retainLargeCoverFor(audio);
+  }
+
+  void _scheduleNextAudioPreload() {
+    final requestId = ++_preloadRequestId;
+
+    Future<void>.delayed(const Duration(milliseconds: 160), () {
+      if (requestId != _preloadRequestId) return;
+
+      final audio = _nextAudioForPreload();
+      if (audio == null) return;
+
+      if (AppSettings.instance.dynamicTheme) {
+        unawaited(audio.coverScheme(_currentBrightness()));
+      } else {
+        unawaited(audio.cover);
+      }
+    });
+  }
+
+  void _retainLargeCoverFor(Audio audio) {
+    _largeCoverCacheWindow.remove(audio);
+    _largeCoverCacheWindow.add(audio);
+
+    while (_largeCoverCacheWindow.length > 3) {
+      final evicted = _largeCoverCacheWindow.removeAt(0);
+      if (evicted.path != nowPlaying?.path) {
+        evicted.evictLargeCover();
+      }
     }
   }
 

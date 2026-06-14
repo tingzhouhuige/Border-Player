@@ -14,20 +14,26 @@ class CurrentPlaylistView extends StatefulWidget {
 class _CurrentPlaylistViewState extends State<CurrentPlaylistView> {
   final playbackService = PlayService.instance.playbackService;
   late final ScrollController scrollController;
+  int _lastPlaylistIndex = -1;
 
   void _toNowPlaying() {
     if (scrollController.hasClients) {
-      scrollController.animateTo(
-        playbackService.playlistIndex * 64.0,
-        duration: AppMotion.page,
-        curve: AppMotion.enter,
-      );
+      final currentIndex = playbackService.playlistIndex;
+      if (currentIndex != _lastPlaylistIndex) {
+        _lastPlaylistIndex = currentIndex;
+        scrollController.animateTo(
+          currentIndex * 64.0,
+          duration: AppMotion.page,
+          curve: AppMotion.enter,
+        );
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
+    _lastPlaylistIndex = playbackService.playlistIndex;
     scrollController = ScrollController(
       initialScrollOffset: playbackService.playlistIndex * 64.0,
     );

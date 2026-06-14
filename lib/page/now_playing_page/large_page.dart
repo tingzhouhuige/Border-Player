@@ -96,7 +96,7 @@ class _NowPlayingPage_Large extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(34),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(
+                  filter: ui.ImageFilter.blur(
                     sigmaX: 58,
                     sigmaY: 58,
                   ),

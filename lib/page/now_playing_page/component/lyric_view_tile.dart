@@ -26,8 +26,10 @@ class LyricViewTile extends StatelessWidget {
         LyricTextAlign.center => Alignment.center,
         LyricTextAlign.right => Alignment.centerRight,
       },
-      child: Opacity(
+      child: AnimatedOpacity(
         opacity: opacity,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.fastOutSlowIn,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12.0),
@@ -382,10 +384,12 @@ class LyricTransitionTileController extends ChangeNotifier {
   double sizeFactor = 0;
   double k = 1;
   late final Ticker factorTicker;
+  bool _isDisposed = false;
 
   LyricTransitionTileController([this.lrcLine, this.syncLine]) {
     positionStreamSub = playbackService.positionStream.listen(_updateProgress);
     factorTicker = Ticker((elapsed) {
+      if (_isDisposed) return;
       sizeFactor += k * 1 / 180;
       if (sizeFactor > 1) {
         k = -1;
@@ -400,6 +404,8 @@ class LyricTransitionTileController extends ChangeNotifier {
   }
 
   void _updateProgress(double position) {
+    if (_isDisposed) return;
+    
     late int startInMs;
     late int lengthInMs;
     if (lrcLine != null) {
@@ -420,6 +426,8 @@ class LyricTransitionTileController extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
     positionStreamSub.cancel();
     factorTicker.dispose();
     super.dispose();

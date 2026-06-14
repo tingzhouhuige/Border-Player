@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/src/rust/api/tag_reader.dart';
 import 'package:border_player/utils.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 
 /// from index.json
 class AudioLibrary {
@@ -193,6 +193,10 @@ class Audio {
   String? by;
 
   ImageProvider? _cover;
+  Future<ImageProvider?>? _coverFuture;
+  ImageProvider? _largeCover;
+  Future<ImageProvider?>? _largeCoverFuture;
+  final Map<Brightness, Future<ColorScheme?>> _coverSchemes = {};
 
   /// 以“、”和“/”分割艺术家，会把名称中带有这些符号的艺术家分割。
   /// 暂时想不到别的方法。
@@ -262,15 +266,45 @@ class Audio {
   /// 缓存ImageProvider不用重新解码。快速滚动时最多250mb
   /// 48*48
   Future<ImageProvider?> get cover {
-    if (_cover == null) {
-      return _getResizedPic(width: 48, height: 48).then((value) {
-        if (value == null) return null;
+    final cached = _cover;
+    if (cached != null) return Future.value(cached);
 
-        _cover = value;
-        return _cover;
-      });
+    return _coverFuture ??= _getResizedPic(width: 48, height: 48).then((value) {
+      if (value == null) {
+        _coverFuture = null;
+        return null;
+      }
+
+      _cover = value;
+      return _cover;
+    }).catchError((Object error) {
+      _coverFuture = null;
+      throw error;
+    });
+  }
+
+  Future<ColorScheme?> coverScheme(Brightness brightness) {
+    final cached = _coverSchemes[brightness];
+    if (cached != null) return cached;
+
+    final future = _buildCoverScheme(brightness);
+    _coverSchemes[brightness] = future;
+    return future;
+  }
+
+  Future<ColorScheme?> _buildCoverScheme(Brightness brightness) async {
+    try {
+      final provider = await cover;
+      if (provider == null) return null;
+
+      return ColorScheme.fromImageProvider(
+        provider: provider,
+        brightness: brightness,
+      );
+    } catch (_) {
+      _coverSchemes.remove(brightness);
+      return null;
     }
-    return Future.value(_cover);
   }
 
   /// audio detail page 不需要频繁调用，所以不缓存图片
@@ -278,10 +312,31 @@ class Audio {
   Future<ImageProvider?> get mediumCover =>
       _getResizedPic(width: 200, height: 200);
 
-  /// now playing 不需要频繁调用，所以不缓存图片
   /// size: 400 * devicePixelRatio（屏幕缩放大小）
-  Future<ImageProvider?> get largeCover =>
-      _getResizedPic(width: 400, height: 400);
+  Future<ImageProvider?> get largeCover {
+    final cached = _largeCover;
+    if (cached != null) return Future.value(cached);
+
+    return _largeCoverFuture ??=
+        _getResizedPic(width: 400, height: 400).then((value) {
+      if (value == null) {
+        _largeCoverFuture = null;
+        return null;
+      }
+
+      _largeCover = value;
+      return _largeCover;
+    }).catchError((Object error) {
+      _largeCoverFuture = null;
+      throw error;
+    });
+  }
+
+  void evictLargeCover() {
+    _largeCover?.evict();
+    _largeCover = null;
+    _largeCoverFuture = null;
+  }
 
   @override
   String toString() {
