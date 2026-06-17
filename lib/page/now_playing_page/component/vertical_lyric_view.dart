@@ -7,6 +7,7 @@ import 'package:border_player/page/now_playing_page/component/lyric_view_tile.da
 import 'package:border_player/page/now_playing_page/now_playing_render_phase.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 bool ALWAYS_SHOW_LYRIC_VIEW_CONTROLS = false;
@@ -138,29 +139,35 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
     _currentLine = max((next == -1 ? widget.lyric.lines.length : next) - 1, 0);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final targetContext = currentLyricTileKey.currentContext;
-      if (targetContext == null) return;
-      if (targetContext.mounted) {
-        Scrollable.ensureVisible(
-          targetContext,
-          alignment: 0.25,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.fastOutSlowIn,
-        );
-      }
+      _scrollToCurrentLyric();
     });
   }
 
   void _scrollToCurrentLyric() {
     final targetContext = currentLyricTileKey.currentContext;
     if (targetContext == null) return;
+    if (!targetContext.mounted) return;
 
-    if (targetContext.mounted) {
-      Scrollable.ensureVisible(
-        targetContext,
-        alignment: 0.25,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.fastOutSlowIn,
+    final renderBox = targetContext.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final viewport = RenderAbstractViewport.of(renderBox);
+    final targetOffset = viewport
+        .getOffsetToReveal(renderBox, 0.25)
+        .offset
+        .clamp(
+          scrollController.position.minScrollExtent,
+          scrollController.position.maxScrollExtent,
+        );
+
+    final diff = (scrollController.offset - targetOffset).abs();
+    if (diff < 2.0) {
+      scrollController.jumpTo(targetOffset);
+    } else {
+      scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
       );
     }
   }
@@ -185,15 +192,20 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
 
   @override
   Widget build(BuildContext context) {
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    final spacerHeight = (viewportHeight * 0.4).clamp(120.0, 400.0);
+
     return CustomScrollView(
       key: LYRIC_VIEW_KEY,
       controller: scrollController,
+      physics: const ClampingScrollPhysics(),
       slivers: [
-        const SliverFillRemaining(),
         SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(widget.lyric.lines.length, (i) {
+          child: SizedBox(height: spacerHeight),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, i) {
               final isCurrent = i == _currentLine;
               return LyricViewTile(
                 key: isCurrent ? currentLyricTileKey : null,
@@ -201,10 +213,13 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
                 opacity: isCurrent ? 1.0 : 0.18,
                 onTap: () => _seekToLyricLine(i),
               );
-            }),
+            },
+            childCount: widget.lyric.lines.length,
           ),
         ),
-        const SliverFillRemaining(),
+        SliverToBoxAdapter(
+          child: SizedBox(height: spacerHeight),
+        ),
       ],
     );
   }

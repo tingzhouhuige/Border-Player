@@ -1,5 +1,6 @@
 import 'package:border_player/app_settings.dart';
 import 'package:border_player/library/audio_library.dart';
+import 'package:border_player/page/now_playing_page/page.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
@@ -22,6 +23,7 @@ class ThemeProvider extends ChangeNotifier {
   int _audioAccentRequestId = 0;
   String? _audioAccentPath;
   Brightness? _audioAccentBrightness;
+  bool _pendingThemeNotification = false;
 
   static ThemeProvider? _instance;
 
@@ -278,8 +280,18 @@ class ThemeProvider extends ChangeNotifier {
           break;
       }
 
+      if (NowPlayingPage.isVisible) {
+        _pendingThemeNotification = true;
+        return;
+      }
       _notifyThemeChanged();
     });
+  }
+
+  void flushPendingThemeNotification() {
+    if (!_pendingThemeNotification) return;
+    _pendingThemeNotification = false;
+    _notifyThemeChanged();
   }
 
   void changeFontFamily(String? fontFamily) {

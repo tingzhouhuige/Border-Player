@@ -19,6 +19,7 @@ import 'package:border_player/app_paths.dart' as app_paths;
 import 'package:border_player/play_service/play_service.dart';
 import 'package:border_player/play_service/playback_service.dart';
 import 'package:border_player/src/bass/bass_player.dart';
+import 'package:border_player/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -50,6 +51,8 @@ final NOW_PLAYING_VIEW_MODE = ValueNotifier(
 
 class NowPlayingPage extends StatefulWidget {
   const NowPlayingPage({super.key});
+
+  static bool isVisible = false;
 
   @override
   State<NowPlayingPage> createState() => _NowPlayingPageState();
@@ -84,11 +87,16 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     }
 
     final cover = await audio.cover;
-    final scheme = cover == null ? null : await audio.coverScheme(brightness);
     if (!mounted || requestId != _coverRequestId) return;
 
     setState(() {
       nowPlayingCover = cover;
+    });
+
+    final scheme = cover == null ? null : await audio.coverScheme(brightness);
+    if (!mounted || requestId != _coverRequestId) return;
+
+    setState(() {
       nowPlayingScheme = scheme;
     });
     _scheduleNextVisualPrecache();
@@ -97,7 +105,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   void _scheduleNextVisualPrecache() {
     final requestId = ++_visualPrecacheRequestId;
 
-    Future<void>.delayed(const Duration(milliseconds: 300), () async {
+    Future<void>.delayed(const Duration(milliseconds: 500), () async {
       if (!mounted || requestId != _visualPrecacheRequestId) return;
 
       final audio = playbackService.nextAudioForPreload;
@@ -122,6 +130,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   @override
   void initState() {
     super.initState();
+    NowPlayingPage.isVisible = true;
     playbackService.addListener(updateCover);
     _cacheCleanupTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (!mounted) return;
@@ -134,14 +143,19 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     super.didChangeDependencies();
     if (_didRequestInitialCover) return;
     _didRequestInitialCover = true;
-    updateCover();
+    Future<void>.delayed(AppMotion.nowPlayingPage, () {
+      if (!mounted) return;
+      updateCover();
+    });
   }
 
   @override
   void dispose() {
+    NowPlayingPage.isVisible = false;
     _cacheCleanupTimer.cancel();
     _visualPrecacheRequestId++;
     playbackService.removeListener(updateCover);
+    ThemeProvider.instance.flushPendingThemeNotification();
     super.dispose();
   }
 
@@ -400,7 +414,7 @@ class _NowPlayingBackdrop extends StatelessWidget {
       curve: AppMotion.enter,
       color: base,
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
+        duration: const Duration(milliseconds: 420),
         reverseDuration: const Duration(milliseconds: 220),
         switchInCurve: AppMotion.enter,
         switchOutCurve: AppMotion.exit,
@@ -413,19 +427,31 @@ class _NowPlayingBackdrop extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Opacity(
-                opacity: isDark ? 0.78 : 0.92,
-                child: _CachedBackdropLayer(
-                  imageProvider: cover!,
-                  sigma: 18,
-                  scale: 1.08,
+                opacity: isDark ? 0.72 : 0.84,
+                child: Transform.scale(
+                  scale: 1.10,
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                    child: Image(
+                      image: cover!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               ),
               Opacity(
-                opacity: isDark ? 0.30 : 0.34,
-                child: _CachedBackdropLayer(
-                  imageProvider: cover!,
-                  sigma: 56,
-                  scale: 1.34,
+                opacity: isDark ? 0.28 : 0.30,
+                child: Transform.scale(
+                  scale: 1.36,
+                  child: ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 58, sigmaY: 58),
+                    child: Image(
+                      image: cover!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               ),
               DecoratedBox(
@@ -434,9 +460,9 @@ class _NowPlayingBackdrop extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      wash.withValues(alpha: isDark ? 0.16 : 0.38),
-                      base.withValues(alpha: isDark ? 0.12 : 0.24),
-                      wash.withValues(alpha: isDark ? 0.20 : 0.44),
+                      wash.withValues(alpha: isDark ? 0.18 : 0.40),
+                      base.withValues(alpha: isDark ? 0.10 : 0.22),
+                      wash.withValues(alpha: isDark ? 0.22 : 0.48),
                     ],
                     stops: const [0.0, 0.48, 1.0],
                   ),
@@ -445,19 +471,19 @@ class _NowPlayingBackdrop extends StatelessWidget {
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(-0.18, -0.18),
-                    radius: 1.08,
+                    center: const Alignment(-0.22, -0.18),
+                    radius: 1.12,
                     colors: [
                       Colors.transparent,
-                      shade.withValues(alpha: isDark ? 0.18 : 0.08),
-                      shade.withValues(alpha: isDark ? 0.42 : 0.17),
+                      shade.withValues(alpha: isDark ? 0.16 : 0.07),
+                      shade.withValues(alpha: isDark ? 0.38 : 0.14),
                     ],
-                    stops: const [0.50, 0.78, 1.0],
+                    stops: const [0.48, 0.78, 1.0],
                   ),
                 ),
               ),
               ColoredBox(
-                color: wash.withValues(alpha: isDark ? 0.06 : 0.14),
+                color: wash.withValues(alpha: isDark ? 0.05 : 0.12),
               ),
             ],
           ),
