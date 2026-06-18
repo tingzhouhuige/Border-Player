@@ -305,10 +305,23 @@ class _LrcLineContent extends StatelessWidget {
 
 /// 歌词间奏表示
 /// lrcLine 和 syncLine 必须有且只有一个不为空
-class LyricTransitionTile extends StatelessWidget {
+class LyricTransitionTile extends StatefulWidget {
   final LrcLine? lrcLine;
   final SyncLyricLine? syncLine;
   const LyricTransitionTile({super.key, this.lrcLine, this.syncLine});
+
+  @override
+  State<LyricTransitionTile> createState() => _LyricTransitionTileState();
+}
+
+class _LyricTransitionTileState extends State<LyricTransitionTile> {
+  late final LyricTransitionTileController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = LyricTransitionTileController(widget.lrcLine, widget.syncLine);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,11 +335,17 @@ class LyricTransitionTile extends StatelessWidget {
         child: CustomPaint(
           painter: LyricTransitionPainter(
             scheme,
-            LyricTransitionTileController(lrcLine, syncLine),
+            controller,
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
 
@@ -405,7 +424,7 @@ class LyricTransitionTileController extends ChangeNotifier {
 
   void _updateProgress(double position) {
     if (_isDisposed) return;
-    
+
     late int startInMs;
     late int lengthInMs;
     if (lrcLine != null) {
@@ -414,6 +433,12 @@ class LyricTransitionTileController extends ChangeNotifier {
     } else {
       startInMs = syncLine!.start.inMilliseconds;
       lengthInMs = syncLine!.length.inMilliseconds;
+    }
+    if (lengthInMs <= 0) {
+      progress = 1;
+      notifyListeners();
+      dispose();
+      return;
     }
     final sinceStart = position * 1000 - startInMs;
     progress = max(sinceStart, 0) / lengthInMs;

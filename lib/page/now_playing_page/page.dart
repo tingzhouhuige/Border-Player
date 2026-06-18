@@ -67,7 +67,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   String? _coverPath;
   Brightness? _coverBrightness;
   int _visualPrecacheRequestId = 0;
-  late final Timer _cacheCleanupTimer;
 
   void updateCover() async {
     final audio = playbackService.nowPlaying;
@@ -86,17 +85,17 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
       return;
     }
 
-    final cover = await audio.cover;
+    final coverFuture = audio.cover;
+    final schemeFuture = audio.coverScheme(brightness);
+
+    final cover = await coverFuture;
+    if (!mounted || requestId != _coverRequestId) return;
+
+    final scheme = cover == null ? null : await schemeFuture;
     if (!mounted || requestId != _coverRequestId) return;
 
     setState(() {
       nowPlayingCover = cover;
-    });
-
-    final scheme = cover == null ? null : await audio.coverScheme(brightness);
-    if (!mounted || requestId != _coverRequestId) return;
-
-    setState(() {
       nowPlayingScheme = scheme;
     });
     _scheduleNextVisualPrecache();
@@ -132,10 +131,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     super.initState();
     NowPlayingPage.isVisible = true;
     playbackService.addListener(updateCover);
-    _cacheCleanupTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (!mounted) return;
-      imageCache.clearLiveImages();
-    });
   }
 
   @override
@@ -152,7 +147,6 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   @override
   void dispose() {
     NowPlayingPage.isVisible = false;
-    _cacheCleanupTimer.cancel();
     _visualPrecacheRequestId++;
     playbackService.removeListener(updateCover);
     ThemeProvider.instance.flushPendingThemeNotification();

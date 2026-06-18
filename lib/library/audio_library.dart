@@ -283,6 +283,8 @@ class Audio {
     });
   }
 
+  ImageProvider? get cachedCover => _cover;
+
   Future<ColorScheme?> coverScheme(Brightness brightness) {
     final cached = _coverSchemes[brightness];
     if (cached != null) return cached;

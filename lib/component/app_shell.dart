@@ -44,16 +44,20 @@ class _AppShell_Small extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         _HomeCoverBackdrop(scheme: scheme),
-        Scaffold(
-          backgroundColor: _useHomeCoverBackdrop()
-              ? Colors.transparent
-              : scheme.surfaceContainer,
-          appBar: const PreferredSize(
-            preferredSize: Size.fromHeight(72.0),
-            child: TitleBar(),
+        BackdropGroup(
+          child: Scaffold(
+            backgroundColor: _useHomeCoverBackdrop()
+                ? Colors.transparent
+                : scheme.surfaceContainer,
+            appBar: const PreferredSize(
+              preferredSize: Size.fromHeight(72.0),
+              child: TitleBar(),
+            ),
+            drawer: const SideNav(),
+            body: Stack(
+              children: [RepaintBoundary(child: page), const MiniNowPlaying()],
+            ),
           ),
-          drawer: const SideNav(),
-          body: Stack(children: [page, const MiniNowPlaying()]),
         ),
       ],
     );
@@ -72,30 +76,32 @@ class _AppShell_Large extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         _HomeCoverBackdrop(scheme: scheme),
-        Scaffold(
-          backgroundColor: _useHomeCoverBackdrop()
-              ? Colors.transparent
-              : scheme.surfaceContainer,
-          appBar: const PreferredSize(
-            preferredSize: Size.fromHeight(72.0),
-            child: TitleBar(),
-          ),
-          body: Row(
-            children: [
-              const SideNav(),
-              Expanded(
-                child: Stack(children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 16, 20, 18),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(22.0),
-                      child: page,
+        BackdropGroup(
+          child: Scaffold(
+            backgroundColor: _useHomeCoverBackdrop()
+                ? Colors.transparent
+                : scheme.surfaceContainer,
+            appBar: const PreferredSize(
+              preferredSize: Size.fromHeight(72.0),
+              child: TitleBar(),
+            ),
+            body: Row(
+              children: [
+                const SideNav(),
+                Expanded(
+                  child: Stack(children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 16, 20, 18),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22.0),
+                        child: RepaintBoundary(child: page),
+                      ),
                     ),
-                  ),
-                  const MiniNowPlaying()
-                ]),
-              ),
-            ],
+                    const MiniNowPlaying()
+                  ]),
+                ),
+              ],
+            ),
           ),
         ),
       ],

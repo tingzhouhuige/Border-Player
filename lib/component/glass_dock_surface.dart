@@ -57,7 +57,7 @@ class GlassDockSurface extends StatelessWidget {
       child: ClipRRect(
         borderRadius: borderRadius,
         clipBehavior: clipBehavior,
-        child: BackdropFilter(
+        child: BackdropFilter.grouped(
           filter: ImageFilter.blur(sigmaX: 58, sigmaY: 58),
           child: Container(
             height: height,

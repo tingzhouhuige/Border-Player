@@ -1,12 +1,13 @@
 import 'package:border_player/component/settings_tile.dart';
 import 'package:border_player/hotkeys_helper.dart';
-import 'package:border_player/page/settings_page/cpfeedback_key.dart';
 import 'package:border_player/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:github/github.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:go_router/go_router.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
+
+const _cpFeedbackKey = String.fromEnvironment("CPFEEDBACK_KEY");
 
 class CreateIssueTile extends StatelessWidget {
   const CreateIssueTile({super.key});
@@ -38,9 +39,14 @@ class _SettingsIssuePageState extends State<SettingsIssuePage> {
   final submitBtnController = WidgetStatesController();
 
   Future<void> createIssue() async {
+    if (_cpFeedbackKey.isEmpty) {
+      showTextOnSnackBar("当前版本未配置反馈密钥，请到 GitHub 页面反馈问题");
+      return;
+    }
+
     submitBtnController.update(WidgetState.disabled, true);
     final cpfeedback = GitHub(
-      auth: const Authentication.withToken(CPFEEDBACK_KEY),
+      auth: const Authentication.withToken(_cpFeedbackKey),
     );
     final issueBodyBuilder = StringBuffer();
     issueBodyBuilder

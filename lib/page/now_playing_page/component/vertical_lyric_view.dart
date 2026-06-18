@@ -113,22 +113,54 @@ class _VerticalLyricScrollView extends StatefulWidget {
       _VerticalLyricScrollViewState();
 }
 
-class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
+class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
+    with TickerProviderStateMixin {
   final playbackService = PlayService.instance.playbackService;
   final lyricService = PlayService.instance.lyricService;
   late StreamSubscription lyricLineStreamSubscription;
   final scrollController = ScrollController();
+  late final AnimationController _scrollAnimationController;
+  late final AnimationController _entranceAnimationController;
 
   int _currentLine = 0;
+  bool _scrollFramePending = false;
+  bool _pendingScrollAnimated = false;
+  bool _entranceReady = false;
+  double _scrollAnimationStart = 0;
+  double _scrollAnimationTarget = 0;
   final currentLyricTileKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
 
+    _scrollAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..addListener(_tickScrollAnimation);
+    _entranceAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
     _initLyricView();
     lyricLineStreamSubscription =
         lyricService.lyricLineStream.listen(_updateNextLyricLine);
+  }
+
+  void _tickScrollAnimation() {
+    if (!scrollController.hasClients) return;
+
+    final progress =
+        Curves.easeOutCubic.transform(_scrollAnimationController.value);
+    final targetOffset = _scrollAnimationStart +
+        (_scrollAnimationTarget - _scrollAnimationStart) * progress;
+    final clampedOffset = targetOffset.clamp(
+      scrollController.position.minScrollExtent,
+      scrollController.position.maxScrollExtent,
+    );
+
+    if ((scrollController.offset - clampedOffset).abs() < 0.1) return;
+    scrollController.jumpTo(clampedOffset);
   }
 
   void _initLyricView() {
@@ -138,37 +170,69 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
     );
     _currentLine = max((next == -1 ? widget.lyric.lines.length : next) - 1, 0);
 
+    _scheduleLyricEntrance();
+  }
+
+  void _scheduleLyricEntrance() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToCurrentLyric();
+      if (!mounted) return;
+
+      final targetOffset = _targetOffsetForCurrentLyric();
+      if (targetOffset == null) return;
+
+      _scrollAnimationController.stop();
+      scrollController.jumpTo(targetOffset);
+      setState(() {
+        _entranceReady = true;
+      });
+      _entranceAnimationController.forward(from: 0);
     });
   }
 
-  void _scrollToCurrentLyric() {
+  void _scheduleScrollToCurrentLyric({required bool animated}) {
+    _pendingScrollAnimated = _pendingScrollAnimated || animated;
+    if (_scrollFramePending) return;
+
+    _scrollFramePending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final shouldAnimate = _pendingScrollAnimated;
+      _scrollFramePending = false;
+      _pendingScrollAnimated = false;
+      if (!mounted) return;
+      _scrollToCurrentLyric(animated: shouldAnimate);
+    });
+  }
+
+  double? _targetOffsetForCurrentLyric() {
     final targetContext = currentLyricTileKey.currentContext;
-    if (targetContext == null) return;
-    if (!targetContext.mounted) return;
+    if (targetContext == null) return null;
+    if (!targetContext.mounted) return null;
+    if (!scrollController.hasClients) return null;
 
     final renderBox = targetContext.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
+    if (renderBox == null) return null;
 
     final viewport = RenderAbstractViewport.of(renderBox);
-    final targetOffset = viewport
-        .getOffsetToReveal(renderBox, 0.25)
-        .offset
-        .clamp(
+    return viewport.getOffsetToReveal(renderBox, 0.25).offset.clamp(
           scrollController.position.minScrollExtent,
           scrollController.position.maxScrollExtent,
         );
+  }
+
+  void _scrollToCurrentLyric({required bool animated}) {
+    final targetOffset = _targetOffsetForCurrentLyric();
+    if (targetOffset == null) return;
 
     final diff = (scrollController.offset - targetOffset).abs();
+    _scrollAnimationController.stop();
     if (diff < 2.0) {
+      return;
+    } else if (!animated) {
       scrollController.jumpTo(targetOffset);
     } else {
-      scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-      );
+      _scrollAnimationStart = scrollController.offset;
+      _scrollAnimationTarget = targetOffset.toDouble();
+      _scrollAnimationController.forward(from: 0);
     }
   }
 
@@ -177,17 +241,18 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
     setState(() {
       _currentLine = i;
     });
+    _scheduleScrollToCurrentLyric(animated: true);
   }
 
   void _updateNextLyricLine(int lyricLine) {
-    if (lyricLine == _currentLine) return;
+    if (widget.lyric.lines.isEmpty) return;
+    final nextLine = lyricLine.clamp(0, widget.lyric.lines.length - 1);
+    if (nextLine == _currentLine) return;
     setState(() {
-      _currentLine = lyricLine;
+      _currentLine = nextLine;
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToCurrentLyric();
-    });
+    _scheduleScrollToCurrentLyric(animated: true);
   }
 
   @override
@@ -195,7 +260,7 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
     final viewportHeight = MediaQuery.sizeOf(context).height;
     final spacerHeight = (viewportHeight * 0.4).clamp(120.0, 400.0);
 
-    return CustomScrollView(
+    final lyricScrollView = CustomScrollView(
       key: LYRIC_VIEW_KEY,
       controller: scrollController,
       physics: const ClampingScrollPhysics(),
@@ -222,12 +287,33 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView> {
         ),
       ],
     );
+
+    return ClipRect(
+      child: AnimatedBuilder(
+        animation: _entranceAnimationController,
+        builder: (context, child) {
+          final progress = Curves.easeOutCubic.transform(
+            _entranceAnimationController.value,
+          );
+          return Opacity(
+            opacity: _entranceReady ? 1 : 0,
+            child: Transform.translate(
+              offset: Offset(0, (1 - progress) * 56),
+              child: child,
+            ),
+          );
+        },
+        child: lyricScrollView,
+      ),
+    );
   }
 
   @override
   void dispose() {
-    super.dispose();
+    _scrollAnimationController.dispose();
+    _entranceAnimationController.dispose();
     lyricLineStreamSubscription.cancel();
     scrollController.dispose();
+    super.dispose();
   }
 }

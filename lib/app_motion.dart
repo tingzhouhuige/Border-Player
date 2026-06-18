@@ -35,8 +35,8 @@ class AppMotion {
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(enterAnimation),
       child: SlideTransition(
-        position:
-            Tween<Offset>(begin: begin, end: Offset.zero).animate(enterAnimation),
+        position: Tween<Offset>(begin: begin, end: Offset.zero)
+            .animate(enterAnimation),
         child: FadeTransition(
           opacity:
               Tween<double>(begin: 1, end: 0.92).animate(outgoingAnimation),

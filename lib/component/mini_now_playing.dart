@@ -2,6 +2,7 @@ import 'package:border_player/app_settings.dart';
 import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/component/rectangle_progress_indicator.dart';
 import 'package:border_player/component/responsive_builder.dart';
+import 'package:border_player/library/audio_library.dart';
 import 'package:border_player/play_service/play_service.dart';
 import 'package:border_player/src/bass/bass_player.dart';
 import 'package:border_player/app_paths.dart' as app_paths;
@@ -109,33 +110,10 @@ class _NowPlayingForeground extends StatelessWidget {
 
               return Row(
                 children: [
-                  /// now playing cover
-                  nowPlaying != null
-                      ? FutureBuilder(
-                          future: nowPlaying.cover,
-                          builder: (context, snapshot) =>
-                              switch (snapshot.connectionState) {
-                            ConnectionState.done => snapshot.data == null
-                                ? placeholder
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(26.0),
-                                    child: Image(
-                                      image: snapshot.data!,
-                                      width: 48.0,
-                                      height: 48.0,
-                                      errorBuilder: (_, __, ___) => placeholder,
-                                    ),
-                                  ),
-                            _ => const SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                          },
-                        )
-                      : placeholder,
+                  _MiniNowPlayingCover(
+                    audio: nowPlaying,
+                    placeholder: placeholder,
+                  ),
                   const SizedBox(width: 8.0),
                   Expanded(
                     child: Column(
@@ -181,6 +159,91 @@ class _NowPlayingForeground extends StatelessWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MiniNowPlayingCover extends StatefulWidget {
+  const _MiniNowPlayingCover({
+    required this.audio,
+    required this.placeholder,
+  });
+
+  final Audio? audio;
+  final Widget placeholder;
+
+  @override
+  State<_MiniNowPlayingCover> createState() => _MiniNowPlayingCoverState();
+}
+
+class _MiniNowPlayingCoverState extends State<_MiniNowPlayingCover> {
+  ImageProvider<Object>? _cover;
+  String? _coverPath;
+  int _coverRequestId = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncCover();
+  }
+
+  @override
+  void didUpdateWidget(_MiniNowPlayingCover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.audio?.path == widget.audio?.path) return;
+    _syncCover();
+  }
+
+  void _syncCover() {
+    final audio = widget.audio;
+    final requestId = ++_coverRequestId;
+    _coverPath = audio?.path;
+
+    if (audio == null) {
+      setState(() {
+        _cover = null;
+      });
+      return;
+    }
+
+    final cachedCover = audio.cachedCover;
+    if (cachedCover != null) {
+      setState(() {
+        _cover = cachedCover;
+      });
+      return;
+    }
+
+    audio.cover.then((cover) {
+      if (!mounted || requestId != _coverRequestId) return;
+      if (_coverPath != audio.path) return;
+
+      setState(() {
+        _cover = cover;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cover = _cover;
+    if (cover == null) {
+      return SizedBox(
+        width: 48,
+        height: 48,
+        child: Center(child: widget.placeholder),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26.0),
+      child: Image(
+        image: cover,
+        width: 48.0,
+        height: 48.0,
+        gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => widget.placeholder,
       ),
     );
   }

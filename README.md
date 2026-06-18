@@ -50,6 +50,14 @@ https://github.com/tingzhouhuige/Border-Player/releases
 
 ## 版本更新
 
+### v2.0.2
+
+- 优化质感模式主页切换性能：切换左侧栏内容时避免内容容器叠加动画，减少闪烁、拖影和卡顿。
+- 优化主页玻璃质感控件的模糊合成，降低多个毛玻璃控件同时重绘时的性能开销。
+- 优化播放页歌词切歌后的入场和滚动逻辑，减少歌词到达顶部时的瞬间抖动。
+- 修复从播放页返回主页后迷你播放栏圆形封面重新刷新的问题，封面加载时保持旧图直到新图可用。
+- 修复反馈入口缺少构建密钥时导致编译失败的问题，未配置密钥时改为提示不可用。
+
 ### v2.0
 
 - 新增三种主页软件风格：基础、取色、质感，可在设置页一键切换。
@@ -98,7 +106,7 @@ https://github.com/tingzhouhuige/Border-Player/releases
 指定版本发布目录示例：
 
 ```powershell
-.\tools\build_windows_release.ps1 -PackageName v2.0
+.\tools\build_windows_release.ps1 -PackageName v2.0.2
 ```
 
 如果 BASS DLL 缺失，加 `-DownloadBassIfMissing` 参数会自动下载：
