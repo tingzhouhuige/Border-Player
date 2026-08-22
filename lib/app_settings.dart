@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:github/github.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:border_player/window_geometry.dart';
+import 'package:border_player/windows_window_placement.dart';
 
 /// 把旧的 app data 目录（如果存在）移到新的目录
 /// 只在新 app data 目录没有数据时进行
@@ -17,10 +20,12 @@ Future<void> migrateAppData() async {
     if (newAppDataDir.listSync().isNotEmpty) return;
 
     final oldAppDataDir = await getApplicationSupportDirectory();
-    final oldDocumentsDir = Directory(path.join(
-      (await getApplicationDocumentsDirectory()).path,
-      "border_player",
-    ));
+    final oldDocumentsDir = Directory(
+      path.join(
+        (await getApplicationDocumentsDirectory()).path,
+        "border_player",
+      ),
+    );
     final sourceDir =
         oldDocumentsDir.existsSync() ? oldDocumentsDir : oldAppDataDir;
 
@@ -40,13 +45,24 @@ Future<void> migrateAppData() async {
 
 Future<Directory> getAppDataDir() async {
   final dir = await getApplicationDocumentsDirectory();
-  return Directory(path.join(dir.path, "Border Player"))
-      .create(recursive: true);
+  return Directory(
+    path.join(dir.path, "Border Player"),
+  ).create(recursive: true);
 }
+
+Rect? _parseRect(String? value) {
+  if (value == null) return null;
+  final parts = value.split(',').map(double.tryParse).toList();
+  if (parts.length != 4 || parts.any((part) => part == null)) return null;
+  return Rect.fromLTWH(parts[0]!, parts[1]!, parts[2]!, parts[3]!);
+}
+
+String _rectToString(Rect rect) =>
+    "${rect.left.toStringAsFixed(1)},${rect.top.toStringAsFixed(1)},${rect.width.toStringAsFixed(1)},${rect.height.toStringAsFixed(1)}";
 
 class AppSettings {
   static final github = GitHub();
-  static const String version = "2.0.2";
+  static const String version = "2.0.3";
 
   /// 主题模式：亮 / 暗
   ThemeMode themeMode = ThemeMode.light;
@@ -69,6 +85,14 @@ class AppSettings {
   /// 歌词来源：true，本地优先；false，在线优先
   bool localLyricFirst = true;
   Size windowSize = const Size(1280, 756);
+  Offset? windowPosition;
+  String? windowDisplayId;
+  String? windowDisplayName;
+  Rect? windowDisplayWorkArea;
+  Rect? windowPhysicalBounds;
+  Rect? windowPhysicalWorkArea;
+  String? windowPhysicalMonitorName;
+  bool windowPhysicalBoundsAreVisible = false;
   bool isWindowMaximized = false;
 
   String? fontFamily = "Microsoft YaHei";
@@ -135,8 +159,10 @@ class AppSettings {
     final sizeStr = settingsMap["WindowSize"];
     if (sizeStr != null) {
       final sizeStrs = (sizeStr as String).split(",");
-      _instance.windowSize = Size(double.tryParse(sizeStrs[0]) ?? 1280,
-          double.tryParse(sizeStrs[1]) ?? 756);
+      _instance.windowSize = Size(
+        double.tryParse(sizeStrs[0]) ?? 1280,
+        double.tryParse(sizeStrs[1]) ?? 756,
+      );
     }
 
     final isMaximized = settingsMap["IsWindowMaximized"];
@@ -200,14 +226,50 @@ class AppSettings {
       final sizeStr = settingsMap["WindowSize"];
       if (sizeStr != null) {
         final sizeStrs = (sizeStr as String).split(",");
-        _instance.windowSize = Size(double.tryParse(sizeStrs[0]) ?? 1280,
-            double.tryParse(sizeStrs[1]) ?? 756);
+        _instance.windowSize = Size(
+          double.tryParse(sizeStrs[0]) ?? 1280,
+          double.tryParse(sizeStrs[1]) ?? 756,
+        );
       }
 
       final isMaximized = settingsMap["IsWindowMaximized"];
       if (isMaximized != null) {
         _instance.isWindowMaximized = isMaximized;
       }
+
+      final positionStr = settingsMap["WindowPosition"] as String?;
+      if (positionStr != null) {
+        final values = positionStr.split(",");
+        if (values.length == 2) {
+          final x = double.tryParse(values[0]);
+          final y = double.tryParse(values[1]);
+          if (x != null && y != null) _instance.windowPosition = Offset(x, y);
+        }
+      }
+      _instance.windowDisplayId = settingsMap["WindowDisplayId"]?.toString();
+      _instance.windowDisplayName = settingsMap["WindowDisplayName"] as String?;
+      final workAreaStr = settingsMap["WindowDisplayWorkArea"] as String?;
+      if (workAreaStr != null) {
+        final values = workAreaStr.split(",").map(double.tryParse).toList();
+        if (values.length == 4 && values.every((value) => value != null)) {
+          _instance.windowDisplayWorkArea = Rect.fromLTWH(
+            values[0]!,
+            values[1]!,
+            values[2]!,
+            values[3]!,
+          );
+        }
+      }
+
+      final physicalBoundsStr = settingsMap["WindowPhysicalBounds"] as String?;
+      final physicalWorkAreaStr =
+          settingsMap["WindowPhysicalWorkArea"] as String?;
+      _instance.windowPhysicalBounds = _parseRect(physicalBoundsStr);
+      _instance.windowPhysicalWorkArea = _parseRect(physicalWorkAreaStr);
+      _instance.windowPhysicalMonitorName =
+          settingsMap["WindowPhysicalMonitorName"] as String?;
+      _instance.windowPhysicalBoundsAreVisible =
+          settingsMap["WindowPhysicalBoundsAreVisible"] == true;
 
       final ff = settingsMap["FontFamily"];
       final fp = settingsMap["FontPath"];
@@ -220,10 +282,44 @@ class AppSettings {
     }
   }
 
+  Future<void> captureWindowGeometry() async {
+    try {
+      if (await windowManager.isMaximized() ||
+          await windowManager.isFullScreen()) {
+        return;
+      }
+      final bounds = await windowManager.getBounds();
+      windowSize = bounds.size;
+      windowPosition = bounds.topLeft;
+
+      final physicalPlacement = await captureWindowsWindowPlacement();
+      if (physicalPlacement != null) {
+        windowPhysicalBounds = physicalPlacement.bounds;
+        windowPhysicalWorkArea = physicalPlacement.workArea;
+        windowPhysicalMonitorName = physicalPlacement.monitorName;
+        windowPhysicalBoundsAreVisible = physicalPlacement.usesVisibleBounds;
+      }
+
+      try {
+        final displays = await screenRetriever.getAllDisplays();
+        final display = displayForWindow(bounds, displays);
+        if (display != null) {
+          windowDisplayId = display.id.toString();
+          windowDisplayName = display.name;
+          windowDisplayWorkArea = displayWorkArea(display);
+        }
+      } catch (err, trace) {
+        LOGGER.e(err, stackTrace: trace);
+      }
+    } catch (err, trace) {
+      LOGGER.e(err, stackTrace: trace);
+    }
+  }
+
   Future<void> saveSettings() async {
     try {
+      await captureWindowGeometry();
       final isMaximized = await windowManager.isMaximized();
-      final isFullScreen = await windowManager.isFullScreen();
       final settingsMap = {
         "Version": version,
         "ThemeMode": themeMode == ThemeMode.dark,
@@ -241,12 +337,32 @@ class AppSettings {
 
       // 只有在窗口不是最大化且不是全屏时才保存窗口尺寸
       // 这样windowSize始终保存的是窗口化时的尺寸
-      Size sizeToSave = windowSize;
-      if (!isMaximized && !isFullScreen) {
-        sizeToSave = await windowManager.getSize();
-      }
+      final sizeToSave = windowSize;
       settingsMap["WindowSize"] =
           "${sizeToSave.width.toStringAsFixed(1)},${sizeToSave.height.toStringAsFixed(1)}";
+      final positionToSave = windowPosition;
+      if (positionToSave != null) {
+        settingsMap["WindowPosition"] =
+            "${positionToSave.dx.toStringAsFixed(1)},${positionToSave.dy.toStringAsFixed(1)}";
+      }
+      settingsMap["WindowDisplayId"] = windowDisplayId;
+      settingsMap["WindowDisplayName"] = windowDisplayName;
+      final workArea = windowDisplayWorkArea;
+      if (workArea != null) {
+        settingsMap["WindowDisplayWorkArea"] =
+            "${workArea.left.toStringAsFixed(1)},${workArea.top.toStringAsFixed(1)},${workArea.width.toStringAsFixed(1)},${workArea.height.toStringAsFixed(1)}";
+      }
+      final physicalBounds = windowPhysicalBounds;
+      final physicalWorkArea = windowPhysicalWorkArea;
+      if (physicalBounds != null) {
+        settingsMap["WindowPhysicalBounds"] = _rectToString(physicalBounds);
+      }
+      if (physicalWorkArea != null) {
+        settingsMap["WindowPhysicalWorkArea"] = _rectToString(physicalWorkArea);
+      }
+      settingsMap["WindowPhysicalMonitorName"] = windowPhysicalMonitorName;
+      settingsMap["WindowPhysicalBoundsAreVisible"] =
+          windowPhysicalBoundsAreVisible;
 
       final settingsStr = json.encode(settingsMap);
       final supportPath = (await getAppDataDir()).path;

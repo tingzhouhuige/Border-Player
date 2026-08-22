@@ -24,10 +24,17 @@ class _VerticalLyricViewState extends State<VerticalLyricView> {
   final lyricViewController = LyricViewController();
 
   @override
+  void initState() {
+    super.initState();
+    PlayService.instance.lyricService.ensureCurrentLyric();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final heavyVisualsReady =
-        NowPlayingRenderPhase.heavyVisualsReadyOf(context);
+    final heavyVisualsReady = NowPlayingRenderPhase.heavyVisualsReadyOf(
+      context,
+    );
 
     const loadingWidget = Center(
       child: SizedBox(
@@ -87,7 +94,7 @@ class _VerticalLyricViewState extends State<VerticalLyricView> {
                               const Align(
                                 alignment: Alignment.bottomRight,
                                 child: LyricViewControls(),
-                              )
+                              ),
                           ],
                         );
                       },
@@ -126,6 +133,7 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
   bool _scrollFramePending = false;
   bool _pendingScrollAnimated = false;
   bool _entranceReady = false;
+  int _entrancePositionAttempts = 0;
   double _scrollAnimationStart = 0;
   double _scrollAnimationTarget = 0;
   final currentLyricTileKey = GlobalKey();
@@ -143,15 +151,17 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
       duration: const Duration(milliseconds: 220),
     );
     _initLyricView();
-    lyricLineStreamSubscription =
-        lyricService.lyricLineStream.listen(_updateNextLyricLine);
+    lyricLineStreamSubscription = lyricService.lyricLineStream.listen(
+      _updateNextLyricLine,
+    );
   }
 
   void _tickScrollAnimation() {
     if (!scrollController.hasClients) return;
 
-    final progress =
-        Curves.easeOutCubic.transform(_scrollAnimationController.value);
+    final progress = Curves.easeOutCubic.transform(
+      _scrollAnimationController.value,
+    );
     final targetOffset = _scrollAnimationStart +
         (_scrollAnimationTarget - _scrollAnimationStart) * progress;
     final clampedOffset = targetOffset.clamp(
@@ -176,17 +186,50 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
   void _scheduleLyricEntrance() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _positionLyricForEntrance();
+    });
+  }
 
-      final targetOffset = _targetOffsetForCurrentLyric();
-      if (targetOffset == null) return;
-
+  void _positionLyricForEntrance() {
+    if (!mounted) return;
+    final targetOffset = _targetOffsetForCurrentLyric();
+    if (targetOffset != null) {
       _scrollAnimationController.stop();
       scrollController.jumpTo(targetOffset);
-      setState(() {
-        _entranceReady = true;
+      _finishEntrance();
+      return;
+    }
+
+    // A lazily built SliverList does not initially create a lyric line far
+    // into the song. Move close to its proportional position, then retry the
+    // exact RenderObject-based alignment on the following frame.
+    if (scrollController.hasClients && widget.lyric.lines.length > 1) {
+      final fraction = _currentLine / (widget.lyric.lines.length - 1);
+      final roughOffset = scrollController.position.maxScrollExtent * fraction;
+      scrollController.jumpTo(
+        roughOffset.clamp(
+          scrollController.position.minScrollExtent,
+          scrollController.position.maxScrollExtent,
+        ),
+      );
+    }
+
+    _entrancePositionAttempts++;
+    if (_entrancePositionAttempts < 4) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _positionLyricForEntrance();
       });
-      _entranceAnimationController.forward(from: 0);
+    } else {
+      _finishEntrance();
+    }
+  }
+
+  void _finishEntrance() {
+    if (_entranceReady || !mounted) return;
+    setState(() {
+      _entranceReady = true;
     });
+    _entranceAnimationController.forward(from: 0);
   }
 
   void _scheduleScrollToCurrentLyric({required bool animated}) {
@@ -219,9 +262,31 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
         );
   }
 
-  void _scrollToCurrentLyric({required bool animated}) {
+  void _scrollToCurrentLyric({required bool animated, int attempt = 0}) {
     final targetOffset = _targetOffsetForCurrentLyric();
-    if (targetOffset == null) return;
+    if (targetOffset == null) {
+      // A large seek can move the current line outside the lazily-built part
+      // of the SliverList. Jump near the line first so it gets built, then
+      // align its actual RenderObject on a following frame.
+      if (scrollController.hasClients && widget.lyric.lines.length > 1) {
+        final fraction = _currentLine / (widget.lyric.lines.length - 1);
+        final roughOffset =
+            scrollController.position.maxScrollExtent * fraction;
+        scrollController.jumpTo(
+          roughOffset.clamp(
+            scrollController.position.minScrollExtent,
+            scrollController.position.maxScrollExtent,
+          ),
+        );
+      }
+      if (attempt < 4) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _scrollToCurrentLyric(animated: animated, attempt: attempt + 1);
+        });
+      }
+      return;
+    }
 
     final diff = (scrollController.offset - targetOffset).abs();
     _scrollAnimationController.stop();
@@ -247,7 +312,10 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
   void _updateNextLyricLine(int lyricLine) {
     if (widget.lyric.lines.isEmpty) return;
     final nextLine = lyricLine.clamp(0, widget.lyric.lines.length - 1);
-    if (nextLine == _currentLine) return;
+    if (nextLine == _currentLine) {
+      _scheduleScrollToCurrentLyric(animated: true);
+      return;
+    }
     setState(() {
       _currentLine = nextLine;
     });
@@ -265,26 +333,19 @@ class _VerticalLyricScrollViewState extends State<_VerticalLyricScrollView>
       controller: scrollController,
       physics: const ClampingScrollPhysics(),
       slivers: [
-        SliverToBoxAdapter(
-          child: SizedBox(height: spacerHeight),
-        ),
+        SliverToBoxAdapter(child: SizedBox(height: spacerHeight)),
         SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, i) {
-              final isCurrent = i == _currentLine;
-              return LyricViewTile(
-                key: isCurrent ? currentLyricTileKey : null,
-                line: widget.lyric.lines[i],
-                opacity: isCurrent ? 1.0 : 0.18,
-                onTap: () => _seekToLyricLine(i),
-              );
-            },
-            childCount: widget.lyric.lines.length,
-          ),
+          delegate: SliverChildBuilderDelegate((context, i) {
+            final isCurrent = i == _currentLine;
+            return LyricViewTile(
+              key: isCurrent ? currentLyricTileKey : null,
+              line: widget.lyric.lines[i],
+              opacity: isCurrent ? 1.0 : 0.18,
+              onTap: () => _seekToLyricLine(i),
+            );
+          }, childCount: widget.lyric.lines.length),
         ),
-        SliverToBoxAdapter(
-          child: SizedBox(height: spacerHeight),
-        ),
+        SliverToBoxAdapter(child: SizedBox(height: spacerHeight)),
       ],
     );
 

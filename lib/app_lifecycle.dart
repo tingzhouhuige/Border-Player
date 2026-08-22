@@ -13,6 +13,7 @@ class AppLifecycle with WindowListener {
   static final instance = AppLifecycle._();
 
   bool _isClosing = false;
+  bool _isCapturingGeometry = false;
 
   Future<void> init() async {
     await windowManager.setPreventClose(true);
@@ -38,6 +39,22 @@ class AppLifecycle with WindowListener {
     await windowManager.setPreventClose(false);
     await windowManager.close();
   }
+
+  void _captureWindowGeometry() async {
+    if (_isClosing || _isCapturingGeometry) return;
+    _isCapturingGeometry = true;
+    try {
+      await AppSettings.instance.captureWindowGeometry();
+    } finally {
+      _isCapturingGeometry = false;
+    }
+  }
+
+  @override
+  void onWindowMove() => _captureWindowGeometry();
+
+  @override
+  void onWindowResize() => _captureWindowGeometry();
 
   @override
   Future<void> onWindowClose() => close();

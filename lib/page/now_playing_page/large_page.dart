@@ -16,6 +16,8 @@ class _NowPlayingPage_Large extends StatelessWidget {
               widthFactor: 0.92,
               child: LayoutBuilder(
                 builder: (context, constraints) {
+                  final useVerticalLayout =
+                      constraints.maxHeight > constraints.maxWidth * 1.18;
                   final leftWidth = constraints.maxWidth * 0.56;
                   final coverAreaHeight =
                       constraints.maxHeight - _largeTitleBlockHeight;
@@ -34,6 +36,35 @@ class _NowPlayingPage_Large extends StatelessWidget {
                       ((coverAreaHeight - coverSize) / 2)
                           .clamp(0.0, 999.0)
                           .toDouble();
+
+                  if (useVerticalLayout) {
+                    final portraitCoverSize = math.min(
+                      680.0,
+                      math.min(
+                        constraints.maxWidth * 0.68,
+                        constraints.maxHeight * 0.40,
+                      ),
+                    );
+                    return Column(
+                      children: [
+                        Expanded(
+                          flex: 11,
+                          child: _NowPlayingInfo(
+                            coverSize: portraitCoverSize,
+                            coverAlignment: Alignment.center,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        const Expanded(
+                          flex: 9,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 44),
+                            child: VerticalLyricView(),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
 
                   return Stack(
                     fit: StackFit.expand,

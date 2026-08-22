@@ -16,11 +16,12 @@ class LyricService extends ChangeNotifier {
 
   late StreamSubscription _positionStreamSubscription;
   Lyric? _currentLyric;
+  String? _lyricAudioPath;
   int _lyricRequestId = 0;
 
   LyricService(this.playService) {
-    _positionStreamSubscription =
-        playService.playbackService.positionStream.listen(_handlePosition);
+    _positionStreamSubscription = playService.playbackService.positionStream
+        .listen(_handlePosition);
   }
 
   Audio? _getNowPlaying() => playService.playbackService.nowPlaying;
@@ -31,21 +32,25 @@ class LyricService extends ChangeNotifier {
   /// 下一行歌词
   int _nextLyricLine = 0;
   late final StreamController<int> _lyricLineStreamController =
-      StreamController.broadcast(onListen: () {
-    _lyricLineStreamController.add(max(_nextLyricLine - 1, 0));
-  });
+      StreamController.broadcast(
+        onListen: () {
+          _lyricLineStreamController.add(max(_nextLyricLine - 1, 0));
+        },
+      );
 
   Stream<int> get lyricLineStream => _lyricLineStreamController.stream;
 
   void _handlePosition(double pos) {
     final lyric = _currentLyric;
-    if (lyric == null) return;
-    if (_nextLyricLine >= lyric.lines.length) return;
+    if (lyric == null || lyric.lines.isEmpty) return;
 
-    if ((pos * 1000) > lyric.lines[_nextLyricLine].start.inMilliseconds) {
-      _nextLyricLine += 1;
-
-      final currLineIndex = _nextLyricLine - 1;
+    final next = lyric.lines.indexWhere(
+      (line) => line.start.inMilliseconds / 1000 > pos,
+    );
+    final nextLine = next == -1 ? lyric.lines.length : next;
+    final currLineIndex = max(nextLine - 1, 0);
+    if (nextLine != _nextLyricLine) {
+      _nextLyricLine = nextLine;
       _lyricLineStreamController.add(currLineIndex);
 
       playService.desktopLyricService.canSendMessage.then((canSend) {
@@ -58,8 +63,10 @@ class LyricService extends ChangeNotifier {
     }
   }
 
-  void _setCurrLyricFuture(Future<Lyric?> future,
-      {bool syncToPosition = true}) {
+  void _setCurrLyricFuture(
+    Future<Lyric?> future, {
+    bool syncToPosition = true,
+  }) {
     final requestId = ++_lyricRequestId;
     _currentLyric = null;
     currLyricFuture = future;
@@ -107,6 +114,7 @@ class LyricService extends ChangeNotifier {
   void updateLyric() {
     final nowPlaying = _getNowPlaying();
     if (nowPlaying == null) return;
+    _lyricAudioPath = nowPlaying.path;
 
     final lyricSource = LYRIC_SOURCES[nowPlaying.path];
     if (lyricSource == null) {
@@ -115,9 +123,7 @@ class LyricService extends ChangeNotifier {
       );
     } else {
       if (lyricSource.source == LyricSourceType.local) {
-        _setCurrLyricFuture(
-          Lrc.fromAudioPath(nowPlaying),
-        );
+        _setCurrLyricFuture(Lrc.fromAudioPath(nowPlaying));
       } else {
         _setCurrLyricFuture(
           getOnlineLyric(
@@ -130,6 +136,18 @@ class LyricService extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  /// Re-entering the playing page must reuse the current lyric while syncing
+  /// its line to the live playback position. Reload only if the song changed.
+  void ensureCurrentLyric() {
+    final nowPlaying = _getNowPlaying();
+    if (nowPlaying == null) return;
+    if (_lyricAudioPath != nowPlaying.path) {
+      updateLyric();
+      return;
+    }
+    findCurrLyricLine();
   }
 
   void useLocalLyric() {

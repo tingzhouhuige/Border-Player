@@ -9,28 +9,99 @@ import 'package:border_player/src/rust/api/logger.dart';
 import 'package:border_player/src/rust/frb_generated.dart';
 import 'package:border_player/theme_provider.dart';
 import 'package:border_player/utils.dart';
+import 'package:border_player/window_geometry.dart';
+import 'package:border_player/windows_window_placement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
 Future<void> initWindow() async {
   await windowManager.ensureInitialized();
-  await AppLifecycle.instance.init();
 
   WindowOptions windowOptions = WindowOptions(
-    minimumSize: const Size(507, 507),
+    minimumSize: minimumAppWindowSize,
     size: AppSettings.instance.windowSize,
-    center: true,
+    center: AppSettings.instance.windowPosition == null &&
+        AppSettings.instance.windowPhysicalBounds == null,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
+    final settings = AppSettings.instance;
+    var restored = false;
+    final physicalBounds = settings.windowPhysicalBounds;
+    final physicalWorkArea = settings.windowPhysicalWorkArea;
+    final physicalMonitorName = settings.windowPhysicalMonitorName;
+    if (physicalBounds != null &&
+        physicalWorkArea != null &&
+        physicalMonitorName != null) {
+      try {
+        restored = await restoreWindowsWindowPlacement(
+          savedBounds: physicalBounds,
+          savedWorkArea: physicalWorkArea,
+          savedMonitorName: physicalMonitorName,
+          savedBoundsAreVisible: settings.windowPhysicalBoundsAreVisible,
+        );
+      } catch (err, trace) {
+        LOGGER.e(err, stackTrace: trace);
+      }
+    }
+
+    final savedPosition = settings.windowPosition;
+    if (!restored && savedPosition != null) {
+      try {
+        final displays = await screenRetriever.getAllDisplays();
+        final primaryDisplay = await screenRetriever.getPrimaryDisplay();
+        final restoredBounds = safeRestoredWindowBounds(
+          savedBounds: savedPosition & settings.windowSize,
+          displays: displays,
+          primaryDisplay: primaryDisplay,
+          savedDisplayId: settings.windowDisplayId,
+          savedDisplayName: settings.windowDisplayName,
+          savedDisplayWorkArea: settings.windowDisplayWorkArea,
+        );
+        await windowManager.setBounds(restoredBounds);
+        restored = true;
+      } catch (err, trace) {
+        LOGGER.e(err, stackTrace: trace);
+      }
+    }
+    if (!restored &&
+        (physicalBounds != null || settings.windowPosition != null)) {
+      await windowManager.center();
+    }
     await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
-    if (AppSettings.instance.isWindowMaximized) {
+    final isMaximized = AppSettings.instance.isWindowMaximized;
+    if (isMaximized) {
       await windowManager.maximize();
     }
     await windowManager.show();
+
+    // Moving an initially hidden window between monitors can trigger a final
+    // WM_DPICHANGED adjustment when it becomes visible. Wait for that native
+    // transition, then reapply the saved physical rectangle exactly once.
+    if (!isMaximized &&
+        physicalBounds != null &&
+        physicalWorkArea != null &&
+        physicalMonitorName != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      try {
+        await restoreWindowsWindowPlacement(
+          savedBounds: physicalBounds,
+          savedWorkArea: physicalWorkArea,
+          savedMonitorName: physicalMonitorName,
+          savedBoundsAreVisible: settings.windowPhysicalBoundsAreVisible,
+        );
+      } catch (err, trace) {
+        LOGGER.e(err, stackTrace: trace);
+      }
+    }
+
+    // Start move/resize persistence only after startup placement is final, so
+    // transient DPI coordinates cannot overwrite the saved geometry.
+    await AppLifecycle.instance.init();
     await windowManager.focus();
   });
 }

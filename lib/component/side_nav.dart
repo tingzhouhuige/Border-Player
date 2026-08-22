@@ -57,9 +57,9 @@ class SideNav extends StatelessWidget {
         switch (screenType) {
           case ScreenType.small:
             return Drawer(
-              backgroundColor: useGlassBackdrop
-                  ? scheme.surface.withValues(alpha: 0.34)
-                  : scheme.surfaceContainer,
+              // The modal drawer must fully cover the page behind it. Using a
+              // translucent surface here makes list text/artwork show through.
+              backgroundColor: scheme.surfaceContainer,
               shape: const RoundedRectangleBorder(),
               child: _LargeSideNavContent(
                 selected: selected,

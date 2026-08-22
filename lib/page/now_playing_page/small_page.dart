@@ -57,7 +57,9 @@ class _NowPlayingPage_SmallState extends State<_NowPlayingPage_Small> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      // The body extends behind the custom title bar. Keep the song heading
+      // below its controls in narrow portrait windows.
+      padding: const EdgeInsets.fromLTRB(0, 76, 0, 16),
       child: Column(
         children: [
           Expanded(
@@ -184,12 +186,10 @@ class _NowPlayingSmallViewSwitchState
             opacity: visible ? 1.0 : 0.0,
             child: InkWell(
               borderRadius: BorderRadius.circular(16.0),
-              hoverColor:
-                  scheme.onSecondaryContainer.withValues(alpha: 0.08),
+              hoverColor: scheme.onSecondaryContainer.withValues(alpha: 0.08),
               highlightColor:
                   scheme.onSecondaryContainer.withValues(alpha: 0.12),
-              splashColor:
-                  scheme.onSecondaryContainer.withValues(alpha: 0.12),
+              splashColor: scheme.onSecondaryContainer.withValues(alpha: 0.12),
               onTap: widget.onTap,
               onHover: (hasEntered) {
                 setState(() {
