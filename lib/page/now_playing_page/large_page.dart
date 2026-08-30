@@ -7,8 +7,17 @@ class _NowPlayingPage_Large extends StatelessWidget {
   Widget build(BuildContext context) {
     const spacer = SizedBox(width: 8.0);
     final scheme = Theme.of(context).colorScheme;
+    final pageSize = MediaQuery.sizeOf(context);
+    final useCompactControls =
+        pageSize.height > pageSize.width * _portraitCombinedAspectRatio ||
+            pageSize.width <= 900;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32.0, _largePageTopGap, 32.0, 32.0),
+      padding: EdgeInsets.fromLTRB(
+        32.0,
+        _largePageTopGap,
+        32.0,
+        useCompactControls ? 28.0 : 32.0,
+      ),
       child: Column(
         children: [
           Expanded(
@@ -16,8 +25,8 @@ class _NowPlayingPage_Large extends StatelessWidget {
               widthFactor: 0.92,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final useVerticalLayout =
-                      constraints.maxHeight > constraints.maxWidth * 1.18;
+                  final useVerticalLayout = constraints.maxHeight >
+                      constraints.maxWidth * _portraitCombinedAspectRatio;
                   final leftWidth = constraints.maxWidth * 0.56;
                   final coverAreaHeight =
                       constraints.maxHeight - _largeTitleBlockHeight;
@@ -103,7 +112,7 @@ class _NowPlayingPage_Large extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16.0),
+          SizedBox(height: useCompactControls ? 8.0 : 16.0),
           FractionallySizedBox(
             widthFactor: 0.92,
             child: DecoratedBox(
@@ -132,8 +141,10 @@ class _NowPlayingPage_Large extends StatelessWidget {
                     sigmaY: 58,
                   ),
                   child: Container(
-                    height: 176,
-                    padding: const EdgeInsets.fromLTRB(30, 22, 30, 20),
+                    height: useCompactControls ? 192 : 176,
+                    padding: useCompactControls
+                        ? const EdgeInsets.fromLTRB(10, 6, 10, 6)
+                        : const EdgeInsets.fromLTRB(30, 22, 30, 20),
                     decoration: BoxDecoration(
                       color: scheme.surface.withOpacity(
                         0.34,
@@ -154,51 +165,73 @@ class _NowPlayingPage_Large extends StatelessWidget {
                         stops: const [0.0, 0.58, 1.0],
                       ),
                     ),
-                    child: const Column(
-                      children: [
-                        _NowPlayingSlider(),
-                        Spacer(),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Stack(
-                            alignment: Alignment.center,
+                    child: useCompactControls
+                        ? const Column(
                             children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                              _NowPlayingSlider(),
+                              _NowPlayingMainControls(),
+                              SizedBox(height: 2),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _NowPlayingShuffleSwitch(),
+                                  _NowPlayingPlayModeSwitch(),
+                                  _NowPlayingVolDspSlider(),
+                                  _ExclusiveModeSwitch(),
+                                  _NowPlayingLargeViewSwitch(),
+                                  _NowPlayingSongInfo(),
+                                  _DesktopLyricSwitch(),
+                                  _NowPlayingMoreAction(),
+                                ],
+                              ),
+                            ],
+                          )
+                        : const Column(
+                            children: [
+                              _NowPlayingSlider(),
+                              Spacer(),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                child: Stack(
+                                  alignment: Alignment.center,
                                   children: [
-                                    _NowPlayingShuffleSwitch(),
-                                    spacer,
-                                    _NowPlayingPlayModeSwitch(),
-                                    spacer,
-                                    _NowPlayingVolDspSlider(),
-                                    spacer,
-                                    _ExclusiveModeSwitch(),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _NowPlayingShuffleSwitch(),
+                                          spacer,
+                                          _NowPlayingPlayModeSwitch(),
+                                          spacer,
+                                          _NowPlayingVolDspSlider(),
+                                          spacer,
+                                          _ExclusiveModeSwitch(),
+                                        ],
+                                      ),
+                                    ),
+                                    _NowPlayingMainControls(),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _NowPlayingLargeViewSwitch(),
+                                          spacer,
+                                          _NowPlayingSongInfo(),
+                                          spacer,
+                                          _DesktopLyricSwitch(),
+                                          spacer,
+                                          _NowPlayingMoreAction(),
+                                        ],
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
-                              _NowPlayingMainControls(),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _NowPlayingLargeViewSwitch(),
-                                    spacer,
-                                    _NowPlayingSongInfo(),
-                                    spacer,
-                                    _DesktopLyricSwitch(),
-                                    spacer,
-                                    _NowPlayingMoreAction(),
-                                  ],
-                                ),
-                              )
                             ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),

@@ -10,7 +10,6 @@ import 'package:border_player/app_motion.dart';
 import 'package:border_player/component/title_bar.dart';
 import 'package:border_player/utils.dart';
 import 'package:border_player/library/audio_library.dart';
-import 'package:border_player/component/responsive_builder.dart';
 import 'package:border_player/page/now_playing_page/component/current_playlist_view.dart';
 import 'package:border_player/page/now_playing_page/component/filled_icon_button_style.dart';
 import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
@@ -32,6 +31,7 @@ part 'large_page.dart';
 
 const double _largeTitleBlockHeight = 50.0;
 const double _largePageTopGap = 76.0;
+const double _portraitCombinedAspectRatio = 1.18;
 
 enum NowPlayingViewMode {
   onlyMain,
@@ -188,22 +188,12 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
             ),
             ChangeNotifierProvider.value(
               value: PlayService.instance.playbackService,
-              builder: (context, _) {
-                return AnimatedTheme(
-                  data: contentTheme,
-                  duration: const Duration(milliseconds: 360),
-                  curve: AppMotion.enter,
-                  child: ResponsiveBuilder2(builder: (context, screenType) {
-                    switch (screenType) {
-                      case ScreenType.small:
-                        return const _NowPlayingPage_Small();
-                      case ScreenType.medium:
-                      case ScreenType.large:
-                        return const _NowPlayingPage_Large();
-                    }
-                  }),
-                );
-              },
+              builder: (context, _) => AnimatedTheme(
+                data: contentTheme,
+                duration: const Duration(milliseconds: 360),
+                curve: AppMotion.enter,
+                child: const _NowPlayingPage_Large(),
+              ),
             ),
           ],
         ),
