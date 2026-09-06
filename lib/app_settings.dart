@@ -50,11 +50,32 @@ Future<Directory> getAppDataDir() async {
   ).create(recursive: true);
 }
 
-Rect? _parseRect(String? value) {
+List<double>? _parseFiniteValues(String? value, int expectedLength) {
   if (value == null) return null;
   final parts = value.split(',').map(double.tryParse).toList();
-  if (parts.length != 4 || parts.any((part) => part == null)) return null;
-  return Rect.fromLTWH(parts[0]!, parts[1]!, parts[2]!, parts[3]!);
+  if (parts.length != expectedLength ||
+      parts.any((part) => part == null || !part.isFinite)) {
+    return null;
+  }
+  return parts.cast<double>();
+}
+
+Size? _parseSize(String? value) {
+  final parts = _parseFiniteValues(value, 2);
+  if (parts == null || parts[0] <= 0 || parts[1] <= 0) return null;
+  return Size(parts[0], parts[1]);
+}
+
+Offset? _parseOffset(String? value) {
+  final parts = _parseFiniteValues(value, 2);
+  if (parts == null) return null;
+  return Offset(parts[0], parts[1]);
+}
+
+Rect? _parseRect(String? value) {
+  final parts = _parseFiniteValues(value, 4);
+  if (parts == null || parts[2] <= 0 || parts[3] <= 0) return null;
+  return Rect.fromLTWH(parts[0], parts[1], parts[2], parts[3]);
 }
 
 String _rectToString(Rect rect) =>
@@ -62,7 +83,7 @@ String _rectToString(Rect rect) =>
 
 class AppSettings {
   static final github = GitHub();
-  static const String version = "2.0.3";
+  static const String version = "2.0.5";
 
   /// 主题模式：亮 / 暗
   ThemeMode themeMode = ThemeMode.light;
@@ -94,6 +115,7 @@ class AppSettings {
   String? windowPhysicalMonitorName;
   bool windowPhysicalBoundsAreVisible = false;
   bool isWindowMaximized = false;
+  Future<void> _saveQueue = Future<void>.value();
 
   String? fontFamily = "Microsoft YaHei";
   String? fontPath;
@@ -156,14 +178,8 @@ class AppSettings {
       _instance.localLyricFirst = llf == 1 ? true : false;
     }
 
-    final sizeStr = settingsMap["WindowSize"];
-    if (sizeStr != null) {
-      final sizeStrs = (sizeStr as String).split(",");
-      _instance.windowSize = Size(
-        double.tryParse(sizeStrs[0]) ?? 1280,
-        double.tryParse(sizeStrs[1]) ?? 756,
-      );
-    }
+    final windowSize = _parseSize(settingsMap["WindowSize"]?.toString());
+    if (windowSize != null) _instance.windowSize = windowSize;
 
     final isMaximized = settingsMap["IsWindowMaximized"];
     if (isMaximized != null) {
@@ -223,43 +239,20 @@ class AppSettings {
         _instance.localLyricFirst = llf;
       }
 
-      final sizeStr = settingsMap["WindowSize"];
-      if (sizeStr != null) {
-        final sizeStrs = (sizeStr as String).split(",");
-        _instance.windowSize = Size(
-          double.tryParse(sizeStrs[0]) ?? 1280,
-          double.tryParse(sizeStrs[1]) ?? 756,
-        );
-      }
+      final windowSize = _parseSize(settingsMap["WindowSize"]?.toString());
+      if (windowSize != null) _instance.windowSize = windowSize;
 
       final isMaximized = settingsMap["IsWindowMaximized"];
       if (isMaximized != null) {
         _instance.isWindowMaximized = isMaximized;
       }
 
-      final positionStr = settingsMap["WindowPosition"] as String?;
-      if (positionStr != null) {
-        final values = positionStr.split(",");
-        if (values.length == 2) {
-          final x = double.tryParse(values[0]);
-          final y = double.tryParse(values[1]);
-          if (x != null && y != null) _instance.windowPosition = Offset(x, y);
-        }
-      }
+      _instance.windowPosition =
+          _parseOffset(settingsMap["WindowPosition"]?.toString());
       _instance.windowDisplayId = settingsMap["WindowDisplayId"]?.toString();
       _instance.windowDisplayName = settingsMap["WindowDisplayName"] as String?;
-      final workAreaStr = settingsMap["WindowDisplayWorkArea"] as String?;
-      if (workAreaStr != null) {
-        final values = workAreaStr.split(",").map(double.tryParse).toList();
-        if (values.length == 4 && values.every((value) => value != null)) {
-          _instance.windowDisplayWorkArea = Rect.fromLTWH(
-            values[0]!,
-            values[1]!,
-            values[2]!,
-            values[3]!,
-          );
-        }
-      }
+      _instance.windowDisplayWorkArea =
+          _parseRect(settingsMap["WindowDisplayWorkArea"]?.toString());
 
       final physicalBoundsStr = settingsMap["WindowPhysicalBounds"] as String?;
       final physicalWorkAreaStr =
@@ -285,10 +278,19 @@ class AppSettings {
   Future<void> captureWindowGeometry() async {
     try {
       if (await windowManager.isMaximized() ||
-          await windowManager.isFullScreen()) {
+          await windowManager.isFullScreen() ||
+          await windowManager.isMinimized()) {
         return;
       }
       final bounds = await windowManager.getBounds();
+      final displays = await screenRetriever.getAllDisplays();
+      if (displays.isEmpty ||
+          !hasMeaningfulVisibleArea(
+            bounds,
+            displays.map(displayWorkArea),
+          )) {
+        return;
+      }
       windowSize = bounds.size;
       windowPosition = bounds.topLeft;
 
@@ -301,7 +303,6 @@ class AppSettings {
       }
 
       try {
-        final displays = await screenRetriever.getAllDisplays();
         final display = displayForWindow(bounds, displays);
         if (display != null) {
           windowDisplayId = display.id.toString();
@@ -316,7 +317,13 @@ class AppSettings {
     }
   }
 
-  Future<void> saveSettings() async {
+  Future<void> saveSettings() {
+    final save = _saveQueue.then((_) => _saveSettingsNow());
+    _saveQueue = save;
+    return save;
+  }
+
+  Future<void> _saveSettingsNow() async {
     try {
       await captureWindowGeometry();
       final isMaximized = await windowManager.isMaximized();
@@ -368,7 +375,7 @@ class AppSettings {
       final supportPath = (await getAppDataDir()).path;
       final settingsPath = "$supportPath\\settings.json";
       final output = await File(settingsPath).create(recursive: true);
-      output.writeAsStringSync(settingsStr);
+      await output.writeAsString(settingsStr, flush: true);
     } catch (err, trace) {
       LOGGER.e(err, stackTrace: trace);
     }

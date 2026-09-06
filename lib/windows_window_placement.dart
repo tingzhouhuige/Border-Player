@@ -6,6 +6,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:win32/win32.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:border_player/window_geometry.dart';
 
 class WindowsWindowPlacement {
   const WindowsWindowPlacement({
@@ -123,12 +124,21 @@ Future<bool> restoreWindowsWindowPlacement({
   );
   final workArea = target.workArea;
   final workAreaUnchanged = _rectNearlyEquals(savedWorkArea, workArea);
+  final savedBoundsAreOnScreen = hasMeaningfulVisibleArea(
+    savedBounds,
+    monitors.map((monitor) => monitor.workArea),
+  );
   late final int width;
   late final int height;
   late double left;
   late double top;
 
-  if (monitorStillExists && workAreaUnchanged) {
+  if (!savedBoundsAreOnScreen) {
+    width = savedBounds.width.clamp(320.0, workArea.width).round();
+    height = savedBounds.height.clamp(240.0, workArea.height).round();
+    left = workArea.left + (workArea.width - width) / 2;
+    top = workArea.top + (workArea.height - height) / 2;
+  } else if (monitorStillExists && workAreaUnchanged) {
     // Preserve the user's exact placement, including a deliberately oversized
     // window or one that crosses the edge between two monitors.
     width = savedBounds.width.round();

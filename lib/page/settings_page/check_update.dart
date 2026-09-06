@@ -2,6 +2,7 @@ import 'package:border_player/app_settings.dart';
 import 'package:border_player/page/settings_page/settings_dialog.dart';
 import 'package:border_player/src/rust/api/utils.dart';
 import 'package:border_player/utils.dart';
+import 'package:border_player/version_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:github/github.dart';
@@ -32,18 +33,14 @@ class _CheckForUpdateState extends State<CheckForUpdate> {
                 try {
                   final newest = await AppSettings.github.repositories
                       .listReleases(
-                        RepositorySlug("Ferry-200", "border_player"),
+                        RepositorySlug("tingzhouhuige", "Border-Player"),
                       )
                       .first;
-                  final newestVer = int.tryParse(
-                        newest.tagName?.substring(1).replaceAll(".", "") ?? "",
-                      ) ??
-                      0;
-                  final currVer = int.tryParse(
-                        AppSettings.version.replaceAll(".", ""),
-                      ) ??
-                      0;
-                  if (newestVer > currVer) {
+                  if (!mounted) return;
+                  if (isReleaseVersionNewer(
+                    newest.tagName,
+                    AppSettings.version,
+                  )) {
                     if (context.mounted) {
                       showSettingsGlassDialog(
                         context: context,
@@ -57,17 +54,16 @@ class _CheckForUpdateState extends State<CheckForUpdate> {
                   }
                 } catch (err, trace) {
                   LOGGER.e(err, stackTrace: trace);
-                  if (context.mounted) {
+                  if (mounted) {
                     showTextOnSnackBar("网络异常");
                   }
-                  setState(() {
-                    isChecking = false;
-                  });
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      isChecking = false;
+                    });
+                  }
                 }
-
-                setState(() {
-                  isChecking = false;
-                });
               },
       ),
       const Padding(

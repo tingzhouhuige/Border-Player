@@ -19,9 +19,21 @@ import 'package:window_manager/window_manager.dart';
 Future<void> initWindow() async {
   await windowManager.ensureInitialized();
 
+  final settings = AppSettings.instance;
+  var initialWindowSize = settings.windowSize;
+  try {
+    final primaryDisplay = await screenRetriever.getPrimaryDisplay();
+    initialWindowSize = constrainWindowSizeToWorkArea(
+      initialWindowSize,
+      displayWorkArea(primaryDisplay),
+    );
+  } catch (err, trace) {
+    LOGGER.e(err, stackTrace: trace);
+  }
+
   WindowOptions windowOptions = WindowOptions(
     minimumSize: minimumAppWindowSize,
-    size: AppSettings.instance.windowSize,
+    size: initialWindowSize,
     center: AppSettings.instance.windowPosition == null &&
         AppSettings.instance.windowPhysicalBounds == null,
     backgroundColor: Colors.transparent,
@@ -29,7 +41,6 @@ Future<void> initWindow() async {
     titleBarStyle: TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
-    final settings = AppSettings.instance;
     var restored = false;
     final physicalBounds = settings.windowPhysicalBounds;
     final physicalWorkArea = settings.windowPhysicalWorkArea;
@@ -140,7 +151,7 @@ Future<void> main() async {
 
   // For hot reload, `unregisterAll()` needs to be called.
   await HotkeysHelper.unregisterAll();
-  HotkeysHelper.registerHotKeys();
+  await HotkeysHelper.registerHotKeys();
 
   await migrateAppData();
 

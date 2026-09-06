@@ -59,11 +59,14 @@ Future<void> readLyricSources() async {
 
     final lyricSourceStr = File(lyricSourcePath).readAsStringSync();
     final Map lyricSourceJson = json.decode(lyricSourceStr);
-
+    final loadedSources = <String, LyricSource>{};
     for (final item in lyricSourceJson.entries) {
       if (File(item.key).existsSync() == false) continue;
-      LYRIC_SOURCES[item.key] = LyricSource.fromMap(item.value);
+      loadedSources[item.key] = LyricSource.fromMap(item.value);
     }
+    LYRIC_SOURCES
+      ..clear()
+      ..addAll(loadedSources);
   } catch (err, trace) {
     LOGGER.e(err, stackTrace: trace);
   }

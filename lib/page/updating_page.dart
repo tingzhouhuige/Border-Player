@@ -60,17 +60,18 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
   late final Stream<IndexActionState> updateIndexStream;
   StreamSubscription? _subscription;
 
-  void whenIndexUpdated() async {
+  Future<void> whenIndexUpdated() async {
     await Future.wait([
       AudioLibrary.initFromIndex(),
       PlayStatistics.instance.load(),
       readPlaylists(),
       readLyricSources(),
     ]);
-    _subscription?.cancel();
+    await _subscription?.cancel();
+    _subscription = null;
 
-    // 恢复上次播放状态
-    PlayService.instance.playbackService.restoreLastPlayback();
+    // 恢复上次播放状态后再进入主页，避免界面先显示旧状态。
+    await PlayService.instance.playbackService.restoreLastPlayback();
 
     final ctx = context;
     if (ctx.mounted) {
@@ -91,6 +92,12 @@ class _UpdatingStateViewState extends State<UpdatingStateView> {
       },
       onDone: whenIndexUpdated,
     );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   @override

@@ -47,9 +47,9 @@ class HotkeysHelper {
     },
   };
 
-  static void registerHotKeys() {
+  static Future<void> registerHotKeys() async {
     for (var item in _hotKeys.entries) {
-      hotKeyManager.register(
+      await hotKeyManager.register(
         item.key,
         keyDownHandler: item.value,
       );
@@ -62,7 +62,7 @@ class HotkeysHelper {
     if (focus) {
       await unregisterAll();
     } else {
-      registerHotKeys();
+      await registerHotKeys();
     }
   }
 }

@@ -16,10 +16,13 @@ Future<void> readPlaylists() async {
 
     final playlistsStr = File(playlistsPath).readAsStringSync();
     final List playlistsJson = json.decode(playlistsStr);
-
+    final loadedPlaylists = <Playlist>[];
     for (Map item in playlistsJson) {
-      PLAYLISTS.add(Playlist.fromMap(item));
+      loadedPlaylists.add(Playlist.fromMap(item));
     }
+    PLAYLISTS
+      ..clear()
+      ..addAll(loadedPlaylists);
   } catch (err, trace) {
     LOGGER.e(err, stackTrace: trace);
   }

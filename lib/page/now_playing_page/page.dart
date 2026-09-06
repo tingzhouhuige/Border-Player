@@ -817,7 +817,7 @@ class _NowPlayingVolDspSliderState extends State<_NowPlayingVolDspSlider> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           child: SliderTheme(
             data: const SliderThemeData(
-              showValueIndicator: ShowValueIndicator.always,
+              showValueIndicator: ShowValueIndicator.onDrag,
               trackHeight: 3,
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10),
               overlayShape: RoundSliderOverlayShape(overlayRadius: 18),
@@ -991,7 +991,7 @@ class _NowPlayingSliderState extends State<_NowPlayingSlider> {
       children: [
         SliderTheme(
           data: const SliderThemeData(
-            showValueIndicator: ShowValueIndicator.always,
+            showValueIndicator: ShowValueIndicator.onDrag,
           ),
           child: StreamBuilder(
             stream: playbackService.playerStateStream,

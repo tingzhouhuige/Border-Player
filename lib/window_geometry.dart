@@ -4,6 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 
 const Size minimumAppWindowSize = Size(507, 507);
+const Size defaultAppWindowSize = Size(1280, 756);
+
+Size constrainWindowSizeToWorkArea(Size requested, Rect workArea) {
+  if (!workArea.width.isFinite ||
+      !workArea.height.isFinite ||
+      workArea.width <= 0 ||
+      workArea.height <= 0) {
+    return defaultAppWindowSize;
+  }
+  final requestedWidth = requested.width.isFinite && requested.width > 0
+      ? requested.width
+      : defaultAppWindowSize.width;
+  final requestedHeight = requested.height.isFinite && requested.height > 0
+      ? requested.height
+      : defaultAppWindowSize.height;
+  return Size(
+    requestedWidth.clamp(
+      math.min(minimumAppWindowSize.width, workArea.width),
+      workArea.width,
+    ),
+    requestedHeight.clamp(
+      math.min(minimumAppWindowSize.height, workArea.height),
+      workArea.height,
+    ),
+  );
+}
 
 Rect displayWorkArea(Display display) => Rect.fromLTWH(
       display.visiblePosition?.dx ?? 0,
@@ -11,6 +37,31 @@ Rect displayWorkArea(Display display) => Rect.fromLTWH(
       display.visibleSize?.width ?? display.size.width,
       display.visibleSize?.height ?? display.size.height,
     );
+
+bool hasMeaningfulVisibleArea(
+  Rect bounds,
+  Iterable<Rect> workAreas, {
+  double minimumVisibleExtent = 32.0,
+}) {
+  if (!bounds.left.isFinite ||
+      !bounds.top.isFinite ||
+      !bounds.width.isFinite ||
+      !bounds.height.isFinite ||
+      bounds.width <= 0 ||
+      bounds.height <= 0) {
+    return false;
+  }
+
+  for (final workArea in workAreas) {
+    final intersection = bounds.intersect(workArea);
+    if (!intersection.isEmpty &&
+        intersection.width >= minimumVisibleExtent &&
+        intersection.height >= minimumVisibleExtent) {
+      return true;
+    }
+  }
+  return false;
+}
 
 Display? displayForWindow(Rect windowBounds, List<Display> displays) {
   Display? best;

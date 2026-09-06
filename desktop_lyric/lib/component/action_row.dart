@@ -126,7 +126,7 @@ class ActionRow extends StatelessWidget {
 final _COLOR_SELECTOR_CONTROLLER = MenuController();
 
 class _ShowColorSelectorBtn extends StatelessWidget {
-  const _ShowColorSelectorBtn({super.key});
+  const _ShowColorSelectorBtn();
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +201,7 @@ class _ShowColorSelectorBtn extends StatelessWidget {
 
 class _ColorTile extends StatelessWidget {
   final Color color;
-  const _ColorTile({super.key, required this.color});
+  const _ColorTile({required this.color});
 
   @override
   Widget build(BuildContext context) {
