@@ -77,7 +77,7 @@ class SideNav extends StatelessWidget {
           case ScreenType.medium:
             return NavigationRail(
               backgroundColor: useGlassBackdrop
-                  ? scheme.surface.withValues(alpha: 0.20)
+                  ? Colors.transparent
                   : scheme.surfaceContainer,
               selectedIndex: selected,
               onDestinationSelected: onDestinationSelected,
