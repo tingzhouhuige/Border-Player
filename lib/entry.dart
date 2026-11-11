@@ -13,6 +13,7 @@ import 'package:border_player/page/folders_page.dart';
 import 'package:border_player/page/now_playing_page/page.dart';
 import 'package:border_player/page/playlist_detail_page.dart';
 import 'package:border_player/page/playlists_page.dart';
+import 'package:border_player/page/favorites_page.dart';
 import 'package:border_player/page/search_page/search_page.dart';
 import 'package:border_player/page/search_page/search_result_page.dart';
 import 'package:border_player/page/settings_page/page.dart';
@@ -330,6 +331,15 @@ class Entry extends StatelessWidget {
                 },
               ),
             ],
+          ),
+
+          /// search page
+          GoRoute(
+            path: app_paths.FAVORITES_PAGE,
+            pageBuilder: (context, state) => SlideTransitionPage(
+              key: state.pageKey,
+              child: const FavoritesPage(),
+            ),
           ),
 
           /// search page

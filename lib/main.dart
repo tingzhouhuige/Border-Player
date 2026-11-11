@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:border_player/library/favorites.dart';
 
 import 'package:border_player/app_lifecycle.dart';
 import 'package:border_player/app_preference.dart';
@@ -154,6 +155,7 @@ Future<void> main() async {
   await HotkeysHelper.registerHotKeys();
 
   await migrateAppData();
+  await Favorites.initialize();
 
   final supportPath = (await getAppDataDir()).path;
   if (File("$supportPath\\settings.json").existsSync()) {

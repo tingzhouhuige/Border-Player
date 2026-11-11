@@ -1,6 +1,7 @@
 // ignore_for_file: camel_case_types
 
 import 'dart:async';
+import 'package:border_player/component/favorite_button.dart';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -925,48 +926,78 @@ class _NowPlayingMainControls extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final playbackService = PlayService.instance.playbackService;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: playbackService.lastAudio,
-          icon: const Icon(Symbols.skip_previous),
-          style: LargeFilledIconButtonStyle(primary: false, scheme: scheme),
-        ),
-        const SizedBox(width: 16),
-        StreamBuilder(
-          stream: playbackService.playerStateStream,
-          initialData: playbackService.playerState,
-          builder: (context, snapshot) {
-            final playerState = snapshot.data!;
-            late void Function() onTap;
-            if (playerState == PlayerState.playing) {
-              onTap = playbackService.pause;
-            } else if (playerState == PlayerState.completed) {
-              onTap = playbackService.playAgain;
-            } else {
-              onTap = playbackService.start;
-            }
-
-            return IconButton(
-              onPressed: onTap,
-              icon: Icon(
-                playerState == PlayerState.playing
-                    ? Symbols.pause
-                    : Symbols.play_arrow,
-              ),
-              style: LargeFilledIconButtonStyle(primary: true, scheme: scheme),
-            );
-          },
-        ),
-        const SizedBox(width: 16),
-        IconButton(
-          onPressed: playbackService.nextAudio,
-          icon: const Icon(Symbols.skip_next),
-          style: LargeFilledIconButtonStyle(primary: false, scheme: scheme),
-        ),
-      ],
+    // Five equal slots keep play centered, with a quiet space balancing the
+    // favorite action. Fixed hit areas prevent theme defaults changing gaps.
+    final sideStyle = IconButton.styleFrom(
+      fixedSize: const Size.square(56),
+      minimumSize: const Size.square(48),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
+    return LayoutBuilder(builder: (context, constraints) {
+      return SizedBox(
+        width: math.min(360, constraints.maxWidth),
+        height: 76,
+        child: Row(children: [
+          const Expanded(child: SizedBox.shrink()),
+          Expanded(
+              child: Center(
+                  child: IconButton(
+            onPressed: playbackService.lastAudio,
+            icon: const Icon(Symbols.skip_previous),
+            style: LargeFilledIconButtonStyle(primary: false, scheme: scheme)
+                .merge(sideStyle),
+          ))),
+          Expanded(
+              child: Center(
+                  child: StreamBuilder(
+            stream: playbackService.playerStateStream,
+            initialData: playbackService.playerState,
+            builder: (context, snapshot) {
+              final playerState = snapshot.data!;
+              late void Function() onTap;
+              if (playerState == PlayerState.playing) {
+                onTap = playbackService.pause;
+              } else if (playerState == PlayerState.completed) {
+                onTap = playbackService.playAgain;
+              } else {
+                onTap = playbackService.start;
+              }
+
+              return IconButton(
+                onPressed: onTap,
+                icon: Icon(
+                  playerState == PlayerState.playing
+                      ? Symbols.pause
+                      : Symbols.play_arrow,
+                ),
+                style: LargeFilledIconButtonStyle(primary: true, scheme: scheme)
+                    .merge(
+                  IconButton.styleFrom(
+                      fixedSize: const Size.square(64),
+                      minimumSize: const Size.square(64),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                ),
+              );
+            },
+          ))),
+          Expanded(
+              child: Center(
+                  child: IconButton(
+            onPressed: playbackService.nextAudio,
+            icon: const Icon(Symbols.skip_next),
+            style: LargeFilledIconButtonStyle(primary: false, scheme: scheme)
+                .merge(sideStyle),
+          ))),
+          Expanded(
+              child: Center(
+                  child: ListenableBuilder(
+            listenable: playbackService,
+            builder: (context, _) =>
+                FavoriteButton(audio: playbackService.nowPlaying),
+          ))),
+        ]),
+      );
+    });
   }
 }
 

@@ -36,6 +36,17 @@ migrate_working_dir/
 /release_packages/*
 !/release_packages/.gitkeep
 
+# Personal runtime data and local Apple Music import reports
+**/favorites*.json
+**/favorites*.tmp
+/index.json
+/playlists.json
+/settings.json
+/app_preference.json
+/play_statistics.json
+/lyric_source.json
+/apple-favorites-*
+
 # Symbolication related
 app.*.symbols
 

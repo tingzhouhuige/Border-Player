@@ -127,6 +127,9 @@ class AppPreference {
   var playlistDetailPagePref =
       PagePreference(0, SortOrder.ascending, ContentView.list);
 
+  var favoritesPagePref =
+      PagePreference(0, SortOrder.ascending, ContentView.list);
+
   int startPage = 0;
 
   var playbackPref = PlaybackPreference(PlayMode.forward, 1.0);
@@ -148,6 +151,7 @@ class AppPreference {
         "foldersPagePref": foldersPagePref.toMap(),
         "folderDetailPagePref": folderDetailPagePref.toMap(),
         "playlistsPagePref": playlistsPagePref.toMap(),
+        "favoritesPagePref": favoritesPagePref.toMap(),
         "playlistDetailPagePref": playlistDetailPagePref.toMap(),
         "startPage": startPage,
         "playbackPref": playbackPref.toMap(),
@@ -194,6 +198,14 @@ class AppPreference {
         prefMap["playlistDetailPagePref"],
       );
       instance.startPage = prefMap["startPage"];
+      if (prefMap["favoritesPagePref"] is Map) {
+        instance.favoritesPagePref =
+            PagePreference.fromMap(prefMap["favoritesPagePref"]);
+        if (instance.favoritesPagePref.sortMethod < 0 ||
+            instance.favoritesPagePref.sortMethod > 1) {
+          instance.favoritesPagePref.sortMethod = 0;
+        }
+      }
       instance.playbackPref =
           PlaybackPreference.fromMap(prefMap["playbackPref"]);
       instance.nowPlayingPagePref =

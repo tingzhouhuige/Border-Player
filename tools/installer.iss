@@ -1,5 +1,5 @@
 #define MyAppName "Border Player"
-#define MyAppVersion "2.0.3"
+#define MyAppVersion "2.0.6"
 #define MyAppPublisher "tingzhouhuige"
 #define MyAppURL "https://github.com/tingzhouhuige/Border-Player"
 #define MyAppExeName "border_player.exe"
@@ -29,7 +29,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "..\release_packages\v2.0.3\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\release_packages\v2.0.6\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -48,7 +48,7 @@ begin
   DeleteUserDataOnUninstall :=
     MsgBox(
       '是否同时删除 Border Player 的个人数据？' + #13#10 + #13#10 +
-      '选择“否”会保留曲库、设置、歌单和听歌统计，之后安装新版本仍可继续使用这些数据。' + #13#10 +
+      '选择“否”会保留曲库、设置、歌单、喜爱歌曲和听歌统计，之后安装新版本仍可继续使用这些数据。' + #13#10 +
       '选择“是”会删除这些个人数据。',
       mbConfirmation,
       MB_YESNO or MB_DEFBUTTON2

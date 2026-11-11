@@ -1,4 +1,5 @@
 import 'package:border_player/app_settings.dart';
+import 'package:border_player/component/favorite_button.dart';
 import 'package:border_player/component/glass_dock_surface.dart';
 import 'package:border_player/component/rectangle_progress_indicator.dart';
 import 'package:border_player/component/responsive_builder.dart';
@@ -154,6 +155,7 @@ class _NowPlayingForeground extends StatelessWidget {
                   ),
                   const SizedBox(width: 8.0),
                   const _MiniPlaybackControls(),
+                  FavoriteButton(audio: nowPlaying),
                 ],
               );
             },

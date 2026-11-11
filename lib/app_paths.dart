@@ -13,6 +13,7 @@ const String FOLDERS_PAGE = "/folders";
 const String FOLDER_DETAIL_PAGE = "/folders/detail";
 
 const String PLAYLISTS_PAGE = "/playlists";
+const String FAVORITES_PAGE = "/favorites";
 const String PLAYLIST_DETAIL_PAGE = "/playlists/detail";
 
 const String SEARCH_PAGE = "/search";

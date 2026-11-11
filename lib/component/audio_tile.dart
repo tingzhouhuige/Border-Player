@@ -1,4 +1,5 @@
 import 'package:border_player/component/scroll_aware_future_builder.dart';
+import 'package:border_player/component/favorite_button.dart';
 import 'package:border_player/app_motion.dart';
 import 'package:border_player/page/now_playing_page/component/now_playing_popup.dart';
 import 'package:border_player/utils.dart';
@@ -324,6 +325,7 @@ class AudioTile extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8.0),
                     child: action!,
                   ),
+                FavoriteButton(audio: audio),
               ]),
             ),
           ),
